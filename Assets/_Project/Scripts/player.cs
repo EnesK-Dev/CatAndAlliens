@@ -28,6 +28,10 @@ public class player : MonoBehaviour
     [SerializeField] private float shakeDuration;
     [SerializeField] private float shakeMagnitude;
 
+    [Tooltip("Hasar alinca uygulanan sarsinti — vurus sarsintisindan belirgin sekilde guclu olmali.")]
+    [SerializeField] private float hurtShakeDuration = 0.35f;
+    [SerializeField] private float hurtShakeMagnitude = 0.45f;
+
     [Header("Dash Ayarlari")]
     [SerializeField] private float dashSpeed = 15f;
     [SerializeField] private float dashDuration = 0.15f;
@@ -67,6 +71,9 @@ public class player : MonoBehaviour
 
     /// <summary>Player ölüm animasyonu bittiğinde bir kez tetiklenir. GameOverUI bunu dinler.</summary>
     public static event System.Action OnPlayerDied;
+
+    /// <summary>Player hasar aldığında alınan hasar miktarıyla tetiklenir. DamageScreenFlash bunu dinler.</summary>
+    public static event System.Action<float> OnPlayerDamaged;
 
     void Awake()
     {
@@ -340,6 +347,11 @@ public class player : MonoBehaviour
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
 
         OnHealthChanged?.Invoke(currentHealth);
+        OnPlayerDamaged?.Invoke(amount); // Ekran kirmizi flash'i tetikler (sadece player hasar alinca)
+
+        // Hasar sarsintisi vurus sarsintisindan guclu — CameraShake guclü olani onceler
+        if (cameraShake != null)
+            cameraShake.TriggerShake(hurtShakeDuration, hurtShakeMagnitude);
 
         if (spriteRenderer != null)
             StartCoroutine(HurtFlash());

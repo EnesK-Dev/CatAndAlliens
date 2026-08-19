@@ -43,7 +43,7 @@
     <UnityVersion>6000.3.15f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="/home/ryuk/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.2.2/Analyzers/Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="/home/ryuk/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.3.1/Analyzers/Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="/home/ryuk/Unity/Hub/Editor/6000.3.15f1/Editor/Data/Tools/BuildPipeline/Unity.SourceGenerators/Unity.SourceGenerators.dll" />
     <Analyzer Include="/home/ryuk/Unity/Hub/Editor/6000.3.15f1/Editor/Data/Tools/BuildPipeline/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="/home/ryuk/Unity/Hub/Editor/6000.3.15f1/Editor/Data/Tools/BuildPipeline/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
@@ -55,11 +55,9 @@
     <Compile Include="Assets/_Project/Scripts/DamageNumber.cs" />
     <Compile Include="Assets/_Project/Scripts/UpgradeCard.cs" />
     <Compile Include="Assets/_Project/Scripts/DifficultyManager.cs" />
-    <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FloatingJoystick.cs" />
     <Compile Include="Assets/_Project/Scripts/AttackZone.cs" />
     <Compile Include="Assets/_Project/Scripts/BurstShooterEnemy.cs" />
     <Compile Include="Assets/_Project/Scripts/LaserVisual.cs" />
-    <Compile Include="Assets/_Project/Scripts/UpgradeSelectionUI.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyController.cs" />
     <Compile Include="Assets/_Project/Scripts/DamagePopupManager.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyBullet.cs" />
@@ -68,21 +66,25 @@
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FixedJoystick.cs" />
     <Compile Include="Assets/_Project/Scripts/SceneLoader.cs" />
     <Compile Include="Assets/_Project/Scripts/ClawSlashVisual.cs" />
-    <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/DynamicJoystick.cs" />
-    <Compile Include="Assets/Joystick Pack/Scripts/Base/Joystick.cs" />
+    <Compile Include="Assets/_Project/Scripts/GameLog.cs" />
     <Compile Include="Assets/_Project/Scripts/HeartUI.cs" />
-    <Compile Include="Assets/_Project/Scripts/CoreItem.cs" />
     <Compile Include="Assets/Joystick Pack/Examples/JoystickPlayerExample.cs" />
-    <Compile Include="Assets/_Project/Scripts/BombRainSystem.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/VariableJoystick.cs" />
     <Compile Include="Assets/_Project/Scripts/BombWarning.cs" />
-    <Compile Include="Assets/Joystick Pack/Examples/JoystickSetterExample.cs" />
+    <Compile Include="Assets/_Project/Scripts/DamageScreenFlash.cs" />
     <Compile Include="Assets/_Project/Scripts/GameOverUI.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyGenerator.cs" />
     <Compile Include="Assets/_Project/Scripts/SpaceBackground.cs" />
-    <Compile Include="Assets/_Project/Scripts/CoreManager.cs" />
     <Compile Include="Assets/_Project/Scripts/MainMenuController.cs" />
     <Compile Include="Assets/_Project/Scripts/CameraShake.cs" />
+    <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FloatingJoystick.cs" />
+    <Compile Include="Assets/_Project/Scripts/UpgradeSelectionUI.cs" />
+    <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/DynamicJoystick.cs" />
+    <Compile Include="Assets/Joystick Pack/Scripts/Base/Joystick.cs" />
+    <Compile Include="Assets/_Project/Scripts/CoreItem.cs" />
+    <Compile Include="Assets/_Project/Scripts/BombRainSystem.cs" />
+    <Compile Include="Assets/Joystick Pack/Examples/JoystickSetterExample.cs" />
+    <Compile Include="Assets/_Project/Scripts/CoreManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />
@@ -657,10 +659,6 @@
     </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>Library/PackageCache/com.unity.nuget.mono-cecil@ecb9724e46ff/Mono.Cecil.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe">
-      <HintPath>Library/PackageCache/com.unity.collections@12999e356c23/Unity.Collections.Tests/System.Runtime.CompilerServices.Unsafe/System.Runtime.CompilerServices.Unsafe.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Android.Types">
@@ -1279,6 +1277,10 @@
       <HintPath>Library/ScriptAssemblies/Unity.2D.Tilemap.Extras.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="glTFast.dots">
+      <HintPath>Library/ScriptAssemblies/glTFast.dots.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.VisualStudio.Editor">
       <HintPath>Library/ScriptAssemblies/Unity.VisualStudio.Editor.dll</HintPath>
       <Private>False</Private>
@@ -1357,6 +1359,10 @@
     </Reference>
     <Reference Include="UnityEditor.UI.Analytics">
       <HintPath>Library/ScriptAssemblies/UnityEditor.UI.Analytics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="glTFast.Editor">
+      <HintPath>Library/ScriptAssemblies/glTFast.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.2D.IK.Runtime">
@@ -1475,6 +1481,10 @@
       <HintPath>Library/ScriptAssemblies/Unity.Mathematics.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.Serialization">
+      <HintPath>Library/ScriptAssemblies/Unity.Serialization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.Multiplayer.Center.Common">
       <HintPath>Library/ScriptAssemblies/Unity.Multiplayer.Center.Common.dll</HintPath>
       <Private>False</Private>
@@ -1515,12 +1525,20 @@
       <HintPath>Library/ScriptAssemblies/Unity.Collections.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.Serialization.Editor">
+      <HintPath>Library/ScriptAssemblies/Unity.Serialization.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.ShaderGraph.Editor">
       <HintPath>Library/ScriptAssemblies/Unity.ShaderGraph.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.InferenceEngine.iOSBLAS">
       <HintPath>Library/ScriptAssemblies/Unity.InferenceEngine.iOSBLAS.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="glTFast">
+      <HintPath>Library/ScriptAssemblies/glTFast.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.UI">
