@@ -1,46 +1,89 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Kamerayi kisa sureligine rastgele sarsar. Vurus ve hasar geri bildirimi icin kullanilir.
+/// Ust uste gelen sarsintilarda GUCLU olan kazanir — zayif bir sarsinti devam eden guclu
+/// olani kesmez (vurus sarsintisi hasar sarsintisini bozmasin diye).
+/// </summary>
 public class CameraShake : MonoBehaviour
 {
-    // Kameranın sallantı bittikten sonra döneceği orijinal pozisyonu
-    private Vector3 originalPosition;
+    #region Private Fields
 
-    void Start()
+    // Sallanti bittikten sonra donulecek orijinal lokal pozisyon
+    private Vector3 originalPosition;
+    private Coroutine shakeRoutine;
+    private float activeMagnitude;
+
+    #endregion
+
+    #region Unity Callbacks
+
+    private void Start()
     {
-        // Oyun başında kameranın durduğu ilk yeri hafızaya alıyoruz
         originalPosition = transform.localPosition;
     }
 
-    // Kedinin vuruş kodundan çağıracağımız sallama metodu
+    private void OnDisable()
+    {
+        if (shakeRoutine != null)
+        {
+            StopCoroutine(shakeRoutine);
+            shakeRoutine = null;
+        }
+
+        activeMagnitude = 0f;
+        transform.localPosition = originalPosition;
+    }
+
+    #endregion
+
+    #region Public Methods
+
+    /// <summary>Kamerayi verilen sure ve siddette sarsar.</summary>
+    /// <param name="duration">Sarsinti suresi (saniye).</param>
+    /// <param name="magnitude">Sarsinti siddeti (dunya birimi cinsinden sapma).</param>
     public void TriggerShake(float duration, float magnitude)
     {
-        // Sallama işlemini zaman ayarlı rutin (Coroutine) olarak başlatıyoruz
-        StartCoroutine(ShakeRoutine(duration, magnitude));
+        // Devam eden sarsinti daha guclüyse yenisini yok say
+        if (shakeRoutine != null && magnitude < activeMagnitude)
+            return;
+
+        if (shakeRoutine != null)
+            StopCoroutine(shakeRoutine);
+
+        activeMagnitude = magnitude;
+        shakeRoutine = StartCoroutine(ShakeRoutine(duration, magnitude));
     }
+
+    #endregion
+
+    #region Private Methods
 
     private IEnumerator ShakeRoutine(float duration, float magnitude)
     {
-        float elapsed = 0f; // Geçen süreyi tutan sayaç
+        float elapsed = 0f;
 
-        // Belirlediğimiz süre dolana kadar döngüyü çalıştır
         while (elapsed < duration)
         {
-            // Rastgele X ve Y koordinatları üreterek kamerayı sarsıyoruz
-            float x = Random.Range(-1f, 1f) * magnitude;
-            float y = Random.Range(-1f, 1f) * magnitude;
+            // Sona dogru sonumleme — sarsinti aniden kesilmez, yumusakca durur
+            float damper = 1f - (elapsed / duration);
+            float x = Random.Range(-1f, 1f) * magnitude * damper;
+            float y = Random.Range(-1f, 1f) * magnitude * damper;
 
-            // Kamerayı yeni rastgele pozisyona zıplatıyoruz (Z eksenini -10'da sabit tutuyoruz)
-            transform.localPosition = new Vector3(x, y, originalPosition.z);
+            transform.localPosition = new Vector3(
+                originalPosition.x + x,
+                originalPosition.y + y,
+                originalPosition.z);
 
-            // Geçen süreye her kare (frame) arasındaki zamanı ekliyoruz
             elapsed += Time.deltaTime;
-
-            // Bir sonraki kareye kadar Unity'yi bekletiyoruz
             yield return null;
         }
 
-        // Sallanma süresi bittiğinde kamerayı milimetrik olarak eski orijinal yerine oturtuyoruz
         transform.localPosition = originalPosition;
+        shakeRoutine = null;
+        activeMagnitude = 0f;
     }
+
+    #endregion
 }

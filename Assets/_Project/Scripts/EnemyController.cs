@@ -50,6 +50,9 @@ public class EnemyController : MonoBehaviour
     [Tooltip("Zorluk 1 iken hareket hizi carpani (1 = degisme, 1.15 = %15 hizli). Abartma.")]
     [SerializeField] private float moveSpeedMultiplierAtMaxDifficulty = 1.15f;
 
+    [Tooltip("Zorluk 1 iken lazer kalinlik carpani (1 = degismez, 1.6 = %60 kalin). Her atista yeniden hesaplanir.")]
+    [SerializeField] private float laserWidthMultiplierAtMaxDifficulty = 1.6f;
+
     [Header("Core Drop (FAZ 4)")]
     [Tooltip("Normal (lazersiz) dusman olunce dusen core sayisi.")]
     [SerializeField] private int coreDropNormal = 1;
@@ -294,9 +297,10 @@ public class EnemyController : MonoBehaviour
             yield return null;
         }
 
-        // Ateş anında tam lazere geç
+        // Ateş anında tam lazere geç - kalinlik da zorlukla buyur (bu atisa ozel, her seferinde yeniden hesaplanir)
+        float widthMultiplier = Mathf.Lerp(1f, laserWidthMultiplierAtMaxDifficulty, factor);
         if (laserVisualInstance != null)
-            laserVisualInstance.SetChargeMode(false);
+            laserVisualInstance.SetChargeMode(false, widthMultiplier);
 
         UpdateLaserVisual();
 

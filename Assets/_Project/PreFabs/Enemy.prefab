@@ -113,7 +113,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1333401826788945531, guid: 44d8f3305c026b47c87736491744811c, type: 3}
-  m_Color: {r: 0.1462264, g: 1, b: 0.3882353, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -227,3 +227,10 @@ MonoBehaviour:
   eliteMoveSpeed: 1.5
   laserVisualPrefab: {fileID: 8123456789012345678, guid: 1992a096572d90d17b44989b0b1280c9, type: 3}
   laserChance: 0
+  chargeDurationAtMaxDifficulty: 0.7
+  minAttackCooldownAtMaxDifficulty: 1.5
+  maxAttackCooldownAtMaxDifficulty: 3
+  moveSpeedMultiplierAtMaxDifficulty: 1.15
+  coreDropNormal: 1
+  coreDropEliteMin: 2
+  coreDropEliteMax: 3

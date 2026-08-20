@@ -65,11 +65,11 @@ public class BombWarning : MonoBehaviour
 
     private IEnumerator BombSequence()
     {
-        Debug.Log($"[BombWarning] Uyarı başladı: {transform.position}, süre: {warningDuration}s");
+        GameLog.Log($"[BombWarning] Uyarı başladı: {transform.position}, süre: {warningDuration}s", this);
         SetVisuals(warning: true, explosion: false);
         yield return new WaitForSeconds(warningDuration);
 
-        Debug.Log($"[BombWarning] Patlama başladı. Frame sayısı: {explosionFrames?.Length ?? 0}, FPS: {explosionFrameRate}");
+        GameLog.Log($"[BombWarning] Patlama başladı. Frame sayısı: {explosionFrames?.Length ?? 0}, FPS: {explosionFrameRate}", this);
         SetVisuals(warning: false, explosion: true);
         ApplyExplosionDamage();
         yield return PlayExplosionVisual();
@@ -103,12 +103,12 @@ public class BombWarning : MonoBehaviour
         if (warningSpriteRenderer != null)
             warningSpriteRenderer.enabled = warning;
         else if (warning)
-            Debug.LogWarning("[BombWarning] Warning Sprite Renderer atanmamış!", this);
+            GameLog.Warning("[BombWarning] Warning Sprite Renderer atanmamış!", this);
 
         if (explosionSpriteRenderer != null)
             explosionSpriteRenderer.enabled = explosion;
         else if (explosion)
-            Debug.LogWarning("[BombWarning] Explosion Sprite Renderer atanmamış!", this);
+            GameLog.Warning("[BombWarning] Explosion Sprite Renderer atanmamış!", this);
     }
 
     private void ApplyExplosionDamage()

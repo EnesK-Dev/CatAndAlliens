@@ -17,7 +17,7 @@ public class UpgradeSelectionUI : MonoBehaviour
         Damage,
         AttackSpeed,
         AttackRange,
-        MaxHealth
+        GainHealth // Anlik can doldurur (max can DEGISMEZ). NOT: 4. sirada kalmali — sahne serialize'i int deger.
     }
 
     /// <summary>Bir upgrade seceneginin verisi — Inspector'dan doldurulur (denge burada tutulur).</summary>
@@ -30,7 +30,7 @@ public class UpgradeSelectionUI : MonoBehaviour
         public UpgradeType type;
 
         [Tooltip("Damage: +hasar | AttackSpeed: cooldown carpani (0.85 = %15 hizli) | " +
-                 "AttackRange: +menzil | MaxHealth: +max can")]
+                 "AttackRange: +menzil | GainHealth: anlik +can (max can degismez)")]
         public float amount = 1f;
 
         [HideInInspector] public int level; // kac kez secildi (runtime stack sayaci)
@@ -198,8 +198,8 @@ public class UpgradeSelectionUI : MonoBehaviour
             case UpgradeType.AttackRange:
                 playerRef.AddAttackRange(def.amount);
                 break;
-            case UpgradeType.MaxHealth:
-                playerRef.AddMaxHealth(def.amount);
+            case UpgradeType.GainHealth:
+                playerRef.Heal(def.amount); // eksik cani doldurur; max can sabit kalir
                 break;
         }
     }
