@@ -72,7 +72,17 @@ public class player : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Coroutine _dieRoutine;
 
+    // ---- Ultimate buff (tum statlar carpani) ----
+    // 1f = normal. Ultimate aktifken ultMultiplier'a cikar; damage/moveSpeed/range ile CARPILIR,
+    // cooldown ise BOLUNUR (2x carpan -> yari cooldown -> 2x saldiri hizi). Sure bitince 1f'e doner.
+    // Kalici upgrade metotlarina (AddDamage vb.) DOKUNMAZ — cakisma/kalicilasma olmaz.
+    private float _ultStatMultiplier = 1f;
+    private Coroutine _ultRoutine;
+
     public event System.Action<float> OnHealthChanged;
+
+    /// <summary>Ultimate buff'i basladiginda (true) ve bittiginde (false) tetiklenir. UltimateAura bunu dinler.</summary>
+    public event System.Action<bool> OnUltimateActiveChanged;
 
     /// <summary>Player ölüm animasyonu bittiğinde bir kez tetiklenir. GameOverUI bunu dinler.</summary>
     public static event System.Action OnPlayerDied;
@@ -175,7 +185,7 @@ public class player : MonoBehaviour
 
         // Deadzone altindaysa tam dur — animasyonla ayni esik, tutarli davranis
         rb.linearVelocity = moveInput.sqrMagnitude > InputDeadZoneSqr
-            ? moveInput * moveSpeed
+            ? moveInput * (moveSpeed * _ultStatMultiplier)
             : Vector2.zero;
     }
 
@@ -195,7 +205,7 @@ public class player : MonoBehaviour
     private Transform GetClosestEnemy()
     {
         // Sahnedeki her seyi aramak yerine sadece menzildeki enemyLayer'lari radarla tarar
-        Collider2D[] enemiesInRange = Physics2D.OverlapCircleAll(transform.position, autoAttackRange, enemyLayers);
+        Collider2D[] enemiesInRange = Physics2D.OverlapCircleAll(transform.position, autoAttackRange * _ultStatMultiplier, enemyLayers);
         
         Transform closestEnemy = null;
         float closestDistance = Mathf.Infinity;
@@ -286,7 +296,7 @@ public class player : MonoBehaviour
             Collider2D closestEnemy = GetClosestEnemyCollider(worldAttackPosition, hitCount);
             if (closestEnemy != null)
             {
-                ApplyDamage(closestEnemy, playerDamage);
+                ApplyDamage(closestEnemy, playerDamage * _ultStatMultiplier);
                 hasHitThisSwing = true;
             }
         }
@@ -301,12 +311,12 @@ public class player : MonoBehaviour
     {
         Collider2D targetCollider = targetEnemy.GetComponent<Collider2D>();
         if (targetCollider != null)
-            ApplyDamage(targetCollider, playerDamage);
+            ApplyDamage(targetCollider, playerDamage * _ultStatMultiplier);
     }
 
     attackPointObject.SetActive(false);
 
-    yield return new WaitForSeconds(attackCooldown);
+    yield return new WaitForSeconds(attackCooldown / _ultStatMultiplier);
     isCooldown = false;
 }
 
@@ -434,6 +444,32 @@ public class player : MonoBehaviour
     {
         currentHealth = Mathf.Clamp(currentHealth + amount, 0f, maxHealth);
         OnHealthChanged?.Invoke(currentHealth);
+    }
+
+    /// <summary>
+    /// Ultimate'i aktive eder: 'duration' saniye boyunca TUM statlari 'multiplier' ile gucler
+    /// (hasar/hareket/menzil CARPILIR, saldiri cooldown'u BOLUNUR). Tekrar cagrilirsa stack degil
+    /// REFRESH — sure bastan baslar. UltimateManager cagirir. Kalici upgrade'lere dokunmaz.
+    /// </summary>
+    /// <param name="multiplier">Stat carpani (orn. 2 = 2x). 1'in altina inmez.</param>
+    /// <param name="duration">Buff suresi (saniye).</param>
+    public void ActivateUltimate(float multiplier, float duration)
+    {
+        if (_ultRoutine != null) StopCoroutine(_ultRoutine);
+        _ultRoutine = StartCoroutine(UltimateBuffRoutine(multiplier, duration));
+    }
+
+    /// <summary>Aktif olan ultimate buff'in bitmesine kalan sureyi/varligini disariya acar (UI icin faydali).</summary>
+    public bool IsUltimateActive => _ultStatMultiplier > 1f;
+
+    private IEnumerator UltimateBuffRoutine(float multiplier, float duration)
+    {
+        _ultStatMultiplier = Mathf.Max(1f, multiplier);
+        OnUltimateActiveChanged?.Invoke(true);   // aura basla
+        yield return new WaitForSeconds(duration);
+        _ultStatMultiplier = 1f;
+        _ultRoutine = null;
+        OnUltimateActiveChanged?.Invoke(false);  // aura dur
     }
 
     private IEnumerator HurtFlash()

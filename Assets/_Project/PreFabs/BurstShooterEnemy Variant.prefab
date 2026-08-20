@@ -116,3 +116,10 @@ MonoBehaviour:
   delayBetweenShots: 0.8
   burstCount: 3
   shooterColor: {r: 0.14901961, g: 0.85882354, b: 0.6392157, a: 1}
+  burstCountAtMaxDifficulty: 6
+  delayBetweenShotsAtMaxDifficulty: 0.2
+  shootCooldownAtMaxDifficulty: 2
+  moveSpeedMultiplierAtMaxDifficulty: 1.15
+  coreDropMin: 2
+  coreDropMax: 3
+  ultFoodDropChance: 1

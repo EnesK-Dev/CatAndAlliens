@@ -1,22 +1,37 @@
 fileFormatVersion: 2
-guid: efb6671e8c0f3a0b38b5c24cab83ba9c
+guid: 1db9b4debf66724efa1f20c6f77f300d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6270953770400647376
-    second: 14_0
+      213: 141893073332109768
+    second: 06_0
   - first:
-      213: 4394673570059883492
-    second: 14_1
+      213: 7526069927036187072
+    second: 06_1
   - first:
-      213: 8820753214136849641
-    second: 14_2
+      213: -3213609745909556679
+    second: 06_2
   - first:
-      213: 5012592636484453320
-    second: 14_3
+      213: -946184459887860389
+    second: 06_3
   - first:
-      213: -1161698649178992294
-    second: 14_4
+      213: 2741956415766260738
+    second: 06_4
+  - first:
+      213: -3236815362507524970
+    second: ultBar_0
+  - first:
+      213: 6631133618010372158
+    second: ultBar_1
+  - first:
+      213: -8739632446151918154
+    second: ultBar_2
+  - first:
+      213: -2284193498496478684
+    second: ultBar_3
+  - first:
+      213: -4335480109367038357
+    second: ultBar_4
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -63,7 +78,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 70
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -84,7 +99,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -125,111 +140,111 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 14_0
+      name: ultBar_0
       rect:
         serializedVersion: 2
-        x: 507
-        y: 685
-        width: 6
-        height: 6
+        x: 0
+        y: 0
+        width: 48
+        height: 17
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0377f5055c819f8a0800000000000000
-      internalID: -6270953770400647376
+      spriteID: 6943632c3958413d0800000000000000
+      internalID: -3236815362507524970
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 14_1
+      name: ultBar_1
       rect:
         serializedVersion: 2
-        x: 513
-        y: 684
-        width: 6
-        height: 6
+        x: 48
+        y: 0
+        width: 48
+        height: 17
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4e39737f3540dfc30800000000000000
-      internalID: 4394673570059883492
+      spriteID: e38b8af64e4860c50800000000000000
+      internalID: 6631133618010372158
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 14_2
+      name: ultBar_2
       rect:
         serializedVersion: 2
-        x: 519
-        y: 683
-        width: 11
-        height: 6
+        x: 96
+        y: 0
+        width: 49
+        height: 17
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9e4130c505c996a70800000000000000
-      internalID: 8820753214136849641
+      spriteID: 6bdf2a3489696b680800000000000000
+      internalID: -8739632446151918154
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 14_3
+      name: ultBar_3
       rect:
         serializedVersion: 2
-        x: 530
-        y: 680
-        width: 11
-        height: 7
+        x: 145
+        y: 0
+        width: 48
+        height: 17
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8c3056de17e409540800000000000000
-      internalID: 5012592636484453320
+      spriteID: 4225cd38d1aec40e0800000000000000
+      internalID: -2284193498496478684
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 14_4
+      name: ultBar_4
       rect:
         serializedVersion: 2
-        x: 312
-        y: 335
-        width: 373
-        height: 348
+        x: 193
+        y: 0
+        width: 48
+        height: 17
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a5192a7cb31d0efe0800000000000000
-      internalID: -1161698649178992294
+      spriteID: b6ee7669fc745d3c0800000000000000
+      internalID: -4335480109367038357
       vertices: []
       indices: 
       edges: []
@@ -248,11 +263,16 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      14_0: -6270953770400647376
-      14_1: 4394673570059883492
-      14_2: 8820753214136849641
-      14_3: 5012592636484453320
-      14_4: -1161698649178992294
+      06_0: 141893073332109768
+      06_1: 7526069927036187072
+      06_2: -3213609745909556679
+      06_3: -946184459887860389
+      06_4: 2741956415766260738
+      ultBar_0: -3236815362507524970
+      ultBar_1: 6631133618010372158
+      ultBar_2: -8739632446151918154
+      ultBar_3: -2284193498496478684
+      ultBar_4: -4335480109367038357
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

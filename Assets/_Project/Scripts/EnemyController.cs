@@ -62,6 +62,10 @@ public class EnemyController : MonoBehaviour
 
     [Tooltip("Elite (lazerli) dusman olunce dusen core ust siniri (dahil).")]
     [SerializeField] private int coreDropEliteMax = 3;
+
+    [Header("UltFood Drop (Ultimate)")]
+    [Tooltip("Bu dusman olunce ultFood dusme ihtimali (0 = hic, 1 = her zaman).")]
+    [Range(0f, 1f)] [SerializeField] private float ultFoodDropChance = 0.25f;
     #endregion
 
     #region Private Fields
@@ -346,6 +350,10 @@ public class EnemyController : MonoBehaviour
             ? Random.Range(coreDropEliteMin, coreDropEliteMax + 1)
             : coreDropNormal;
         CoreManager.SpawnCores(transform.position, coreAmount);
+
+        // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
+        if (Random.value < ultFoodDropChance)
+            UltimateManager.SpawnFood(transform.position, baseColor, 1);
 
         // Olurken AI, hareket ve carpismalari durdur
         StopAllCoroutines();                    // devam eden lazer/flash coroutine'lerini kes

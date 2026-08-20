@@ -227,3 +227,12 @@ MonoBehaviour:
   eliteMoveSpeed: 1.5
   laserVisualPrefab: {fileID: 8123456789012345678, guid: 1992a096572d90d17b44989b0b1280c9, type: 3}
   laserChance: 1
+  chargeDurationAtMaxDifficulty: 0.7
+  minAttackCooldownAtMaxDifficulty: 1.5
+  maxAttackCooldownAtMaxDifficulty: 3
+  moveSpeedMultiplierAtMaxDifficulty: 1.15
+  laserWidthMultiplierAtMaxDifficulty: 1.6
+  coreDropNormal: 1
+  coreDropEliteMin: 2
+  coreDropEliteMax: 3
+  ultFoodDropChance: 0.1

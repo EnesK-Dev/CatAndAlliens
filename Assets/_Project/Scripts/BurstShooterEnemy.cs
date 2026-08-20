@@ -55,6 +55,10 @@ public class BurstShooterEnemy : MonoBehaviour
 
     [Tooltip("Bu dusman olunce dusen core ust siniri (dahil).")]
     [SerializeField] private int coreDropMax = 3;
+
+    [Header("UltFood Drop (Ultimate)")]
+    [Tooltip("Bu dusman olunce ultFood dusme ihtimali (0 = hic, 1 = her zaman).")]
+    [Range(0f, 1f)] [SerializeField] private float ultFoodDropChance = 0.25f;
     #endregion
 
     #region Private Fields
@@ -230,6 +234,10 @@ public class BurstShooterEnemy : MonoBehaviour
         // Olum aninda core birak — araliktan rastgele.
         // Random.Range(int, int) ust sinir HARIC oldugu icin +1.
         CoreManager.SpawnCores(transform.position, UnityEngine.Random.Range(coreDropMin, coreDropMax + 1));
+
+        // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
+        if (UnityEngine.Random.value < ultFoodDropChance)
+            UltimateManager.SpawnFood(transform.position, shooterColor, 1);
 
         // Olurken AI, hareket ve carpismalari durdur
         StopAllCoroutines();                    // devam eden burst/flash coroutine'lerini kes
