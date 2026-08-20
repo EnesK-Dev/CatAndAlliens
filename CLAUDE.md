@@ -7,6 +7,11 @@
 - **Geliştirici:** Unity'ye yeni başlıyor — öğrenme süreci öncelikli
 - **Oyun dili:** Oyun içi TÜM metinler İngilizce (menü, butonlar, başlıklar, UI). Sohbet/açıklama dili Türkçe kalır.
 
+## Çalışma Şekli
+- **Uzun/çok adımlı bir kodlama işine başlamadan ÖNCE kısa bir bilgilendirme yap:** ne yapılacağını, hangi kavramların/mekanizmaların devreye gireceğini, planı birkaç madde ile özetle. Geliştirici kod yazılırken pasif beklemek istemiyor — okuyup ne yapılacağını anlamak, kavramları öğrenmek istiyor. Kör ilerleme (sessizce edit/prefab/komut yapıp en sonda özet) istenmiyor.
+- Bilgilendirme kısa olsun — büyük bir tasarım dokümanı değil, "şunu şöyle yapacağım çünkü X, bu arada Y kavramı devreye giriyor" seviyesinde birkaç cümle/madde yeterli.
+- Bu, "Açıklama Formatı" bölümündeki İŞ BİTTİKTEN SONRAKİ açıklamanın YERİNE geçmez — ikisi de gerekli: önce plan/kavram özeti, sonra (iş bitince) ne yapıldı/neden özeti.
+
 ## Mevcut Sistem Durumu
 - ✅ Player — 8 yönlü hareket, joystick kontrol, dash
 - ✅ Player sağlık sistemi — `TakeDamage(float)`, hasar alınca kırmızı flash, can bitince ölüm → `OnPlayerDied` (static event) + `OnHealthChanged` event

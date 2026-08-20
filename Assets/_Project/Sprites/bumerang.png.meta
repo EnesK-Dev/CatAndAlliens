@@ -1,22 +1,25 @@
 fileFormatVersion: 2
-guid: efb6671e8c0f3a0b38b5c24cab83ba9c
+guid: 576ce76d6b565fdc7b87084ed7dff038
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6270953770400647376
-    second: 14_0
+      213: 4362533118088950298
+    second: bumerang_0
   - first:
-      213: 4394673570059883492
-    second: 14_1
+      213: -6171910512598797988
+    second: bumerang_1
   - first:
-      213: 8820753214136849641
-    second: 14_2
+      213: 3827021873794563569
+    second: bumerang_2
   - first:
-      213: 5012592636484453320
-    second: 14_3
+      213: 5957992957202859869
+    second: bumerang_3
   - first:
-      213: -1161698649178992294
-    second: 14_4
+      213: -8597923244323260880
+    second: bumerang_4
+  - first:
+      213: -2669975877837651519
+    second: bumerang_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,7 +52,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -63,7 +66,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 150
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -84,7 +87,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 512
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -125,13 +128,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 14_0
+      name: bumerang_0
       rect:
         serializedVersion: 2
-        x: 507
-        y: 685
-        width: 6
-        height: 6
+        x: 0
+        y: 0
+        width: 31
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -140,20 +143,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0377f5055c819f8a0800000000000000
-      internalID: -6270953770400647376
+      spriteID: a12b198d1c4da8c30800000000000000
+      internalID: 4362533118088950298
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 14_1
+      name: bumerang_1
       rect:
         serializedVersion: 2
-        x: 513
-        y: 684
-        width: 6
-        height: 6
+        x: 32
+        y: 0
+        width: 33
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -162,20 +165,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4e39737f3540dfc30800000000000000
-      internalID: 4394673570059883492
+      spriteID: c51bc07c618f85aa0800000000000000
+      internalID: -6171910512598797988
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 14_2
+      name: bumerang_2
       rect:
         serializedVersion: 2
-        x: 519
-        y: 683
-        width: 11
-        height: 6
+        x: 69
+        y: 2
+        width: 26
+        height: 28
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -184,20 +187,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9e4130c505c996a70800000000000000
-      internalID: 8820753214136849641
+      spriteID: 1fdbc272e105c1530800000000000000
+      internalID: 3827021873794563569
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 14_3
+      name: bumerang_3
       rect:
         serializedVersion: 2
-        x: 530
-        y: 680
-        width: 11
-        height: 7
+        x: 95
+        y: 0
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -206,20 +209,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8c3056de17e409540800000000000000
-      internalID: 5012592636484453320
+      spriteID: d570b5c170b0fa250800000000000000
+      internalID: 5957992957202859869
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: 14_4
+      name: bumerang_4
       rect:
         serializedVersion: 2
-        x: 312
-        y: 335
-        width: 373
-        height: 348
+        x: 128
+        y: 0
+        width: 33
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -228,8 +231,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a5192a7cb31d0efe0800000000000000
-      internalID: -1161698649178992294
+      spriteID: 036b900fc5a0ea880800000000000000
+      internalID: -8597923244323260880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bumerang_5
+      rect:
+        serializedVersion: 2
+        x: 165
+        y: 2
+        width: 26
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c100a2d51752fad0800000000000000
+      internalID: -2669975877837651519
       vertices: []
       indices: 
       edges: []
@@ -248,11 +273,12 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      14_0: -6270953770400647376
-      14_1: 4394673570059883492
-      14_2: 8820753214136849641
-      14_3: 5012592636484453320
-      14_4: -1161698649178992294
+      bumerang_0: 4362533118088950298
+      bumerang_1: -6171910512598797988
+      bumerang_2: 3827021873794563569
+      bumerang_3: 5957992957202859869
+      bumerang_4: -8597923244323260880
+      bumerang_5: -2669975877837651519
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

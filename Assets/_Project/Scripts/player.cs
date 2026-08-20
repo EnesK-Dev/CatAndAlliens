@@ -47,6 +47,11 @@ public class player : MonoBehaviour
     private const int MaxHitBufferSize = 32;
     private readonly Collider2D[] _hitBuffer = new Collider2D[MaxHitBufferSize];
 
+    // Pence, vurus suresinin ilk bu oraninda hedefin tam mesafesine uzanir; kalan surede o noktada kalir.
+    // Uzak dusmanlarda (menzil upgrade'i) gorselin gercekten degmesini ve overlap'in tam acilimda
+    // dusmani yakalamasini saglar — "vuruyor ama hasar yok" sorununu kokten cozer.
+    private const float AttackReachPortion = 0.7f;
+
     // Joystick girisi bu buyuklugun altindaysa "durgun" say (kucuk noise deadzone).
     // HEM hareket HEM animasyon ayni esigi kullanir — "yavas hareket ama animasyon yok" tutarsizligini onler.
     private const float InputDeadZoneSqr = 0.0025f; // magnitude ~0.05
@@ -74,6 +79,9 @@ public class player : MonoBehaviour
 
     /// <summary>Player hasar aldığında alınan hasar miktarıyla tetiklenir. DamageScreenFlash bunu dinler.</summary>
     public static event System.Action<float> OnPlayerDamaged;
+
+    /// <summary>Ölüm animasyonu BAŞLARKEN (Die() çağrılır çağrılmaz) ölüm konumuyla tetiklenir. CameraDeathZoom bunu dinler.</summary>
+    public static event System.Action<Vector3> OnPlayerDeathStarted;
 
     void Awake()
     {
@@ -194,9 +202,10 @@ public class player : MonoBehaviour
 
         foreach (Collider2D enemyCollider in enemiesInRange)
         {
-            // EnemyController ya da BurstShooterEnemy — ikisinden biri varsa geçerli düşman
+            // EnemyController, BurstShooterEnemy ya da BoomerangEnemy — biri varsa geçerli düşman
             bool isEnemy = enemyCollider.GetComponent<EnemyController>() != null
-                        || enemyCollider.GetComponent<BurstShooterEnemy>() != null;
+                        || enemyCollider.GetComponent<BurstShooterEnemy>() != null
+                        || enemyCollider.GetComponent<BoomerangEnemy>() != null;
             if (!isEnemy) continue;
 
             float distanceToEnemy = Vector2.Distance(transform.position, enemyCollider.transform.position);
@@ -219,10 +228,18 @@ public class player : MonoBehaviour
 
     // Vuruş yönü: düşman hâlâ varsa güncel yönünü kullan, kaybolmuşsa başlangıç yönü
     Vector2 attackDirection = targetDirection;
-    if (targetEnemy != null)
-        attackDirection = ((Vector2)targetEnemy.position - (Vector2)transform.position).normalized;
 
-    // Pençe DÜŞMANIN üstüne ışınlanmaz; kedinin ÖNÜNDE sabit offset'te, düşman yönünde durur
+    // Pençenin ULAŞACAĞI mesafe: düşman varsa onun GERÇEK mesafesi (menzil upgrade'iyle büyür),
+    // yoksa sabit attackOffset. attackOffset'ten bu mesafeye dogru vurus suresince Lerp'lenecek —
+    // sabit kisa mesafede kalip havaya sallamak yerine pence gercekten dusmana ulasir.
+    float targetDistance = attackOffset;
+    if (targetEnemy != null)
+    {
+        attackDirection = ((Vector2)targetEnemy.position - (Vector2)transform.position).normalized;
+        targetDistance = Vector2.Distance(transform.position, targetEnemy.position);
+    }
+
+    // Pençe DÜŞMANIN üstüne ışınlanmaz; kedinin ÖNÜNDE, düşman yönünde durur (baslangic mesafesi)
     attackPointObject.transform.localPosition =
         new Vector3(attackDirection.x, attackDirection.y, 0f) * attackOffset;
 
@@ -252,6 +269,15 @@ public class player : MonoBehaviour
     float elapsed = 0f;
     while (elapsed < attackDuration)
     {
+        // Pençeyi baslangic mesafesinden (attackOffset) hedefin GERCEK mesafesine dogru ilerlet —
+        // ilk %70'te tam mesafeye ULASIR (reachT 1'e kilitlenir), kalan surede o noktada kalir.
+        // Boylece uzak dusmanda gorsel gercekten deger ve overlap tam acilimda yakalar.
+        float reachT = attackDuration > 0f
+            ? Mathf.Clamp01((elapsed / attackDuration) / AttackReachPortion)
+            : 1f;
+        float currentDistance = Mathf.Lerp(attackOffset, targetDistance, reachT);
+        attackPointObject.transform.localPosition = new Vector3(attackDirection.x, attackDirection.y, 0f) * currentDistance;
+
         if (!hasHitThisSwing)
         {
             Vector3 worldAttackPosition = attackPointObject.transform.position;
@@ -267,6 +293,15 @@ public class player : MonoBehaviour
 
         elapsed += Time.deltaTime;
         yield return null;
+    }
+
+    // GARANTI: swing bitti ama overlap dusmani yakalayamadiysa (uzak hedef + dusuk FPS'te olabilir),
+    // nisan alinan dusmana DOGRUDAN hasar uygula. targetEnemy yok olmussa Unity fake-null ile atlanir.
+    if (!hasHitThisSwing && targetEnemy != null)
+    {
+        Collider2D targetCollider = targetEnemy.GetComponent<Collider2D>();
+        if (targetCollider != null)
+            ApplyDamage(targetCollider, playerDamage);
     }
 
     attackPointObject.SetActive(false);
@@ -298,7 +333,7 @@ public class player : MonoBehaviour
         return closest;
     }
 
-    /// <summary>Verilen collider'a hasar uygular; iki dusman tipini de destekler.</summary>
+    /// <summary>Verilen collider'a hasar uygular; uc dusman tipini de destekler.</summary>
     private void ApplyDamage(Collider2D enemyCollider, float damage)
     {
         EnemyController enemy = enemyCollider.GetComponent<EnemyController>();
@@ -311,7 +346,15 @@ public class player : MonoBehaviour
         // EnemyController degilse burst shooter olabilir — ayri sinif, kendi TakeDamage'i var
         BurstShooterEnemy burst = enemyCollider.GetComponent<BurstShooterEnemy>();
         if (burst != null)
+        {
             burst.TakeDamage(damage);
+            return;
+        }
+
+        // Ikisi de degilse boomerang dusmani olabilir — ayri sinif, kendi TakeDamage'i var
+        BoomerangEnemy boomerang = enemyCollider.GetComponent<BoomerangEnemy>();
+        if (boomerang != null)
+            boomerang.TakeDamage(damage);
     }
 
     /// <summary>UI Dash butonuna bağla. Cooldown'daysa veya zaten dash'teyse yoksayar.</summary>
@@ -386,10 +429,9 @@ public class player : MonoBehaviour
     /// <summary>Oto-saldırı menzilini kalıcı arttırır (menzil upgrade'i).</summary>
     public void AddAttackRange(float amount) => autoAttackRange += amount;
 
-    /// <summary>Maksimum canı arttırır ve aynı miktarda iyileştirir (max HP upgrade'i). OnHealthChanged fırlatır.</summary>
-    public void AddMaxHealth(float amount)
+    /// <summary>Eksik cani doldurur (heal upgrade'i). Max can DEGISMEZ - hep sabit kalir. OnHealthChanged fırlatır.</summary>
+    public void Heal(float amount)
     {
-        maxHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth + amount, 0f, maxHealth);
         OnHealthChanged?.Invoke(currentHealth);
     }
@@ -406,6 +448,7 @@ public class player : MonoBehaviour
         isDead = true;
         rb.linearVelocity = Vector2.zero;
         animator.SetTrigger("Death");
+        OnPlayerDeathStarted?.Invoke(transform.position); // Kamera zoom'unu animasyonla ES ZAMANLI baslat
         _dieRoutine = StartCoroutine(DieRoutine());
     }
 

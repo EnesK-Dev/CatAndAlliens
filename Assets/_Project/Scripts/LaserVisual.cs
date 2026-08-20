@@ -67,9 +67,10 @@ public class LaserVisual : MonoBehaviour
     /// <summary>
     /// Şarj modunda lazeri ince gösterir; ateş moduna geçince animasyonları baştan oynatır.
     /// </summary>
-    public void SetChargeMode(bool isCharging)
+    /// <param name="fireWidthMultiplier">Ateş modunda kalınlık çarpanı (1 = normal). Zorlukla büyür.</param>
+    public void SetChargeMode(bool isCharging, float fireWidthMultiplier = 1f)
     {
-        transform.localScale = isCharging ? ChargeModeScale : Vector3.one;
+        transform.localScale = isCharging ? ChargeModeScale : new Vector3(1f, fireWidthMultiplier, 1f);
 
         if (!isCharging)
             ResetAnimations();

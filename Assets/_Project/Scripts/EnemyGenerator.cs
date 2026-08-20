@@ -53,6 +53,13 @@ public class EnemyGenerator : MonoBehaviour
 
     [Tooltip("Cizgi dikey (Y) mi yoksa yatay (X) mi uzansin.")]
     [SerializeField] private bool isVerticalLine = false;
+
+    [Header("Son Dalga (kazanmadan hemen once)")]
+    [Tooltip("Bu milestone index'ine ulasilinca 'son dalga' baslar - spawn araligi minSpawnInterval'in ALTINA iner. DifficultyFactor zaten 1'e ulasmis olsa da bu ekstra bir sicramadir.")]
+    [SerializeField] private int finalWaveMilestoneIndex = 4;
+
+    [Tooltip("Son dalgada iki spawn arasi sabit bekleme (+/- jitter). minSpawnInterval'den KISA olmali ki fark hissedilsin.")]
+    [SerializeField] private float finalWaveSpawnInterval = 0.3f;
     #endregion
 
     #region Private Fields
@@ -91,8 +98,20 @@ public class EnemyGenerator : MonoBehaviour
     /// <summary>Zorluga gore bir sonraki spawn zamanini hesaplar (seyrek -> sik) ve jitter ekler.</summary>
     private void ScheduleNextSpawn()
     {
-        float factor = DifficultyManager.DifficultyFactor;
-        float interval = Mathf.Lerp(maxSpawnInterval, minSpawnInterval, factor);
+        float interval;
+
+        // Son dalga: DifficultyFactor zaten tavan yapmis olsa da (maxSpawnInterval/minSpawnInterval Lerp'i
+        // 8dk'da zaten minimuma iniyor), bu ozel milestone'da onun da ALTINA inerek gercek bir sicrama yaratir.
+        if (DifficultyManager.CurrentMilestone >= finalWaveMilestoneIndex)
+        {
+            interval = finalWaveSpawnInterval;
+        }
+        else
+        {
+            float factor = DifficultyManager.DifficultyFactor;
+            interval = Mathf.Lerp(maxSpawnInterval, minSpawnInterval, factor);
+        }
+
         interval += UnityEngine.Random.Range(-spawnIntervalJitter, spawnIntervalJitter);
         interval = Mathf.Max(IntervalFloor, interval);
         _nextSpawnTime = Time.time + interval;

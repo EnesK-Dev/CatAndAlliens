@@ -64,6 +64,7 @@
     <Compile Include="Assets/_Project/Scripts/AudioManager.cs" />
     <Compile Include="Assets/_Project/Scripts/player.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FixedJoystick.cs" />
+    <Compile Include="Assets/_Project/Scripts/BoomerangProjectile.cs" />
     <Compile Include="Assets/_Project/Scripts/SceneLoader.cs" />
     <Compile Include="Assets/_Project/Scripts/ClawSlashVisual.cs" />
     <Compile Include="Assets/_Project/Scripts/GameLog.cs" />
@@ -77,14 +78,19 @@
     <Compile Include="Assets/_Project/Scripts/SpaceBackground.cs" />
     <Compile Include="Assets/_Project/Scripts/MainMenuController.cs" />
     <Compile Include="Assets/_Project/Scripts/CameraShake.cs" />
+    <Compile Include="Assets/_Project/Scripts/WinUI.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FloatingJoystick.cs" />
+    <Compile Include="Assets/_Project/Scripts/WinConditionManager.cs" />
     <Compile Include="Assets/_Project/Scripts/UpgradeSelectionUI.cs" />
+    <Compile Include="Assets/_Project/Scripts/BoomerangEnemy.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/DynamicJoystick.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Base/Joystick.cs" />
     <Compile Include="Assets/_Project/Scripts/CoreItem.cs" />
+    <Compile Include="Assets/_Project/Scripts/CameraDeathZoom.cs" />
     <Compile Include="Assets/_Project/Scripts/BombRainSystem.cs" />
     <Compile Include="Assets/Joystick Pack/Examples/JoystickSetterExample.cs" />
     <Compile Include="Assets/_Project/Scripts/CoreManager.cs" />
+    <Compile Include="Assets/_Project/Scripts/CoreCounterUI.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />
