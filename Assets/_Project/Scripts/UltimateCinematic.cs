@@ -32,8 +32,12 @@ public class UltimateCinematic : MonoBehaviour
     [SerializeField] private float zoomInFactor = 0.82f;
 
     [Header("Zamanlama (saniye, unscaled) — toplam ~3sn")]
-    [Tooltip("CHARGE fazi: zoom-in + alev kademeli buyume + dusman emilmesi.")]
+    [Tooltip("CHARGE fazi: zoom-in + alev kademeli buyume + dusman emilmesi. Buyut = tum buildup yavaslar.")]
     [SerializeField] private float chargeDuration = 2.4f;
+    [Tooltip("Alev yogunlugunun zamanla artis EGRISI. Yatay=zaman(0-1), dikey=yogunluk(0-1). Ease-in " +
+             "(basta yatay, sonda dik) = once normal aura, sonra patlama. Editor'de suruklenerek sekillendirilir.")]
+    [SerializeField] private AnimationCurve chargeCurve =
+        new AnimationCurve(new Keyframe(0f, 0f, 0f, 0f), new Keyframe(1f, 1f, 3f, 0f));
     [Tooltip("IMPACT'te beyaz ekranin tam parlak kalma suresi.")]
     [SerializeField] private float whiteHold = 0.15f;
     [Tooltip("RECOVERY: beyaz fade + kamera geri acilma suresi.")]
@@ -116,7 +120,9 @@ public class UltimateCinematic : MonoBehaviour
 
             if (cam != null && cam.orthographic)
                 cam.orthographicSize = Mathf.Lerp(_baseOrthoSize, zoomedSize, Mathf.SmoothStep(0f, 1f, n));
-            if (aura != null) aura.SetIntensity(n); // alevler kademeli buyur/yogunlas/hizlanir
+            // Alev yogunlugu egriyle sekillenir (ease-in = once aura, sonra patlama). Bos egri gelirse dogrusal.
+            float intensity = (chargeCurve != null && chargeCurve.length > 0) ? chargeCurve.Evaluate(n) : n;
+            if (aura != null) aura.SetIntensity(intensity);
 
             // Dusmanlari oyuncuya cek — hizlanarak (vacuum). Player pozda sabit, playerPos degismez.
             float pullSpeed = Mathf.Lerp(pullSpeedStart, pullSpeedEnd, n);
