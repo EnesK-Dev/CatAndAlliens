@@ -16,12 +16,18 @@ public class UltimateParticleAura : MonoBehaviour
     [SerializeField] private ParticleSystem[] systems;
 
     [Header("Charge Ramp — doruktaki KAT (baseline'IN kaci kati)")]
-    [Tooltip("t=0 = tam senin editor ayarin (baseline). t=1 = baseline * bu kat. Yogunluk (emission).")]
-    [SerializeField] private float rateRampMax = 4.0f;
-    [Tooltip("Boyut / kapladigi alan (start size).")]
-    [SerializeField] private float sizeRampMax = 3.0f;
-    [Tooltip("Hiz + yayilim (startSpeed + velocityOverLifetime X/Y). Buyuk = daha genise/hizli coussun.")]
-    [SerializeField] private float speedRampMax = 2.5f;
+    [Tooltip("Parcacik SAYISI (emission) kati. PERF: yuksek = CPU yuku. Ilimli tut (2-4).")]
+    [SerializeField] private float rateRampMax = 3.0f;
+    [Tooltip("Parcacik BOYUTU (start size) kati. PERF: cok buyuk additive = overdraw (GPU).")]
+    [SerializeField] private float sizeRampMax = 2.0f;
+    [Tooltip("Dikey hiz/yukselis (velocityOverLifetime Y + startSpeed) kati.")]
+    [SerializeField] private float speedRampMax = 2.0f;
+
+    [Header("Charge Ramp — EKRANI KAPLAMA (Transform Scale, ucuz)")]
+    [Tooltip("Transform Scale X kati: alevler YATAY buyuyup ekrani kaplar. Sayi ARTMADAN kapladigi icin CPU'ya UCUZ.")]
+    [SerializeField] private float scaleXRampMax = 6.0f;
+    [Tooltip("Transform Scale Y kati: alevler DIKEY buyuyup ekrani kaplar.")]
+    [SerializeField] private float scaleYRampMax = 6.0f;
     #endregion
 
     #region Private Fields
@@ -32,6 +38,7 @@ public class UltimateParticleAura : MonoBehaviour
     private float[] _baseSpeed;
     private float[] _baseVelX;
     private float[] _baseVelY;
+    private Vector3[] _baseScale; // her sistemin taban Transform localScale'i (ekrani kaplama rampi bunu buyutur)
     #endregion
 
     #region Unity Callbacks
@@ -51,6 +58,7 @@ public class UltimateParticleAura : MonoBehaviour
         _baseSpeed = new float[n];
         _baseVelX = new float[n];
         _baseVelY = new float[n];
+        _baseScale = new Vector3[n];
 
         for (int i = 0; i < n; i++)
         {
@@ -58,6 +66,7 @@ public class UltimateParticleAura : MonoBehaviour
             if (ps == null)
             {
                 _baseRate[i] = _baseSize[i] = _baseSpeed[i] = _baseVelX[i] = _baseVelY[i] = 1f;
+                _baseScale[i] = Vector3.one;
                 continue;
             }
             _baseRate[i] = ps.emission.rateOverTimeMultiplier;
@@ -65,6 +74,7 @@ public class UltimateParticleAura : MonoBehaviour
             _baseSpeed[i] = ps.main.startSpeedMultiplier;
             _baseVelX[i] = ps.velocityOverLifetime.xMultiplier;
             _baseVelY[i] = ps.velocityOverLifetime.yMultiplier;
+            _baseScale[i] = ps.transform.localScale;
         }
     }
 
@@ -113,8 +123,8 @@ public class UltimateParticleAura : MonoBehaviour
             // Emit'i kes ama mevcut parcaciklar dogal sonsun (aniden kaybolma olmaz)
             ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         }
-        // Carpanlari TABANA geri al (kat=1) — senin ayarini ezmeden sonraki ultimate temiz baslasin
-        ApplyRamp(1f, 1f, 1f);
+        // Carpanlari + Transform scale'i TABANA geri al (kat=1) — sonraki ultimate temiz baslasin
+        ApplyRamp(1f, 1f, 1f, 1f, 1f);
     }
 
     /// <summary>
@@ -128,10 +138,12 @@ public class UltimateParticleAura : MonoBehaviour
         // Kat: t=0 -> 1 (baseline), t=1 -> RampMax. Taban carpanla CARPILIR (ezilmez).
         ApplyRamp(Mathf.Lerp(1f, rateRampMax, t01),
                   Mathf.Lerp(1f, sizeRampMax, t01),
-                  Mathf.Lerp(1f, speedRampMax, t01));
+                  Mathf.Lerp(1f, speedRampMax, t01),
+                  Mathf.Lerp(1f, scaleXRampMax, t01),
+                  Mathf.Lerp(1f, scaleYRampMax, t01));
     }
 
-    private void ApplyRamp(float rateFactor, float sizeFactor, float speedFactor)
+    private void ApplyRamp(float rateFactor, float sizeFactor, float speedFactor, float scaleXFactor, float scaleYFactor)
     {
         if (systems == null || _baseRate == null) return;
         for (int i = 0; i < systems.Length; i++)
@@ -140,19 +152,24 @@ public class UltimateParticleAura : MonoBehaviour
             if (ps == null) continue;
 
             var em = ps.emission;
-            em.rateOverTimeMultiplier = _baseRate[i] * rateFactor;   // yogunluk
+            em.rateOverTimeMultiplier = _baseRate[i] * rateFactor;   // parcacik sayisi
 
             var main = ps.main;
-            main.startSizeMultiplier = _baseSize[i] * sizeFactor;    // boyut / kapladigi alan
+            main.startSizeMultiplier = _baseSize[i] * sizeFactor;    // parcacik boyutu
             main.startSpeedMultiplier = _baseSpeed[i] * speedFactor; // startSpeed kullanan sistemler
 
-            // velocityOverLifetime kullanan sistemler (alev yukari yelpaze) icin X/Y hizini olcekle
+            // Alev hareketi (yukari flicker) — X ve Y ayni oranda; yayilma artik SCALE'den gelir
             var vel = ps.velocityOverLifetime;
             if (vel.enabled)
             {
                 vel.xMultiplier = _baseVelX[i] * speedFactor;
                 vel.yMultiplier = _baseVelY[i] * speedFactor;
             }
+
+            // EKRANI KAPLAMA: Transform Scale X/Y buyur (Scaling Mode Local -> alan + boyut birlikte buyur).
+            // Sayi artmadan kapladigi icin CPU'ya ucuz; bedel sadece kisa suren GPU overdraw.
+            Vector3 bs = _baseScale[i];
+            ps.transform.localScale = new Vector3(bs.x * scaleXFactor, bs.y * scaleYFactor, bs.z);
         }
     }
     #endregion
