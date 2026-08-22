@@ -52,6 +52,7 @@
     <Analyzer Include="/home/ryuk/catAndAliens/Library/PackageCache/com.unity.dt.app-ui@8ac7e730dd5d/Runtime/MVVM/SourceGenerators/netstandard2.0/MVVMSourceGenerators.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/_Project/Scripts/ComboManager.cs" />
     <Compile Include="Assets/_Project/Scripts/DamageNumber.cs" />
     <Compile Include="Assets/_Project/Scripts/UpgradeCard.cs" />
     <Compile Include="Assets/_Project/Scripts/DifficultyManager.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Assets/_Project/Scripts/GameOverUI.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyGenerator.cs" />
     <Compile Include="Assets/_Project/Scripts/SpaceBackground.cs" />
+    <Compile Include="Assets/_Project/Scripts/UltimateParticleAura.cs" />
     <Compile Include="Assets/_Project/Scripts/MainMenuController.cs" />
     <Compile Include="Assets/_Project/Scripts/CameraShake.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateBarUI.cs" />
@@ -86,13 +88,16 @@
     <Compile Include="Assets/_Project/Scripts/UpgradeSelectionUI.cs" />
     <Compile Include="Assets/_Project/Scripts/BoomerangEnemy.cs" />
     <Compile Include="Assets/_Project/Scripts/UltFoodItem.cs" />
+    <Compile Include="Assets/_Project/Scripts/ComboUI.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/DynamicJoystick.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Base/Joystick.cs" />
     <Compile Include="Assets/_Project/Scripts/CoreItem.cs" />
+    <Compile Include="Assets/_Project/Scripts/UltimateCinematic.cs" />
     <Compile Include="Assets/_Project/Scripts/CameraDeathZoom.cs" />
     <Compile Include="Assets/_Project/Scripts/BombRainSystem.cs" />
     <Compile Include="Assets/Joystick Pack/Examples/JoystickSetterExample.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateAura.cs" />
+    <Compile Include="Assets/_Project/Scripts/UltimateScreenFX.cs" />
     <Compile Include="Assets/_Project/Scripts/CoreManager.cs" />
     <Compile Include="Assets/_Project/Scripts/CoreCounterUI.cs" />
   </ItemGroup>

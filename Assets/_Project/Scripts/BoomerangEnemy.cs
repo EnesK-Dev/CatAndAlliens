@@ -73,6 +73,7 @@ public class BoomerangEnemy : MonoBehaviour
     private Collider2D _bodyCollider;
     private Animator _animator;
     private bool _isDying;
+    private bool _vacuumed; // Ultimate vacuum: AI/collider kapali, transform'u director oyuncuya ceker
     private float _effectiveMoveSpeed;
     private bool _hasDetectedPlayer;
     private const float MinTelegraphDuration = 0.05f; // telegraph suresinin inebilecegi guvenli taban
@@ -100,7 +101,7 @@ public class BoomerangEnemy : MonoBehaviour
 
     private void Update()
     {
-        if (_isDying) return;
+        if (_isDying || _vacuumed) return;
         if (_playerTransform == null || _isAttacking) return;
 
         if (!_hasDetectedPlayer)
@@ -119,7 +120,7 @@ public class BoomerangEnemy : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (_isDying) return;
+        if (_isDying || _vacuumed) return;
         if (_playerTransform == null || _isAttacking)
         {
             _rb.linearVelocity = Vector2.zero;
@@ -171,7 +172,7 @@ public class BoomerangEnemy : MonoBehaviour
         DamagePopupManager.Show(transform.position, amount);
 
         if (_currentHealth <= 0f)
-            Die();
+            Die(dropLoot: true);
     }
     #endregion
 
@@ -221,18 +222,41 @@ public class BoomerangEnemy : MonoBehaviour
         _hitFlashRoutine = null;
     }
 
-    private void Die()
+    /// <summary>
+    /// Ultimate ekran-temizlemesi bu dusmani DROPSUZ yok eder: core/ultFood birakmadan olum
+    /// animasyonunu oynatir. Normal olumden tek farki loot dusurmemesi. UltimateCinematic cagirir.
+    /// </summary>
+    public void Vaporize() => Die(dropLoot: false);
+
+    /// <summary>
+    /// Ultimate CHARGE fazi: dusmani "emilebilir" hale getirir — AI durur, fizik+collider kapanir
+    /// (cekilirken temas hasari vermez), coroutine'ler kesilir. Olmez (isDying set edilmez); director
+    /// transform'u oyuncuya ceker, IMPACT'te Vaporize ile silinir. Animator acik kalir (canli gorunur).
+    /// </summary>
+    public void BeginUltimateVacuum()
+    {
+        if (_isDying || _vacuumed) return;
+        _vacuumed = true;
+        StopAllCoroutines();
+        if (_rb != null) { _rb.linearVelocity = Vector2.zero; _rb.simulated = false; }
+        if (_bodyCollider != null) _bodyCollider.enabled = false;
+    }
+
+    private void Die(bool dropLoot)
     {
         if (_isDying) return;
         _isDying = true;
 
-        // Olum aninda core birak - araliktan rastgele.
-        // Random.Range(int, int) ust sinir HARIC oldugu icin +1.
-        CoreManager.SpawnCores(transform.position, Random.Range(coreDropMin, coreDropMax + 1));
+        if (dropLoot)
+        {
+            // Olum aninda core birak - araliktan rastgele.
+            // Random.Range(int, int) ust sinir HARIC oldugu icin +1.
+            CoreManager.SpawnCores(transform.position, Random.Range(coreDropMin, coreDropMax + 1));
 
-        // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
-        if (Random.value < ultFoodDropChance)
-            UltimateManager.SpawnFood(transform.position, enemyColor, 1);
+            // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
+            if (Random.value < ultFoodDropChance)
+                UltimateManager.SpawnFood(transform.position, enemyColor, 1);
+        }
 
         // Olurken AI, hareket ve carpismalari durdur
         StopAllCoroutines();                    // devam eden throw/flash coroutine'lerini kes

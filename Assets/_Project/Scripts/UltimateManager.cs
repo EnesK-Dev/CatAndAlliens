@@ -16,13 +16,6 @@ public class UltimateManager : MonoBehaviour
     [Tooltip("Ultimate'in dolmasi icin toplanmasi gereken ultFood sayisi.")]
     [SerializeField] private int requiredFood = 8;
 
-    [Header("Ultimate Etkisi")]
-    [Tooltip("Aktive olunca tum statlarin carpani (2 = 2x hasar/hiz/menzil, yari cooldown).")]
-    [SerializeField] private float ultMultiplier = 2f;
-
-    [Tooltip("Buff'in saniye cinsinden suresi.")]
-    [SerializeField] private float ultDuration = 8f;
-
     [Header("Debug")]
     [Tooltip("SADECE TEST: acikken oyun basinda bar dolu + ult hazir baslar. Yayinda KAPAT.")]
     [SerializeField] private bool startReadyForTesting = false;
@@ -226,7 +219,7 @@ public class UltimateManager : MonoBehaviour
         if (!_isReady) return false;
 
         if (playerRef != null)
-            playerRef.ActivateUltimate(ultMultiplier, ultDuration);
+            playerRef.ActivateUltimate();
 
         // Sarji sifirla — tekrar doldurulmasi gerekir
         _currentFood = 0;

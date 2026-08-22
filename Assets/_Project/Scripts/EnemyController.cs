@@ -85,6 +85,7 @@ public class EnemyController : MonoBehaviour
     private Collider2D bodyCollider;
     private Animator animator;
     private bool isDying;
+    private bool vacuumed; // Ultimate vacuum: AI/collider kapali, transform'u director oyuncuya ceker
     private float effectiveMoveSpeed;
     private const float MinChargeDuration = 0.05f; // sarj suresinin inebilecegi guvenli taban
     #endregion
@@ -103,7 +104,7 @@ public class EnemyController : MonoBehaviour
 
     private void Update()
     {
-        if (isDying) return;
+        if (isDying || vacuumed) return;
         if (playerTransform == null) return;
 
         if (isAttacking)
@@ -119,7 +120,7 @@ public class EnemyController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (isDying) return;
+        if (isDying || vacuumed) return;
         MoveTowardsPlayer();
     }
 
@@ -164,7 +165,7 @@ public class EnemyController : MonoBehaviour
         DamagePopupManager.Show(transform.position, damageAmount);
 
         if (currentHealth <= 0f)
-            Die();
+            Die(dropLoot: true);
     }
     #endregion
 
@@ -339,21 +340,45 @@ public class EnemyController : MonoBehaviour
         laserVisualInstance.UpdateLaser(transform.position, endPoint);
     }
 
-    private void Die()
+    /// <summary>
+    /// Ultimate ekran-temizlemesi bu dusmani DROPSUZ yok eder: core/ultFood birakmadan olum
+    /// animasyonunu oynatir. Normal olumden tek farki loot dusurmemesi. UltimateCinematic cagirir.
+    /// </summary>
+    public void Vaporize() => Die(dropLoot: false);
+
+    /// <summary>
+    /// Ultimate CHARGE fazi: dusmani "emilebilir" hale getirir — AI durur, fizik+collider kapanir
+    /// (cekilirken temas hasari vermez), coroutine'ler kesilir. Olmez (isDying set edilmez); director
+    /// transform'u oyuncuya ceker, IMPACT'te Vaporize ile silinir. Animator acik kalir (canli gorunur).
+    /// </summary>
+    public void BeginUltimateVacuum()
+    {
+        if (isDying || vacuumed) return;
+        vacuumed = true;
+        StopAllCoroutines();
+        if (rb != null) { rb.linearVelocity = Vector2.zero; rb.simulated = false; }
+        if (bodyCollider != null) bodyCollider.enabled = false;
+        if (laserVisualInstance != null) laserVisualInstance.Hide();
+    }
+
+    private void Die(bool dropLoot)
     {
         if (isDying) return;
         isDying = true;
 
-        // Olum aninda core birak — elite ise araliktan rastgele, normal ise sabit.
-        // Random.Range(int, int) ust sinir HARIC oldugu icin +1.
-        int coreAmount = canUseLaser
-            ? Random.Range(coreDropEliteMin, coreDropEliteMax + 1)
-            : coreDropNormal;
-        CoreManager.SpawnCores(transform.position, coreAmount);
+        if (dropLoot)
+        {
+            // Olum aninda core birak — elite ise araliktan rastgele, normal ise sabit.
+            // Random.Range(int, int) ust sinir HARIC oldugu icin +1.
+            int coreAmount = canUseLaser
+                ? Random.Range(coreDropEliteMin, coreDropEliteMax + 1)
+                : coreDropNormal;
+            CoreManager.SpawnCores(transform.position, coreAmount);
 
-        // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
-        if (Random.value < ultFoodDropChance)
-            UltimateManager.SpawnFood(transform.position, baseColor, 1);
+            // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
+            if (Random.value < ultFoodDropChance)
+                UltimateManager.SpawnFood(transform.position, baseColor, 1);
+        }
 
         // Olurken AI, hareket ve carpismalari durdur
         StopAllCoroutines();                    // devam eden lazer/flash coroutine'lerini kes

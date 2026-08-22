@@ -19,6 +19,12 @@ public class DamageNumber : MonoBehaviour
     [SerializeField] private float horizontalJitter = 0.3f;  // saga/sola rastgele kayma — sayilar ust uste binmesin
     [SerializeField] private float fadeStartPercent = 0.4f;  // omrun bu yuzdesinden sonra solmaya baslar
     [SerializeField] private float popScale = 1.2f;          // dogarken kisa "zipla" olcegi
+
+    [Header("Combo Rank Etkisi")]
+    [Tooltip("Combo rank'i basina sayinin ne kadar buyuyecegi. Ornek 0.12 -> S rank'te ~1.6x buyuk sayi.")]
+    [SerializeField] private float rankScaleStep = 0.12f;
+    [Tooltip("Acikken sayilar combo rank rengine boyanir; kapaliyken prefab'in kendi rengi kalir.")]
+    [SerializeField] private bool useRankColor = true;
     #endregion
 
     #region Private Fields
@@ -26,9 +32,16 @@ public class DamageNumber : MonoBehaviour
     private Action<DamageNumber> _onComplete;
     private Color _baseColor;
     private Vector3 _baseScale;
+    private Vector3 _prefabScale = Vector3.one; // Prefab'in orijinal olcegi — rank buyutmesi bunun uzerine carpar
     #endregion
 
     #region Unity Callbacks
+    private void Awake()
+    {
+        // Havuzdan tekrar kullanildikca localScale'i degistirdigimiz icin prefab olcegini bir kez sakla.
+        _prefabScale = transform.localScale;
+    }
+
     private void OnDisable()
     {
         // Havuza donerken calisan coroutine kalirsa bir sonraki spawn'da cakisir
@@ -49,9 +62,14 @@ public class DamageNumber : MonoBehaviour
     {
         _onComplete = onComplete;
 
+        // Combo rank'ini spawn aninda oku — renk ve boyut buna gore olceklenir (yuksek rank = daha buyuk/renkli).
+        int rank = ComboManager.RankIndex;
+
         if (label != null)
         {
-            _baseColor = label.color;
+            // Rank rengi tek kaynaktan (ComboManager). Kapaliysa prefab'in kendi rengi kalir.
+            _baseColor = useRankColor ? ComboManager.RankColorAt(rank) : label.color;
+            label.color = _baseColor;
             // Alloc yapmadan int yazar — mobilde her vurusta cop uretmemek icin SetText
             label.SetText("{0}", Mathf.RoundToInt(damage));
         }
@@ -59,7 +77,10 @@ public class DamageNumber : MonoBehaviour
         // Yatayda kucuk rastgele kayma ver, dikeyde spawn noktasindan basla
         float jitter = UnityEngine.Random.Range(-horizontalJitter, horizontalJitter);
         transform.position = worldPosition + new Vector3(jitter, 0f, 0f);
-        _baseScale = transform.localScale;
+
+        // Prefab olcegini rank'e gore buyut: yuksek combo'da sayilar gorsel olarak daha iri.
+        _baseScale = _prefabScale * (1f + rank * rankScaleStep);
+        transform.localScale = _baseScale;
 
         if (_playRoutine != null)
             StopCoroutine(_playRoutine);
