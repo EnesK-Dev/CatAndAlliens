@@ -307,6 +307,8 @@ public class EnemyController : MonoBehaviour
         if (laserVisualInstance != null)
             laserVisualInstance.SetChargeMode(false, widthMultiplier);
 
+        SfxManager.Play(SfxId.LaserFire); // lazer ateslendi
+
         UpdateLaserVisual();
 
         // Hasar uygula — engel ve player katmanlarini birlestirir
@@ -401,6 +403,7 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
+        SfxManager.Play(SfxId.EnemyDeath); // olum animasyonu sesi (nuke'ta calmaz)
         StartCoroutine(DeathRoutine());
     }
 

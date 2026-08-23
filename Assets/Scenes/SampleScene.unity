@@ -11803,6 +11803,137 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4169cd16da0dc75e1b6cdd811595ee84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UpgradeCard
+--- !u!1 &1564156893
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1564156895}
+  - component: {fileID: 1564156894}
+  m_Layer: 0
+  m_Name: SfxManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1564156894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564156893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e1fcbf33635fe6e595b7e37d5649dad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SfxManager
+  entries:
+  - id: 0
+    clips:
+    - {fileID: 8300000, guid: f43497bcd2324771bbeb2ffadfd2fe47, type: 3}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 1
+    clips:
+    - {fileID: 0}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 2
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 3
+    clips:
+    - {fileID: 8300000, guid: 272efaaefac761b91bfce8b2b55cc2cf, type: 3}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 4
+    clips:
+    - {fileID: 8300000, guid: 8f80a2f3fccbf78b8ad56f648b1c7652, type: 3}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 5
+    clips:
+    - {fileID: 0}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 6
+    clips:
+    - {fileID: 8300000, guid: cedacf0ccb9d6a3f9a66171c8010d4a4, type: 3}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 7
+    clips:
+    - {fileID: 0}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 8
+    clips:
+    - {fileID: 8300000, guid: 4061010a7365f8986be64b352a1ed263, type: 3}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 9
+    clips:
+    - {fileID: 8300000, guid: 9e1cff7a214ca011b812b38a61b3ff88, type: 3}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 10
+    clips:
+    - {fileID: 8300000, guid: c479926482089b8e68167631a4846c70, type: 3}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 12
+    clips:
+    - {fileID: 0}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 13
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 14
+    clips:
+    - {fileID: 8300000, guid: 8b359ddc6d5e93c768241d950e2154e2, type: 3}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 16
+    clips:
+    - {fileID: 8300000, guid: 9635651d5073b3690bf6977e2cfdf269, type: 3}
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  voiceCount: 8
+  sRankLoop:
+    id: 11
+    clips:
+    - {fileID: 8300000, guid: 5b9f9f3a4c988b92bbc320741598cd5a, type: 3}
+    volume: 0.6
+    pitchRange: {x: 1, y: 1}
+  gameplayMusic:
+    id: 15
+    clips: []
+    volume: 0.5
+    pitchRange: {x: 1, y: 1}
+  playMusicOnStart: 1
+--- !u!4 &1564156895
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564156893}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1596313390
 GameObject:
   m_ObjectHideFlags: 0
@@ -14286,7 +14417,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  whiteHold: 0.25
+  whiteHold: 0.2
   recoveryDuration: 0.4
   pullSpeedStart: 1.5
   pullSpeedEnd: 16
@@ -14654,3 +14785,4 @@ SceneRoots:
   - {fileID: 254816336}
   - {fileID: 2122774362}
   - {fileID: 56867175}
+  - {fileID: 1564156895}

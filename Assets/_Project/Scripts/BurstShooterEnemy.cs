@@ -197,6 +197,8 @@ public class BurstShooterEnemy : MonoBehaviour
                 EnemyBullet bullet = bulletObj.GetComponent<EnemyBullet>();
                 if (bullet != null)
                     bullet.Initialize(targetPos);
+
+                SfxManager.Play(SfxId.BurstShot); // her mermi ates sesi
             }
 
             yield return new WaitForSeconds(shotDelay);
@@ -282,6 +284,7 @@ public class BurstShooterEnemy : MonoBehaviour
             return;
         }
 
+        SfxManager.Play(SfxId.EnemyDeath); // olum animasyonu sesi (nuke'ta calmaz)
         StartCoroutine(DeathRoutine());
     }
 

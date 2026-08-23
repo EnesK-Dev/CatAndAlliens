@@ -52,6 +52,7 @@ public class GameOverUI : MonoBehaviour
     /// <summary>Main Menu butonuna bağlanır. Zamanı normale döndürüp ana menü sahnesini yükler.</summary>
     public void GoToMainMenu()
     {
+        SfxManager.Play(SfxId.ButtonClick);
         Time.timeScale = 1f; // timeScale sahneler arası taşınır — donmuş kalmasın diye sıfırla
         if (sceneLoader != null)
             sceneLoader.LoadScene(mainMenuSceneName);
@@ -60,6 +61,7 @@ public class GameOverUI : MonoBehaviour
     /// <summary>Restart butonuna bağlanır. Zamanı normale döndürüp mevcut sahneyi yeniden yükler.</summary>
     public void RestartGame()
     {
+        SfxManager.Play(SfxId.ButtonClick);
         Time.timeScale = 1f;
         if (sceneLoader != null)
             sceneLoader.ReloadCurrentScene();

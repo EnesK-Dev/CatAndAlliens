@@ -150,6 +150,7 @@ public class UltFoodItem : MonoBehaviour
     {
         if (_isCollected) return;
         _isCollected = true;
+        SfxManager.Play(SfxId.FoodCollect); // ultFood (yemek) toplama sesi
         _onCollected?.Invoke(this);
     }
     #endregion

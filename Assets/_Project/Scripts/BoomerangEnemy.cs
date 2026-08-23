@@ -195,6 +195,8 @@ public class BoomerangEnemy : MonoBehaviour
             BoomerangProjectile boomerang = boomerangObj.GetComponent<BoomerangProjectile>();
             if (boomerang != null)
                 boomerang.Initialize(transform, targetPos);
+
+            SfxManager.Play(SfxId.BoomerangThrow); // bumerang firlatildi
         }
 
         _nextThrowTime = Time.time + Mathf.Lerp(throwCooldown, throwCooldownAtMaxDifficulty, factor);
@@ -277,6 +279,7 @@ public class BoomerangEnemy : MonoBehaviour
             return;
         }
 
+        SfxManager.Play(SfxId.EnemyDeath); // olum animasyonu sesi (nuke'ta calmaz)
         StartCoroutine(DeathRoutine());
     }
 

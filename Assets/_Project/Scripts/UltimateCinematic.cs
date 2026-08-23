@@ -171,6 +171,7 @@ public class UltimateCinematic : MonoBehaviour
         Time.timeScale = 1f;
         if (cameraShake != null) cameraShake.EndSustainedShake(); // sarsintiyi durdur, kamerayi yerine al
         if (screenFX != null) screenFX.SetWhite(1f); // tam ekran beyaz (her seyin ustunde)
+        SfxManager.Play(SfxId.UltimateImpact); // beyaz flash / patlama sesi (aktivasyondan ayri)
         VaporizeAllEnemies();                        // dropsuz + aninda sil (emilenler + stragglerlar)
         _pulled.Clear();
         _pullTargets.Clear();

@@ -140,6 +140,7 @@ public class CoreItem : MonoBehaviour
     {
         if (_isCollected) return;
         _isCollected = true;
+        SfxManager.Play(SfxId.CoinCollect); // core (coin) toplama sesi
         _onCollected?.Invoke(this);
     }
     #endregion

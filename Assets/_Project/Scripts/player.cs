@@ -211,6 +211,7 @@ public class player : MonoBehaviour
         {
             Vector2 directionToEnemy = (targetEnemy.position - transform.position).normalized;
             StartCoroutine(VampireAttackRoutine(directionToEnemy));
+            SfxManager.Play(SfxId.PlayerHit); // pence vurus sesi (menzilde dusman varken her swing)
         }
     }
 
@@ -390,6 +391,7 @@ public class player : MonoBehaviour
     {
         if (isDashing || isDashOnCooldown) return;
         StartCoroutine(DashRoutine());
+        SfxManager.Play(SfxId.Dash); // dash whoosh
     }
 
     private IEnumerator DashRoutine()
@@ -474,6 +476,7 @@ public class player : MonoBehaviour
     {
         if (_ultRoutine != null) StopCoroutine(_ultRoutine);
         _ultRoutine = StartCoroutine(UltimateNukeRoutine());
+        SfxManager.Play(SfxId.Ultimate); // ulti aktivasyon sesi
     }
 
     /// <summary>Ultimate sinema penceresi su an aktif mi (aura/UI icin).</summary>
