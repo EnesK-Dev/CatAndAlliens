@@ -20,6 +20,7 @@ public class UltimateCinematic : MonoBehaviour
     [SerializeField] private Camera cam;
     [SerializeField] private UltimateParticleAura aura;
     [SerializeField] private UltimateScreenFX screenFX;
+    [SerializeField] private CameraShake cameraShake;
 
     [Header("Slow-Mo")]
     [Tooltip("CHARGE boyunca Time.timeScale (0.4 = %40 hiz). IMPACT'te 1'e doner.")]
@@ -30,6 +31,14 @@ public class UltimateCinematic : MonoBehaviour
     [Tooltip("Zoom-in carpani: taban ortho * bu. 1'in altinda = yakinlasir.")]
     [Range(0.5f, 1f)]
     [SerializeField] private float zoomInFactor = 0.82f;
+
+    [Header("Charge Ekran Sarsintisi (charge dolduca artan, ease'li)")]
+    [Tooltip("CHARGE sonundaki (doruk) sarsinti siddeti (dunya birimi). Buyut = ekran daha cok titrer.")]
+    [SerializeField] private float chargeShakeMagnitudeMax = 0.25f;
+    [Tooltip("Sarsintinin zamanla artis EGRISI. Yatay=zaman(0-1), dikey=siddet(0-1). Ease-in " +
+             "(basta yatay, sonda dik) = once hafif titreme, charge dolarken siddetlenir.")]
+    [SerializeField] private AnimationCurve chargeShakeCurve =
+        new AnimationCurve(new Keyframe(0f, 0f, 0f, 0f), new Keyframe(1f, 1f, 3f, 0f));
 
     [Header("Zamanlama (saniye, unscaled) — toplam ~3sn")]
     [Tooltip("CHARGE fazi: zoom-in + alev kademeli buyume + dusman emilmesi. Buyut = tum buildup yavaslar.")]
@@ -48,12 +57,22 @@ public class UltimateCinematic : MonoBehaviour
     [SerializeField] private float pullSpeedStart = 1.5f;
     [Tooltip("CHARGE sonundaki cekme hizi (hizlanarak icine cekilir).")]
     [SerializeField] private float pullSpeedEnd = 16f;
+
+    [Header("Dusman Toplanma Dizilimi (kedinin etrafina, ust uste binmeden)")]
+    [Tooltip("En ic yaricap: dusmanlar bundan yakina gelmez -> kedinin ICINE girmezler.")]
+    [SerializeField] private float gatherMinRadius = 0.7f;
+    [Tooltip("Toplanma sikligi: her dusman biraz daha disa dizilir. Buyut = daha genis, seyrek disk (ust uste binmezler).")]
+    [SerializeField] private float gatherSpacing = 0.42f;
     #endregion
 
     #region Private Fields
     private Coroutine _sequence;
     private float _baseOrthoSize = 5f; // Sahnenin varsayilan zoom'u — restore hedefi (Awake'te okunur)
     private readonly List<Transform> _pulled = new List<Transform>(); // emilen dusman transformlari (alloc'suz yeniden kullanilir)
+    private readonly List<Vector3> _pullTargets = new List<Vector3>(); // her dusmanin kedinin etrafindaki hedef noktasi (_pulled ile ayni index)
+
+    // Altin aci (~137.5°) radyan cinsinden — dusmanlari kedinin etrafina ust uste binmeden (phyllotaxis) dagitir.
+    private const float GoldenAngleRad = 2.399963f;
     #endregion
 
     #region Unity Callbacks
@@ -63,6 +82,7 @@ public class UltimateCinematic : MonoBehaviour
         if (cam == null) cam = Camera.main;
         if (aura == null) aura = FindFirstObjectByType<UltimateParticleAura>();
         if (screenFX == null) screenFX = FindFirstObjectByType<UltimateScreenFX>();
+        if (cameraShake == null && cam != null) cameraShake = cam.GetComponent<CameraShake>();
         if (cam != null && cam.orthographic) _baseOrthoSize = cam.orthographicSize;
     }
 
@@ -106,10 +126,12 @@ public class UltimateCinematic : MonoBehaviour
         Time.timeScale = Mathf.Clamp01(slowMoTimeScale);
         if (screenFX != null) screenFX.ResetFX();
         if (aura != null) aura.SetIntensity(0f); // baseline (senin ayarin) — buradan yukari rampa
-        BeginVacuumGather(); // dusmanlari emilebilir yap + listeye al
 
         Vector3 playerPos = playerRef != null ? playerRef.transform.position : transform.position;
         float zoomedSize = _baseOrthoSize * zoomInFactor;
+
+        BeginVacuumGather(playerPos); // dusmanlari emilebilir yap + kedinin etrafinda hedef nokta ata
+        if (cameraShake != null) cameraShake.BeginSustainedShake(); // charge boyunca ekran sarsintisi
 
         // --- 1) CHARGE ---
         float t = 0f;
@@ -124,14 +146,22 @@ public class UltimateCinematic : MonoBehaviour
             float intensity = (chargeCurve != null && chargeCurve.length > 0) ? chargeCurve.Evaluate(n) : n;
             if (aura != null) aura.SetIntensity(intensity);
 
-            // Dusmanlari oyuncuya cek — hizlanarak (vacuum). Player pozda sabit, playerPos degismez.
+            // Ekran sarsintisi charge dolduca artar (ease'li). Curve bos gelirse dogrusal.
+            if (cameraShake != null)
+            {
+                float shakeN = (chargeShakeCurve != null && chargeShakeCurve.length > 0) ? chargeShakeCurve.Evaluate(n) : n;
+                cameraShake.SetSustainedMagnitude(chargeShakeMagnitudeMax * shakeN);
+            }
+
+            // Dusmanlari kedinin ETRAFINDAKI hedef noktalarina cek — hizlanarak (vacuum). Kedinin/birbirinin
+            // icine girmesinler diye tek noktaya degil, phyllotaxis diskine dizilirler. Player pozda sabit.
             float pullSpeed = Mathf.Lerp(pullSpeedStart, pullSpeedEnd, n);
             float step = pullSpeed * Time.unscaledDeltaTime;
             for (int i = 0; i < _pulled.Count; i++)
             {
                 Transform e = _pulled[i];
                 if (e != null)
-                    e.position = Vector3.MoveTowards(e.position, playerPos, step);
+                    e.position = Vector3.MoveTowards(e.position, _pullTargets[i], step);
             }
 
             yield return null;
@@ -139,9 +169,11 @@ public class UltimateCinematic : MonoBehaviour
 
         // --- 2) IMPACT ---
         Time.timeScale = 1f;
+        if (cameraShake != null) cameraShake.EndSustainedShake(); // sarsintiyi durdur, kamerayi yerine al
         if (screenFX != null) screenFX.SetWhite(1f); // tam ekran beyaz (her seyin ustunde)
-        VaporizeAllEnemies();                        // dropsuz sil (emilenler + stragglerlar)
+        VaporizeAllEnemies();                        // dropsuz + aninda sil (emilenler + stragglerlar)
         _pulled.Clear();
+        _pullTargets.Clear();
         yield return WaitUnscaled(whiteHold);
 
         // --- 3) RECOVERY ---
@@ -163,10 +195,15 @@ public class UltimateCinematic : MonoBehaviour
         _sequence = null;
     }
 
-    /// <summary>Sahnedeki uc dusman tipini de emilebilir yap (BeginUltimateVacuum) ve transformlarini listele.</summary>
-    private void BeginVacuumGather()
+    /// <summary>
+    /// Sahnedeki uc dusman tipini de emilebilir yap (BeginUltimateVacuum), transformlarini listele ve
+    /// her birine kedinin ETRAFINDA bir hedef nokta ata. Hedefler phyllotaxis (ayciyegi/altin aci) diski
+    /// ile dagitilir: kedinin icine (minRadius) ve birbirinin icine girmezler, alevin altinda toplanirlar.
+    /// </summary>
+    private void BeginVacuumGather(Vector3 center)
     {
         _pulled.Clear();
+        _pullTargets.Clear();
 
         var chasers = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
         for (int i = 0; i < chasers.Length; i++)
@@ -179,6 +216,16 @@ public class UltimateCinematic : MonoBehaviour
         var boomerangs = FindObjectsByType<BoomerangEnemy>(FindObjectsSortMode.None);
         for (int i = 0; i < boomerangs.Length; i++)
             if (boomerangs[i] != null) { boomerangs[i].BeginUltimateVacuum(); _pulled.Add(boomerangs[i].transform); }
+
+        // Her dusman icin diskteki hedef: yaricap = minRadius + spacing*sqrt(index), aci = index*altinAci.
+        // sqrt + altin aci = esit yogunluklu, ust uste binmeyen dagilim (ayciyegi cekirdek dizilimi).
+        for (int i = 0; i < _pulled.Count; i++)
+        {
+            float radius = gatherMinRadius + gatherSpacing * Mathf.Sqrt(i);
+            float angle = i * GoldenAngleRad;
+            Vector3 offset = new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0f);
+            _pullTargets.Add(center + offset);
+        }
     }
 
     /// <summary>
@@ -211,6 +258,7 @@ public class UltimateCinematic : MonoBehaviour
     {
         Time.timeScale = 1f;
         if (cam != null && cam.orthographic) cam.orthographicSize = _baseOrthoSize;
+        if (cameraShake != null) cameraShake.EndSustainedShake(); // sarsinti yarida kalmis olabilir — temizle
         if (playerRef != null) playerRef.ExitUltimatePose();
         if (screenFX != null) screenFX.ResetFX();
     }

@@ -15,6 +15,11 @@ public class CameraShake : MonoBehaviour
     private Coroutine shakeRoutine;
     private float activeMagnitude;
 
+    // Surekli (sustained) sarsinti — Ultimate charge gibi "siddeti disaridan her kare ayarlanan,
+    // kendiliginden sonmeyen" sarsintilar icin. Tek-atis TriggerShake'ten bagimsiz calisir.
+    private bool sustainedActive;
+    private float sustainedMagnitude;
+
     #endregion
 
     #region Unity Callbacks
@@ -33,7 +38,23 @@ public class CameraShake : MonoBehaviour
         }
 
         activeMagnitude = 0f;
+        sustainedActive = false;
+        sustainedMagnitude = 0f;
         transform.localPosition = originalPosition;
+    }
+
+    // Surekli sarsinti tek-atis coroutine'den SONRA uygulanmali ki ustune yazsin — bu yuzden LateUpdate.
+    // Unscaled degil dogrudan pozisyon offset'i; slow-mo'dan etkilenmez cunku her kare yeniden set edilir.
+    private void LateUpdate()
+    {
+        if (!sustainedActive) return;
+
+        float x = Random.Range(-1f, 1f) * sustainedMagnitude;
+        float y = Random.Range(-1f, 1f) * sustainedMagnitude;
+        transform.localPosition = new Vector3(
+            originalPosition.x + x,
+            originalPosition.y + y,
+            originalPosition.z);
     }
 
     #endregion
@@ -54,6 +75,28 @@ public class CameraShake : MonoBehaviour
 
         activeMagnitude = magnitude;
         shakeRoutine = StartCoroutine(ShakeRoutine(duration, magnitude));
+    }
+
+    /// <summary>Surekli sarsintiyi baslatir. Siddeti her kare <see cref="SetSustainedMagnitude"/> ile guncellenir.</summary>
+    public void BeginSustainedShake()
+    {
+        sustainedActive = true;
+    }
+
+    /// <summary>Surekli sarsintinin anlik siddetini ayarlar (Ultimate charge dolduca buyutulur).</summary>
+    /// <param name="magnitude">Sarsinti siddeti (dunya birimi). 0 = sakin.</param>
+    public void SetSustainedMagnitude(float magnitude)
+    {
+        sustainedMagnitude = Mathf.Max(0f, magnitude);
+    }
+
+    /// <summary>Surekli sarsintiyi bitirir ve kamerayi orijinal lokal pozisyonuna dondurur.</summary>
+    public void EndSustainedShake()
+    {
+        sustainedActive = false;
+        sustainedMagnitude = 0f;
+        if (shakeRoutine == null)
+            transform.localPosition = originalPosition;
     }
 
     #endregion

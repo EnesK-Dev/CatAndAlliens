@@ -5533,10 +5533,10 @@ MonoBehaviour:
     m_RotationOrder: 4
   milestoneMinutes:
   - 0
-  - 2
-  - 5
-  - 8
-  - 9
+  - 1.5
+  - 3
+  - 4.5
+  - 6
   showDebugOverlay: 1
   debugFontScale: 0.03
 --- !u!4 &1090651623
@@ -7324,7 +7324,7 @@ ParticleSystem:
     y:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 1.98
+      scalar: 1.85
       minScalar: 0.71428573
       maxCurve:
         serializedVersion: 2
@@ -7748,7 +7748,7 @@ ParticleSystem:
     radial:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0
+      scalar: 0.1
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -10841,7 +10841,8 @@ Material:
   m_Shader: {fileID: 4800000, guid: fe393ace9b354375a9cb14cdbbc28be4, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - OUTLINE_ON
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -10866,7 +10867,7 @@ Material:
     - _MaskSoftnessX: 0
     - _MaskSoftnessY: 0
     - _OutlineSoftness: 0
-    - _OutlineWidth: 0.2
+    - _OutlineWidth: 0.356
     - _PerspectiveFilter: 0.875
     - _ScaleRatioA: 0.9
     - _ScaleRatioB: 1
@@ -13798,11 +13799,12 @@ MonoBehaviour:
   playerRef: {fileID: 19887873}
   systems:
   - {fileID: 1137405699}
-  rateRampMax: 5
-  sizeRampMax: 5
+  rateRampMax: 3
+  sizeRampMax: 3
   speedRampMax: 2
   scaleXRampMax: 3
   scaleYRampMax: 4
+  peakColor: {r: 0.9597633, g: 1, b: 0, a: 1}
 --- !u!1 &1992026637
 GameObject:
   m_ObjectHideFlags: 0
@@ -14231,8 +14233,34 @@ MonoBehaviour:
   cam: {fileID: 0}
   aura: {fileID: 0}
   screenFX: {fileID: 0}
+  cameraShake: {fileID: 519420033}
   slowMoTimeScale: 0.35
-  zoomInFactor: 0.85
+  zoomInFactor: 0.584
+  chargeShakeMagnitudeMax: 0.35
+  chargeShakeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 3
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   chargeDuration: 3
   chargeCurve:
     serializedVersion: 2
@@ -14258,10 +14286,12 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  whiteHold: 0.12
+  whiteHold: 0.25
   recoveryDuration: 0.4
   pullSpeedStart: 1.5
   pullSpeedEnd: 16
+  gatherMinRadius: 0.7
+  gatherSpacing: 0.42
 --- !u!4 &2122774362
 Transform:
   m_ObjectHideFlags: 0

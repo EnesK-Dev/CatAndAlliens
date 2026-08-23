@@ -228,10 +228,10 @@ public class BurstShooterEnemy : MonoBehaviour
     }
 
     /// <summary>
-    /// Ultimate ekran-temizlemesi bu dusmani DROPSUZ yok eder: core/ultFood birakmadan olum
-    /// animasyonunu oynatir. Normal olumden tek farki loot dusurmemesi. UltimateCinematic cagirir.
+    /// Ultimate ekran-temizlemesi bu dusmani DROPSUZ ve ANINDA yok eder: core/ultFood birakmaz,
+    /// olum animasyonu + duman OYNATMAZ (nuke temiz olsun). UltimateCinematic IMPACT aninda cagirir.
     /// </summary>
-    public void Vaporize() => Die(dropLoot: false);
+    public void Vaporize() => Die(dropLoot: false, playDeathAnim: false);
 
     /// <summary>
     /// Ultimate CHARGE fazi: dusmani "emilebilir" hale getirir — AI durur, fizik+collider kapanir
@@ -247,7 +247,7 @@ public class BurstShooterEnemy : MonoBehaviour
         if (_bodyCollider != null) _bodyCollider.enabled = false;
     }
 
-    private void Die(bool dropLoot)
+    private void Die(bool dropLoot, bool playDeathAnim = true)
     {
         if (_isDying) return;
         _isDying = true;
@@ -274,6 +274,13 @@ public class BurstShooterEnemy : MonoBehaviour
         }
         if (_bodyCollider != null)
             _bodyCollider.enabled = false;      // artik temas hasari vermesin, icinden gecilebilsin
+
+        // Nuke (Vaporize) icin ANINDA yok ol — death frame'leri/dumani oynatma.
+        if (!playDeathAnim)
+        {
+            Destroy(gameObject);
+            return;
+        }
 
         StartCoroutine(DeathRoutine());
     }

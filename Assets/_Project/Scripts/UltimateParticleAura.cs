@@ -28,6 +28,11 @@ public class UltimateParticleAura : MonoBehaviour
     [SerializeField] private float scaleXRampMax = 6.0f;
     [Tooltip("Transform Scale Y kati: alevler DIKEY buyuyup ekrani kaplar.")]
     [SerializeField] private float scaleYRampMax = 6.0f;
+
+    [Header("Charge Ramp — RENK (charge dolduca koyu kirmiziya)")]
+    [Tooltip("Doruktaki alev rengi. Charge 0 iken editor'deki taban startColor, charge 1 iken bu renk. " +
+             "Koyu kirmizi (orn. R~0.6 G~0.05 B~0.03) alevi 'ofkeli/patlamaya hazir' gosterir.")]
+    [SerializeField] private Color peakColor = new Color(0.6f, 0.06f, 0.03f, 1f);
     #endregion
 
     #region Private Fields
@@ -38,7 +43,9 @@ public class UltimateParticleAura : MonoBehaviour
     private float[] _baseSpeed;
     private float[] _baseVelX;
     private float[] _baseVelY;
+    private float[] _baseRadial; // taban radial (disa itme) carpani — charge dolduca buyutulur (her yone esit yayilma)
     private Vector3[] _baseScale; // her sistemin taban Transform localScale'i (ekrani kaplama rampi bunu buyutur)
+    private Color[] _baseColor;   // her sistemin taban startColor'i (renk rampi bunu peakColor'a lerp'ler)
     #endregion
 
     #region Unity Callbacks
@@ -58,15 +65,18 @@ public class UltimateParticleAura : MonoBehaviour
         _baseSpeed = new float[n];
         _baseVelX = new float[n];
         _baseVelY = new float[n];
+        _baseRadial = new float[n];
         _baseScale = new Vector3[n];
+        _baseColor = new Color[n];
 
         for (int i = 0; i < n; i++)
         {
             var ps = systems[i];
             if (ps == null)
             {
-                _baseRate[i] = _baseSize[i] = _baseSpeed[i] = _baseVelX[i] = _baseVelY[i] = 1f;
+                _baseRate[i] = _baseSize[i] = _baseSpeed[i] = _baseVelX[i] = _baseVelY[i] = _baseRadial[i] = 1f;
                 _baseScale[i] = Vector3.one;
+                _baseColor[i] = Color.white;
                 continue;
             }
             _baseRate[i] = ps.emission.rateOverTimeMultiplier;
@@ -74,7 +84,9 @@ public class UltimateParticleAura : MonoBehaviour
             _baseSpeed[i] = ps.main.startSpeedMultiplier;
             _baseVelX[i] = ps.velocityOverLifetime.xMultiplier;
             _baseVelY[i] = ps.velocityOverLifetime.yMultiplier;
+            _baseRadial[i] = ps.velocityOverLifetime.radialMultiplier; // disa itme (her yone esit)
             _baseScale[i] = ps.transform.localScale;
+            _baseColor[i] = ps.main.startColor.color; // taban renk — renk rampi bunu peakColor'a lerp'ler
         }
     }
 
@@ -123,8 +135,8 @@ public class UltimateParticleAura : MonoBehaviour
             // Emit'i kes ama mevcut parcaciklar dogal sonsun (aniden kaybolma olmaz)
             ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         }
-        // Carpanlari + Transform scale'i TABANA geri al (kat=1) — sonraki ultimate temiz baslasin
-        ApplyRamp(1f, 1f, 1f, 1f, 1f);
+        // Carpanlari + Transform scale'i TABANA geri al (kat=1, renk=taban) — sonraki ultimate temiz baslasin
+        ApplyRamp(1f, 1f, 1f, 1f, 1f, 0f);
     }
 
     /// <summary>
@@ -136,14 +148,16 @@ public class UltimateParticleAura : MonoBehaviour
     {
         t01 = Mathf.Clamp01(t01);
         // Kat: t=0 -> 1 (baseline), t=1 -> RampMax. Taban carpanla CARPILIR (ezilmez).
+        // Renk: t=0 -> taban startColor, t=1 -> peakColor (koyu kirmizi). colorT dogrudan t01.
         ApplyRamp(Mathf.Lerp(1f, rateRampMax, t01),
                   Mathf.Lerp(1f, sizeRampMax, t01),
                   Mathf.Lerp(1f, speedRampMax, t01),
                   Mathf.Lerp(1f, scaleXRampMax, t01),
-                  Mathf.Lerp(1f, scaleYRampMax, t01));
+                  Mathf.Lerp(1f, scaleYRampMax, t01),
+                  t01);
     }
 
-    private void ApplyRamp(float rateFactor, float sizeFactor, float speedFactor, float scaleXFactor, float scaleYFactor)
+    private void ApplyRamp(float rateFactor, float sizeFactor, float speedFactor, float scaleXFactor, float scaleYFactor, float colorT)
     {
         if (systems == null || _baseRate == null) return;
         for (int i = 0; i < systems.Length; i++)
@@ -158,12 +172,19 @@ public class UltimateParticleAura : MonoBehaviour
             main.startSizeMultiplier = _baseSize[i] * sizeFactor;    // parcacik boyutu
             main.startSpeedMultiplier = _baseSpeed[i] * speedFactor; // startSpeed kullanan sistemler
 
-            // Alev hareketi (yukari flicker) — X ve Y ayni oranda; yayilma artik SCALE'den gelir
+            // RENK: taban startColor -> peakColor (charge dolduca koyu kirmiziya). startColor,
+            // colorOverLifetime ile CARPILDIGI icin bu tint tum alevi kirmiziya ceker (constant mode).
+            main.startColor = new ParticleSystem.MinMaxGradient(Color.Lerp(_baseColor[i], peakColor, colorT));
+
+            // Alev hareketi (yukari flicker) — X ve Y ayni oranda; ekrani kaplama SCALE'den gelir.
+            // RADIAL: parcaciklari merkezden DISA (her yone esit) iter — "ruzgar her eksende" hissi.
+            // Ucu de speedFactor ile buyur ki charge dolduca yayilma siddetlensin.
             var vel = ps.velocityOverLifetime;
             if (vel.enabled)
             {
                 vel.xMultiplier = _baseVelX[i] * speedFactor;
                 vel.yMultiplier = _baseVelY[i] * speedFactor;
+                vel.radialMultiplier = _baseRadial[i] * speedFactor;
             }
 
             // EKRANI KAPLAMA: Transform Scale X/Y buyur (Scaling Mode Local -> alan + boyut birlikte buyur).
