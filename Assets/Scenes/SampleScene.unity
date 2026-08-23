@@ -11911,12 +11911,13 @@ MonoBehaviour:
     id: 11
     clips:
     - {fileID: 8300000, guid: 5b9f9f3a4c988b92bbc320741598cd5a, type: 3}
-    volume: 0.6
+    volume: 1
     pitchRange: {x: 1, y: 1}
   gameplayMusic:
     id: 15
-    clips: []
-    volume: 0.5
+    clips:
+    - {fileID: 8300000, guid: c272ea6608ce3b7a6837f84530868d34, type: 3}
+    volume: 0.179
     pitchRange: {x: 1, y: 1}
   playMusicOnStart: 1
 --- !u!4 &1564156895
