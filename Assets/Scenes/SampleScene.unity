@@ -11840,7 +11840,7 @@ MonoBehaviour:
     pitchRange: {x: 0.95, y: 1.05}
   - id: 1
     clips:
-    - {fileID: 0}
+    - {fileID: 8300000, guid: 3a40a4ffaff40eb8eb160807ecbfce1b, type: 3}
     volume: 1
     pitchRange: {x: 0.95, y: 1.05}
   - id: 2
@@ -11898,7 +11898,7 @@ MonoBehaviour:
     pitchRange: {x: 0.95, y: 1.05}
   - id: 14
     clips:
-    - {fileID: 8300000, guid: 8b359ddc6d5e93c768241d950e2154e2, type: 3}
+    - {fileID: 8300000, guid: 7673050f2c5867a038ba05b029adca7b, type: 3}
     volume: 1
     pitchRange: {x: 0.95, y: 1.05}
   - id: 16
