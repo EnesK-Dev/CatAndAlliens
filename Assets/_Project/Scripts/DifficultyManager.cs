@@ -48,6 +48,20 @@ public class DifficultyManager : MonoBehaviour
     /// <summary>Ulasilmis en yuksek milestone index'i (-1 = henuz hicbiri). Manager yoksa -1.</summary>
     public static int CurrentMilestone => _instance != null ? _instance._reachedMilestoneIndex : -1;
 
+    /// <summary>
+    /// Verilen milestone'a ulasilmasindan bu yana gecen SANIYE (henuz ulasilmadiysa/manager yoksa 0).
+    /// Milestone'lar milestoneMinutes[i]*60'ta tetiklendigi icin = elapsed - o zaman. Dusman tipinin
+    /// "acilisindan beri" gecen sureyi olcmek icin EnemyGenerator kullanir (yerel zorluk rampasi).
+    /// </summary>
+    public static float TimeSinceMilestone(int milestoneIndex)
+    {
+        if (_instance == null) return 0f;
+        var mm = _instance.milestoneMinutes;
+        if (mm == null || milestoneIndex < 0 || milestoneIndex >= mm.Length)
+            return _instance._elapsedTime; // unlock=0 gibi durumlar: bastan acik say
+        return Mathf.Max(0f, _instance._elapsedTime - mm[milestoneIndex] * 60f);
+    }
+
     /// <summary>Yeni bir milestone'a ulasilinca firlar. Parametre: milestone index'i.</summary>
     public static event Action<int> OnMilestoneReached;
     #endregion

@@ -5,7 +5,7 @@ using UnityEngine;
 /// 3. uzaylı tipi — oyuncunun anlık konumuna 3 mermi sıkır, aralara bekleme koyar.
 /// Görsel olarak diğer uzaylılarla aynı prefab'ı kullanabilir; renk Inspector'dan ayarlanır.
 /// </summary>
-public class BurstShooterEnemy : MonoBehaviour
+public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
 {
     #region Serialized Fields
     [Header("Hareket Ayarlari")]
@@ -76,6 +76,11 @@ public class BurstShooterEnemy : MonoBehaviour
     private bool _isDying;
     private bool _vacuumed; // Ultimate vacuum: AI/collider kapali, transform'u director oyuncuya ceker
     private float _effectiveMoveSpeed;
+
+    // Yerel zorluk (tipin acilisindan beri). Override yoksa global DifficultyFactor'a duser.
+    private float _spawnDifficulty;
+    private bool _hasSpawnDifficulty;
+    private float EffectiveDifficulty => _hasSpawnDifficulty ? _spawnDifficulty : DifficultyManager.DifficultyFactor;
     #endregion
 
     #region Unity Callbacks
@@ -88,8 +93,8 @@ public class BurstShooterEnemy : MonoBehaviour
         _currentHealth = maxHealth;
         _nextShootTime = Time.time + shootCooldown;
 
-        // Hareket hizini spawn anindaki zorluga gore bir kez hesapla (hafif hizlanma).
-        _effectiveMoveSpeed = moveSpeed * Mathf.Lerp(1f, moveSpeedMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor);
+        // Hareket hizini spawn anindaki (yerel) zorluga gore hesapla. SetSpawnDifficulty gelince yeniden hesaplanir.
+        ComputeEffectiveMoveSpeed();
 
         if (_spriteRenderer != null)
             _spriteRenderer.color = shooterColor;
@@ -151,6 +156,19 @@ public class BurstShooterEnemy : MonoBehaviour
     #endregion
 
     #region Public Methods
+    /// <summary>EnemyGenerator spawn'da cagirir: bu dusmanin YEREL zorlugunu ayarlar (0=taban, 1=tam) ve hizi yeniler.</summary>
+    public void SetSpawnDifficulty(float factor01)
+    {
+        _spawnDifficulty = Mathf.Clamp01(factor01);
+        _hasSpawnDifficulty = true;
+        ComputeEffectiveMoveSpeed();
+    }
+
+    private void ComputeEffectiveMoveSpeed()
+    {
+        _effectiveMoveSpeed = moveSpeed * Mathf.Lerp(1f, moveSpeedMultiplierAtMaxDifficulty, EffectiveDifficulty);
+    }
+
     /// <summary>Bu düşmana hasar verir; can bitince yok edilir.</summary>
     public void TakeDamage(float amount)
     {
@@ -171,8 +189,8 @@ public class BurstShooterEnemy : MonoBehaviour
     {
         _isAttacking = true;
 
-        // Zorlugu seri basinda bir kez ornekle — sayi/bekleme bu seriye sabit uygulanir.
-        float factor = DifficultyManager.DifficultyFactor;
+        // Zorlugu seri basinda bir kez ornekle — YEREL zorluk (tipin acilisindan beri). Ilk cikinca taban.
+        float factor = EffectiveDifficulty;
         int shots = burstCount + Mathf.FloorToInt(factor * (burstCountAtMaxDifficulty - burstCount));
         shots = Mathf.Max(burstCount, shots); // guvenlik: max < base yanlis ayarlanirsa base'in altina inme
         float shotDelay = Mathf.Lerp(delayBetweenShots, delayBetweenShotsAtMaxDifficulty, factor);

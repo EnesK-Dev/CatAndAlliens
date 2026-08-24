@@ -47,6 +47,12 @@ public class EnemyGenerator : MonoBehaviour
     [Tooltip("Her araliga eklenen rastgele +/- sapma (mekaniklik kirmak icin).")]
     [SerializeField] private float spawnIntervalJitter = 0.3f;
 
+    [Header("Tip Guclenme Rampasi (yerel zorluk)")]
+    [Tooltip("Bir dusman tipi ACILDIKTAN sonra kac SANIYEDE tam gucune ulassin. Bu sure boyunca o tip " +
+             "0 (taban) -> 1 (tam) olceklenir. Boylece burst/lazer ILK cikinca zayif gelir, zamanla guclenir. " +
+             "Global spawn sikligini ETKILEMEZ (o zamanla artmaya devam eder).")]
+    [SerializeField] private float typeRampSeconds = 180f;
+
     [Header("Spawn Cizgisi")]
     [Tooltip("Cizginin toplam uzunlugu.")]
     [SerializeField] private float spawnLineLength = 5f;
@@ -120,8 +126,8 @@ public class EnemyGenerator : MonoBehaviour
     /// <summary>Cizgi uzerinde rastgele bir noktaya, weighted random ile secilen tipi spawn eder.</summary>
     private void SpawnEnemyOnLine()
     {
-        GameObject prefabToSpawn = PickWeightedPrefab();
-        if (prefabToSpawn == null) return;
+        EnemySpawnEntry entry = PickWeightedEntry();
+        if (entry == null || entry.prefab == null) return;
 
         float halfLength = spawnLineLength / 2f;
         float randomOffset = UnityEngine.Random.Range(-halfLength, halfLength);
@@ -132,14 +138,22 @@ public class EnemyGenerator : MonoBehaviour
         else
             spawnPosition.x += randomOffset;
 
-        Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
+        GameObject spawned = Instantiate(entry.prefab, spawnPosition, Quaternion.identity);
+
+        // YEREL ZORLUK: bu tip acilalı (unlockMilestone) ne kadar oldu -> 0..1 rampa. Ilk cikinca taban.
+        float localFactor = typeRampSeconds > 0f
+            ? Mathf.Clamp01(DifficultyManager.TimeSinceMilestone(entry.unlockMilestone) / typeRampSeconds)
+            : 1f;
+        // Dusman IDifficultyScaled uyguluyorsa yerel zorlugu ver (Awake sonrasi, Start oncesi — hesaplar buna gore).
+        var scaled = spawned.GetComponent<IDifficultyScaled>();
+        scaled?.SetSpawnDifficulty(localFactor);
     }
 
     /// <summary>
     /// Acilmis (unlockMilestone'una ulasilmis) tipler arasinda agirliga gore rastgele birini secer.
     /// Agirlik zorlukla (DifficultyFactor) Lerp'lenir. Alloc yok — dizide iki gecis yapar.
     /// </summary>
-    private GameObject PickWeightedPrefab()
+    private EnemySpawnEntry PickWeightedEntry()
     {
         if (spawnEntries == null || spawnEntries.Length == 0) return null;
 
@@ -158,15 +172,15 @@ public class EnemyGenerator : MonoBehaviour
 
         // 2. gecis: rastgele nokta hangi girise denk geliyor
         float roll = UnityEngine.Random.value * totalWeight;
-        GameObject lastValid = null;
+        EnemySpawnEntry lastValid = null;
         for (int i = 0; i < spawnEntries.Length; i++)
         {
             EnemySpawnEntry entry = spawnEntries[i];
             if (!IsUnlocked(entry)) continue;
 
-            lastValid = entry.prefab;
+            lastValid = entry;
             roll -= Mathf.Max(0f, Mathf.Lerp(entry.baseWeight, entry.maxWeight, factor));
-            if (roll <= 0f) return entry.prefab;
+            if (roll <= 0f) return entry;
         }
 
         // Float yuvarlama guvencesi: son gecerli girisi don

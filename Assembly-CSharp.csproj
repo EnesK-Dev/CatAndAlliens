@@ -90,6 +90,7 @@
     <Compile Include="Assets/_Project/Scripts/BoomerangEnemy.cs" />
     <Compile Include="Assets/_Project/Scripts/SfxId.cs" />
     <Compile Include="Assets/_Project/Scripts/UltFoodItem.cs" />
+    <Compile Include="Assets/_Project/Scripts/IDifficultyScaled.cs" />
     <Compile Include="Assets/_Project/Scripts/ComboUI.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/DynamicJoystick.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Base/Joystick.cs" />

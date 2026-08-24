@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EnemyController : MonoBehaviour
+public class EnemyController : MonoBehaviour, IDifficultyScaled
 {
     #region Serialized Fields
     [Header("Yapay Zeka Ayarlari")]
@@ -87,6 +87,11 @@ public class EnemyController : MonoBehaviour
     private bool isDying;
     private bool vacuumed; // Ultimate vacuum: AI/collider kapali, transform'u director oyuncuya ceker
     private float effectiveMoveSpeed;
+
+    // Yerel zorluk (tipin acilisindan beri). Override yoksa global DifficultyFactor'a duser.
+    private float _spawnDifficulty;
+    private bool _hasSpawnDifficulty;
+    private float EffectiveDifficulty => _hasSpawnDifficulty ? _spawnDifficulty : DifficultyManager.DifficultyFactor;
     private const float MinChargeDuration = 0.05f; // sarj suresinin inebilecegi guvenli taban
     #endregion
 
@@ -154,6 +159,15 @@ public class EnemyController : MonoBehaviour
     #endregion
 
     #region Public Methods
+    /// <summary>EnemyGenerator spawn'da cagirir: YEREL zorlugu ayarlar (0=taban, 1=tam), hiz + saldiri araligini yeniler.</summary>
+    public void SetSpawnDifficulty(float factor01)
+    {
+        _spawnDifficulty = Mathf.Clamp01(factor01);
+        _hasSpawnDifficulty = true;
+        ComputeEffectiveMoveSpeed();
+        CalculateNextAttackTime(); // ilk saldiri araligi da yerel zorluga gore (ilk cikinca seyrek)
+    }
+
     /// <summary>Düşmana hasar verir; can bitince ölüm tetiklenir.</summary>
     public void TakeDamage(float damageAmount)
     {
@@ -185,8 +199,8 @@ public class EnemyController : MonoBehaviour
 
     private void CalculateNextAttackTime()
     {
-        // Zorlukla saldiri araligi kisalir; base -> hard degerine Lerp (alt sinir = hard degerler).
-        float factor = DifficultyManager.DifficultyFactor;
+        // Zorlukla saldiri araligi kisalir; base -> hard degerine Lerp. YEREL zorluk — ilk cikinca seyrek atar.
+        float factor = EffectiveDifficulty;
         float scaledMin = Mathf.Lerp(minAttackCooldown, minAttackCooldownAtMaxDifficulty, factor);
         float scaledMax = Mathf.Lerp(maxAttackCooldown, maxAttackCooldownAtMaxDifficulty, factor);
         nextAttackTime = Time.time + Random.Range(scaledMin, scaledMax);
@@ -195,7 +209,7 @@ public class EnemyController : MonoBehaviour
     /// <summary>Hareket hizini spawn anindaki zorluga gore bir kez hesaplar (hafif hizlanma).</summary>
     private void ComputeEffectiveMoveSpeed()
     {
-        float factor = DifficultyManager.DifficultyFactor;
+        float factor = EffectiveDifficulty;
         effectiveMoveSpeed = moveSpeed * Mathf.Lerp(1f, moveSpeedMultiplierAtMaxDifficulty, factor);
     }
 
@@ -290,8 +304,8 @@ public class EnemyController : MonoBehaviour
             laserVisualInstance.SetChargeMode(true);
         }
 
-        // Zorlukla sarj (telegraph) suresi kisalir — alt sinir MinChargeDuration.
-        float factor = DifficultyManager.DifficultyFactor;
+        // Zorlukla sarj (telegraph) suresi kisalir — alt sinir MinChargeDuration. YEREL zorluk (ilk cikinda uzun sarj).
+        float factor = EffectiveDifficulty;
         float scaledCharge = Mathf.Max(MinChargeDuration, Mathf.Lerp(chargeDuration, chargeDurationAtMaxDifficulty, factor));
 
         float chargeTimer = 0f;

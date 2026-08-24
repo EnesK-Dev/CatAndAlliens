@@ -5,7 +5,7 @@ using UnityEngine;
 /// 4. uzaylı tipi — oyuncuyla mesafe tutar, anlık konumuna bumerang fırlatır.
 /// Bumerang fırlatılan noktanın etrafında dönüp bu düşmana geri döner (bkz. BoomerangProjectile).
 /// </summary>
-public class BoomerangEnemy : MonoBehaviour
+public class BoomerangEnemy : MonoBehaviour, IDifficultyScaled
 {
     #region Serialized Fields
     [Header("Hareket Ayarlari")]
@@ -75,6 +75,11 @@ public class BoomerangEnemy : MonoBehaviour
     private bool _isDying;
     private bool _vacuumed; // Ultimate vacuum: AI/collider kapali, transform'u director oyuncuya ceker
     private float _effectiveMoveSpeed;
+
+    // Yerel zorluk (tipin acilisindan beri). Override yoksa global DifficultyFactor'a duser.
+    private float _spawnDifficulty;
+    private bool _hasSpawnDifficulty;
+    private float EffectiveDifficulty => _hasSpawnDifficulty ? _spawnDifficulty : DifficultyManager.DifficultyFactor;
     private bool _hasDetectedPlayer;
     private const float MinTelegraphDuration = 0.05f; // telegraph suresinin inebilecegi guvenli taban
     #endregion
@@ -88,8 +93,8 @@ public class BoomerangEnemy : MonoBehaviour
         _animator = GetComponent<Animator>();
         _currentHealth = maxHealth;
 
-        // Hareket hizini spawn anindaki zorluga gore bir kez hesapla (hafif hizlanma).
-        _effectiveMoveSpeed = moveSpeed * Mathf.Lerp(1f, moveSpeedMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor);
+        // Hareket hizini spawn anindaki (yerel) zorluga gore hesapla. SetSpawnDifficulty gelince yenilenir.
+        ComputeEffectiveMoveSpeed();
 
         if (_spriteRenderer != null)
             _spriteRenderer.color = enemyColor;
@@ -161,6 +166,19 @@ public class BoomerangEnemy : MonoBehaviour
     #endregion
 
     #region Public Methods
+    /// <summary>EnemyGenerator spawn'da cagirir: YEREL zorlugu ayarlar (0=taban, 1=tam) ve hizi yeniler.</summary>
+    public void SetSpawnDifficulty(float factor01)
+    {
+        _spawnDifficulty = Mathf.Clamp01(factor01);
+        _hasSpawnDifficulty = true;
+        ComputeEffectiveMoveSpeed();
+    }
+
+    private void ComputeEffectiveMoveSpeed()
+    {
+        _effectiveMoveSpeed = moveSpeed * Mathf.Lerp(1f, moveSpeedMultiplierAtMaxDifficulty, EffectiveDifficulty);
+    }
+
     /// <summary>Bu düşmana hasar verir; can bitince yok edilir.</summary>
     public void TakeDamage(float amount)
     {
@@ -182,7 +200,7 @@ public class BoomerangEnemy : MonoBehaviour
         _isAttacking = true;
 
         // Zorlukla telegraph suresi kisalir - alt sinir MinTelegraphDuration.
-        float factor = DifficultyManager.DifficultyFactor;
+        float factor = EffectiveDifficulty;
         float scaledTelegraph = Mathf.Max(MinTelegraphDuration, Mathf.Lerp(throwTelegraphDuration, throwTelegraphDurationAtMaxDifficulty, factor));
         yield return new WaitForSeconds(scaledTelegraph);
 
