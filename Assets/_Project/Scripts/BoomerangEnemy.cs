@@ -54,6 +54,10 @@ public class BoomerangEnemy : MonoBehaviour
 
     [Tooltip("Bu dusman olunce dusen core ust siniri (dahil).")]
     [SerializeField] private int coreDropMax = 3;
+
+    [Header("UltFood Drop (Ultimate)")]
+    [Tooltip("Bu dusman olunce ultFood dusme ihtimali (0 = hic, 1 = her zaman).")]
+    [Range(0f, 1f)] [SerializeField] private float ultFoodDropChance = 0.25f;
     #endregion
 
     #region Private Fields
@@ -69,6 +73,7 @@ public class BoomerangEnemy : MonoBehaviour
     private Collider2D _bodyCollider;
     private Animator _animator;
     private bool _isDying;
+    private bool _vacuumed; // Ultimate vacuum: AI/collider kapali, transform'u director oyuncuya ceker
     private float _effectiveMoveSpeed;
     private bool _hasDetectedPlayer;
     private const float MinTelegraphDuration = 0.05f; // telegraph suresinin inebilecegi guvenli taban
@@ -96,7 +101,7 @@ public class BoomerangEnemy : MonoBehaviour
 
     private void Update()
     {
-        if (_isDying) return;
+        if (_isDying || _vacuumed) return;
         if (_playerTransform == null || _isAttacking) return;
 
         if (!_hasDetectedPlayer)
@@ -115,7 +120,7 @@ public class BoomerangEnemy : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (_isDying) return;
+        if (_isDying || _vacuumed) return;
         if (_playerTransform == null || _isAttacking)
         {
             _rb.linearVelocity = Vector2.zero;
@@ -167,7 +172,7 @@ public class BoomerangEnemy : MonoBehaviour
         DamagePopupManager.Show(transform.position, amount);
 
         if (_currentHealth <= 0f)
-            Die();
+            Die(dropLoot: true);
     }
     #endregion
 
@@ -190,6 +195,8 @@ public class BoomerangEnemy : MonoBehaviour
             BoomerangProjectile boomerang = boomerangObj.GetComponent<BoomerangProjectile>();
             if (boomerang != null)
                 boomerang.Initialize(transform, targetPos);
+
+            SfxManager.Play(SfxId.BoomerangThrow); // bumerang firlatildi
         }
 
         _nextThrowTime = Time.time + Mathf.Lerp(throwCooldown, throwCooldownAtMaxDifficulty, factor);
@@ -217,14 +224,41 @@ public class BoomerangEnemy : MonoBehaviour
         _hitFlashRoutine = null;
     }
 
-    private void Die()
+    /// <summary>
+    /// Ultimate ekran-temizlemesi bu dusmani DROPSUZ ve ANINDA yok eder: core/ultFood birakmaz,
+    /// olum animasyonu + duman OYNATMAZ (nuke temiz olsun). UltimateCinematic IMPACT aninda cagirir.
+    /// </summary>
+    public void Vaporize() => Die(dropLoot: false, playDeathAnim: false);
+
+    /// <summary>
+    /// Ultimate CHARGE fazi: dusmani "emilebilir" hale getirir — AI durur, fizik+collider kapanir
+    /// (cekilirken temas hasari vermez), coroutine'ler kesilir. Olmez (isDying set edilmez); director
+    /// transform'u oyuncuya ceker, IMPACT'te Vaporize ile silinir. Animator acik kalir (canli gorunur).
+    /// </summary>
+    public void BeginUltimateVacuum()
+    {
+        if (_isDying || _vacuumed) return;
+        _vacuumed = true;
+        StopAllCoroutines();
+        if (_rb != null) { _rb.linearVelocity = Vector2.zero; _rb.simulated = false; }
+        if (_bodyCollider != null) _bodyCollider.enabled = false;
+    }
+
+    private void Die(bool dropLoot, bool playDeathAnim = true)
     {
         if (_isDying) return;
         _isDying = true;
 
-        // Olum aninda core birak - araliktan rastgele.
-        // Random.Range(int, int) ust sinir HARIC oldugu icin +1.
-        CoreManager.SpawnCores(transform.position, Random.Range(coreDropMin, coreDropMax + 1));
+        if (dropLoot)
+        {
+            // Olum aninda core birak - araliktan rastgele.
+            // Random.Range(int, int) ust sinir HARIC oldugu icin +1.
+            CoreManager.SpawnCores(transform.position, Random.Range(coreDropMin, coreDropMax + 1));
+
+            // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
+            if (Random.value < ultFoodDropChance)
+                UltimateManager.SpawnFood(transform.position, enemyColor, 1);
+        }
 
         // Olurken AI, hareket ve carpismalari durdur
         StopAllCoroutines();                    // devam eden throw/flash coroutine'lerini kes
@@ -238,6 +272,14 @@ public class BoomerangEnemy : MonoBehaviour
         if (_bodyCollider != null)
             _bodyCollider.enabled = false;      // artik temas hasari vermesin, icinden gecilebilsin
 
+        // Nuke (Vaporize) icin ANINDA yok ol — death frame'leri/dumani oynatma.
+        if (!playDeathAnim)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        SfxManager.Play(SfxId.EnemyDeath); // olum animasyonu sesi (nuke'ta calmaz)
         StartCoroutine(DeathRoutine());
     }
 

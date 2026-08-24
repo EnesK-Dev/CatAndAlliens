@@ -45,6 +45,7 @@ public class MainMenuController : MonoBehaviour
     /// <summary>PLAY butonuna baglanir. Oyun sahnesini fade ile yukler.</summary>
     public void PlayGame()
     {
+        SfxManager.Play(SfxId.ButtonClick);
         if (sceneLoader != null)
             sceneLoader.LoadScene(gameSceneName);
     }
@@ -52,24 +53,28 @@ public class MainMenuController : MonoBehaviour
     /// <summary>SETTINGS butonuna baglanir. Ayarlar panelini acar.</summary>
     public void OpenSettings()
     {
+        SfxManager.Play(SfxId.ButtonClick);
         if (settingsPanel != null) settingsPanel.SetActive(true);
     }
 
     /// <summary>Ayarlar panelindeki kapat (X) butonuna baglanir.</summary>
     public void CloseSettings()
     {
+        SfxManager.Play(SfxId.ButtonClick);
         if (settingsPanel != null) settingsPanel.SetActive(false);
     }
 
     /// <summary>CREDITS butonuna baglanir. Credits panelini acar.</summary>
     public void OpenCredits()
     {
+        SfxManager.Play(SfxId.ButtonClick);
         if (creditsPanel != null) creditsPanel.SetActive(true);
     }
 
     /// <summary>Credits panelindeki kapat (X) butonuna baglanir.</summary>
     public void CloseCredits()
     {
+        SfxManager.Play(SfxId.ButtonClick);
         if (creditsPanel != null) creditsPanel.SetActive(false);
     }
 

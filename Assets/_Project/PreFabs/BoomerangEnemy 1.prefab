@@ -201,3 +201,4 @@ MonoBehaviour:
   moveSpeedMultiplierAtMaxDifficulty: 1.15
   coreDropMin: 2
   coreDropMax: 3
+  ultFoodDropChance: 0.1

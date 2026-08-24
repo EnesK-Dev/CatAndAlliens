@@ -1030,6 +1030,123 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!1 &470101628
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 470101630}
+  - component: {fileID: 470101629}
+  m_Layer: 0
+  m_Name: SfxManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &470101629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 470101628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e1fcbf33635fe6e595b7e37d5649dad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SfxManager
+  entries:
+  - id: 0
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 1
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 2
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 3
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 4
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 5
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 6
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 7
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 8
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 9
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 10
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 12
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 13
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 14
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  - id: 16
+    clips: []
+    volume: 1
+    pitchRange: {x: 0.95, y: 1.05}
+  voiceCount: 8
+  sRankLoop:
+    id: 11
+    clips: []
+    volume: 0.6
+    pitchRange: {x: 1, y: 1}
+  gameplayMusic:
+    id: 15
+    clips: []
+    volume: 0.5
+    pitchRange: {x: 1, y: 1}
+  playMusicOnStart: 1
+--- !u!4 &470101630
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 470101628}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &668265421
 GameObject:
   m_ObjectHideFlags: 0
@@ -2971,3 +3088,4 @@ SceneRoots:
   - {fileID: 1333872504}
   - {fileID: 1523816665}
   - {fileID: 1045664607}
+  - {fileID: 470101630}

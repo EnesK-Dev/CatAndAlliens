@@ -72,7 +72,22 @@ public class player : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Coroutine _dieRoutine;
 
+    // ---- Ultimate (Nuke) ----
+    // Saf ekran-temizleme: ultimate artik SUREKLI stat buff'i DEGIL. Basinca kisa bir "aktif
+    // pencere" boyunca OnUltimateActiveChanged(true) yayilir (aura + sinema bunu dinler), pencere
+    // bitince (false). Dusmanlari silme / kamera zoom / ekran overlay'i UltimateCinematic yapar.
+    [Header("Ultimate")]
+    [Tooltip("Ultimate sinema/aura penceresinin saniye suresi — bu sure boyunca 'aktif' kabul edilir.")]
+    [SerializeField] private float ultimateActiveDuration = 3.1f;
+    [Tooltip("Ultimate sinemasinda karakterin gecici olarak takindigi kameraya-donuk poz sprite'i.")]
+    [SerializeField] private Sprite ultimatePoseSprite;
+    private Coroutine _ultRoutine;
+    private bool _ultPosing; // true iken hareket/saldiri kilitli, sprite pozda sabit (animator kapali)
+
     public event System.Action<float> OnHealthChanged;
+
+    /// <summary>Ultimate buff'i basladiginda (true) ve bittiginde (false) tetiklenir. UltimateAura bunu dinler.</summary>
+    public event System.Action<bool> OnUltimateActiveChanged;
 
     /// <summary>Player ölüm animasyonu bittiğinde bir kez tetiklenir. GameOverUI bunu dinler.</summary>
     public static event System.Action OnPlayerDied;
@@ -92,6 +107,7 @@ public class player : MonoBehaviour
     {
         if (isDead) return;
         if (isPaused) return; // Panel aciksa hareket/saldiri/dash girisi kilitli (timeScale=0'a ek garanti)
+        if (_ultPosing) return; // Ultimate pozundayken input yok (kilidi asagida fizik de destekler)
 
         HandleMovementInput();
         UpdateAnimationState();
@@ -167,6 +183,12 @@ public class player : MonoBehaviour
 
     private void MoveCharacterPhysics()
     {
+        if (_ultPosing)
+        {
+            rb.linearVelocity = Vector2.zero; // Slow-mo'da timeScale>0 oldugundan FixedUpdate calisir; pozda kaymayi engelle
+            return;
+        }
+
         if (isDashing)
         {
             rb.linearVelocity = dashVelocity;
@@ -189,6 +211,7 @@ public class player : MonoBehaviour
         {
             Vector2 directionToEnemy = (targetEnemy.position - transform.position).normalized;
             StartCoroutine(VampireAttackRoutine(directionToEnemy));
+            SfxManager.Play(SfxId.PlayerHit); // pence vurus sesi (menzilde dusman varken her swing)
         }
     }
 
@@ -286,7 +309,9 @@ public class player : MonoBehaviour
             Collider2D closestEnemy = GetClosestEnemyCollider(worldAttackPosition, hitCount);
             if (closestEnemy != null)
             {
-                ApplyDamage(closestEnemy, playerDamage);
+                // Combo carpani hasara CARPILIR. ComboManager yoksa 1 doner (etkisiz).
+                ApplyDamage(closestEnemy, playerDamage * ComboManager.Multiplier);
+                ComboManager.RegisterHit(); // Basarili vurus — combo sayaci +1
                 hasHitThisSwing = true;
             }
         }
@@ -301,12 +326,16 @@ public class player : MonoBehaviour
     {
         Collider2D targetCollider = targetEnemy.GetComponent<Collider2D>();
         if (targetCollider != null)
-            ApplyDamage(targetCollider, playerDamage);
+        {
+            ApplyDamage(targetCollider, playerDamage * ComboManager.Multiplier);
+            ComboManager.RegisterHit(); // Garanti-vurus da combo'yu sayar
+        }
     }
 
     attackPointObject.SetActive(false);
 
-    yield return new WaitForSeconds(attackCooldown);
+    // Combo carpani saldiri hizina da uygulanir: carpan buyudukce cooldown KISALIR (bolen).
+    yield return new WaitForSeconds(attackCooldown / ComboManager.Multiplier);
     isCooldown = false;
 }
 
@@ -362,6 +391,7 @@ public class player : MonoBehaviour
     {
         if (isDashing || isDashOnCooldown) return;
         StartCoroutine(DashRoutine());
+        SfxManager.Play(SfxId.Dash); // dash whoosh
     }
 
     private IEnumerator DashRoutine()
@@ -434,6 +464,58 @@ public class player : MonoBehaviour
     {
         currentHealth = Mathf.Clamp(currentHealth + amount, 0f, maxHealth);
         OnHealthChanged?.Invoke(currentHealth);
+    }
+
+    /// <summary>
+    /// Ultimate'i aktive eder (SAF NUKE): stat buff'i YOK. Sadece 'ultimateActiveDuration' boyunca
+    /// OnUltimateActiveChanged(true) yayar; bu pencere boyunca aura + UltimateCinematic sahneyi
+    /// yonetir (kamera zoom, alev, beyaz impact, tum dusmanlari dropsuz silme). Pencere bitince
+    /// (false) yayilir. Tekrar cagrilirsa REFRESH — pencere bastan baslar. UltimateManager cagirir.
+    /// </summary>
+    public void ActivateUltimate()
+    {
+        if (_ultRoutine != null) StopCoroutine(_ultRoutine);
+        _ultRoutine = StartCoroutine(UltimateNukeRoutine());
+        SfxManager.Play(SfxId.Ultimate); // ulti aktivasyon sesi
+    }
+
+    /// <summary>Ultimate sinema penceresi su an aktif mi (aura/UI icin).</summary>
+    public bool IsUltimateActive => _ultRoutine != null;
+
+    /// <summary>
+    /// Ultimate sinemasi icin karakteri "kameraya donuk poz"a sokar: hareket/saldiri kilitlenir,
+    /// Animator KAPATILIR (yoksa her kare sprite'i ezer — bilinen tuzak) ve ultimatePoseSprite gosterilir.
+    /// UltimateCinematic zamanlar; sprite atanmamissa yalnizca hareketi dondurur. ExitUltimatePose ile geri alinir.
+    /// </summary>
+    public void EnterUltimatePose()
+    {
+        _ultPosing = true;
+        moveInput = Vector2.zero;
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+
+        if (animator != null) animator.enabled = false; // sprite'i sabitleyebilmek icin animator'i sustur
+        if (spriteRenderer != null && ultimatePoseSprite != null)
+        {
+            spriteRenderer.color = Color.white; // yarim kalmis hurt-flash rengini temizle
+            spriteRenderer.sprite = ultimatePoseSprite;
+        }
+    }
+
+    /// <summary>Ultimate pozundan cikar: Animator tekrar acilir (bir sonraki karede normal sprite'i surer), input serbest.</summary>
+    public void ExitUltimatePose()
+    {
+        _ultPosing = false;
+        if (animator != null) animator.enabled = true;
+    }
+
+    private IEnumerator UltimateNukeRoutine()
+    {
+        // Aktif pencereyi ac: aura + sinema baslar. Stat DEGISMEZ (saf nuke).
+        OnUltimateActiveChanged?.Invoke(true);
+        // Realtime: sinema slow-mo (Time.timeScale<1) uygulasa bile pencere gercek saniyeyle olculur.
+        yield return new WaitForSecondsRealtime(ultimateActiveDuration);
+        _ultRoutine = null;
+        OnUltimateActiveChanged?.Invoke(false);
     }
 
     private IEnumerator HurtFlash()

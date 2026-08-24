@@ -67,10 +67,12 @@ public class BombWarning : MonoBehaviour
     {
         GameLog.Log($"[BombWarning] Uyarı başladı: {transform.position}, süre: {warningDuration}s", this);
         SetVisuals(warning: true, explosion: false);
+        SfxManager.Play(SfxId.BombWarning); // bomba dusme uyari sesi
         yield return new WaitForSeconds(warningDuration);
 
         GameLog.Log($"[BombWarning] Patlama başladı. Frame sayısı: {explosionFrames?.Length ?? 0}, FPS: {explosionFrameRate}", this);
         SetVisuals(warning: false, explosion: true);
+        SfxManager.Play(SfxId.BombExplosion); // bomba patlama sesi
         ApplyExplosionDamage();
         yield return PlayExplosionVisual();
 
