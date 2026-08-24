@@ -71,6 +71,7 @@
     <Compile Include="Assets/_Project/Scripts/GameLog.cs" />
     <Compile Include="Assets/_Project/Scripts/HeartUI.cs" />
     <Compile Include="Assets/Joystick Pack/Examples/JoystickPlayerExample.cs" />
+    <Compile Include="Assets/_Project/Scripts/DashButtonUI.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/VariableJoystick.cs" />
     <Compile Include="Assets/_Project/Scripts/BombWarning.cs" />
     <Compile Include="Assets/_Project/Scripts/DamageScreenFlash.cs" />

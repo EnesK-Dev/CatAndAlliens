@@ -36,6 +36,10 @@ public class player : MonoBehaviour
     [SerializeField] private float dashSpeed = 15f;
     [SerializeField] private float dashDuration = 0.15f;
     [SerializeField] private float dashCooldown = 1.5f;
+    [Tooltip("Dash sirasinda dusmanlari itme yaricapi (kucuk tut — sadece degenler).")]
+    [SerializeField] private float dashPushRadius = 0.55f;
+    [Tooltip("Dash sirasinda her kare uygulanan KUCUK itme mesafesi. Amac: kalabalıktan cikis, uzaga firlatma DEGIL.")]
+    [SerializeField] private float dashPushStep = 0.12f;
 
     [Header("Can Ayarlari")]
     [SerializeField] private float maxHealth = 18f; // 9 kalp x 2 yarim-kalp
@@ -63,6 +67,8 @@ public class player : MonoBehaviour
     private bool isCooldown = false;
     private bool isDashing = false;
     private bool isDashOnCooldown = false;
+    private float dashStartTime; // dash basladigi an — cooldown gostergesi (0->1) icin
+    private readonly Collider2D[] dashHitBuffer = new Collider2D[16]; // dash itme icin alloc'suz overlap tamponu
     private bool isPaused = false; // Upgrade paneli acikken true — Update input'u isler islemez keser
     private Vector2 lastMoveDirection = Vector2.right;
     private Vector2 dashVelocity;
@@ -390,6 +396,7 @@ public class player : MonoBehaviour
     public void TriggerDash()
     {
         if (isDashing || isDashOnCooldown) return;
+        dashStartTime = Time.time; // cooldown gostergesi bu andan itibaren 0->1 dolar
         StartCoroutine(DashRoutine());
         SfxManager.Play(SfxId.Dash); // dash whoosh
     }
@@ -404,17 +411,54 @@ public class player : MonoBehaviour
         animator.SetFloat("DashY", lastMoveDirection.y);
         animator.SetTrigger("Dash");
 
-        yield return new WaitForSeconds(dashDuration);
+        // Dash boyunca her kare degen dusmanlari HAFIFCE it (kalabalıktan cikis). Player bu sure boyunca immun.
+        float elapsed = 0f;
+        while (elapsed < dashDuration)
+        {
+            PushEnemiesAside();
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
         isDashing = false;
 
         yield return new WaitForSeconds(dashCooldown);
         isDashOnCooldown = false;
     }
 
+    /// <summary>Dash sirasinda yaricaptaki dusmanlari oyuncudan uzaga COK KUCUK iter (uzaga firlatmaz, sadece yol acar).</summary>
+    private void PushEnemiesAside()
+    {
+        int count = Physics2D.OverlapCircleNonAlloc(transform.position, dashPushRadius, dashHitBuffer, enemyLayers);
+        for (int i = 0; i < count; i++)
+        {
+            Collider2D col = dashHitBuffer[i];
+            if (col == null) continue;
+            Vector2 dir = (Vector2)col.transform.position - (Vector2)transform.position;
+            // Tam ust uste ise (yon belirsiz) dash yonunun tersine it — yol acilsin
+            dir = dir.sqrMagnitude < 0.0001f ? lastMoveDirection : dir.normalized;
+            col.transform.position += (Vector3)(dir * dashPushStep);
+        }
+    }
+
+    /// <summary>Dash cooldown ilerleme orani: 0 = yeni atildi, 1 = hazir. UI (DashButtonUI) bunu okur.</summary>
+    public float DashCooldownNormalized
+    {
+        get
+        {
+            if (!isDashOnCooldown) return 1f;
+            float total = dashDuration + dashCooldown;
+            return total <= 0f ? 1f : Mathf.Clamp01((Time.time - dashStartTime) / total);
+        }
+    }
+
+    /// <summary>Dash su an kullanilabilir mi (cooldown'da degil).</summary>
+    public bool IsDashReady => !isDashOnCooldown;
+
     /// <summary>Player'a hasar verir; can sıfırlanınca ölüm tetiklenir.</summary>
     public void TakeDamage(float amount)
     {
         if (isDead) return;
+        if (isDashing) return; // Dash sirasinda IMMUN — hasar, flash, sarsinti hicbiri tetiklenmez
 
         currentHealth -= amount;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
