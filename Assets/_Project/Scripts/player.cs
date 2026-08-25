@@ -41,6 +41,12 @@ public class player : MonoBehaviour
     [Tooltip("Dash sirasinda her kare uygulanan KUCUK itme mesafesi. Amac: kalabalıktan cikis, uzaga firlatma DEGIL.")]
     [SerializeField] private float dashPushStep = 0.12f;
 
+    [Tooltip("Dash HIZ egrisi (ease-out): yatay=dash ilerlemesi(0-1), dikey=hiz carpani. Basta 1 (tam hiz) " +
+             "sona dogru dusuk -> patlama gibi firlar sonra suzulur. Sabit tutarsan (hep 1) 'kosu' gibi hissettirir. " +
+             "Mesafe azaldiysa dashSpeed'i yukselt.")]
+    [SerializeField] private AnimationCurve dashSpeedCurve =
+        new AnimationCurve(new Keyframe(0f, 1f, 0f, -1.5f), new Keyframe(1f, 0.15f, -0.5f, 0f));
+
     [Header("Can Ayarlari")]
     [SerializeField] private float maxHealth = 18f; // 9 kalp x 2 yarim-kalp
     [SerializeField] private Color hurtColor = Color.red;
@@ -67,11 +73,11 @@ public class player : MonoBehaviour
     private bool isCooldown = false;
     private bool isDashing = false;
     private bool isDashOnCooldown = false;
-    private float dashStartTime; // dash basladigi an — cooldown gostergesi (0->1) icin
+    private float dashStartTime; // dash basladigi an — cooldown gostergesi (0->1) + hiz egrisi ilerlemesi icin
+    private Vector2 _dashDirection; // dash yonu (basta kilitlenir; egri boyunca bu yonde sonumlenir)
     private readonly Collider2D[] dashHitBuffer = new Collider2D[16]; // dash itme icin alloc'suz overlap tamponu
     private bool isPaused = false; // Upgrade paneli acikken true — Update input'u isler islemez keser
     private Vector2 lastMoveDirection = Vector2.right;
-    private Vector2 dashVelocity;
 
     private float currentHealth;
     private bool isDead;
@@ -197,7 +203,10 @@ public class player : MonoBehaviour
 
         if (isDashing)
         {
-            rb.linearVelocity = dashVelocity;
+            // Hiz egrisi: dash ilerlemesine (0->1) gore carpan. Ease-out -> basta patlama, sonda suzulme.
+            float p = dashDuration > 0f ? Mathf.Clamp01((Time.time - dashStartTime) / dashDuration) : 1f;
+            float speedMul = (dashSpeedCurve != null && dashSpeedCurve.length > 0) ? dashSpeedCurve.Evaluate(p) : 1f;
+            rb.linearVelocity = _dashDirection * (dashSpeed * speedMul);
             return;
         }
 
@@ -406,7 +415,7 @@ public class player : MonoBehaviour
         isDashing = true;
         isDashOnCooldown = true;
 
-        dashVelocity = lastMoveDirection * dashSpeed;
+        _dashDirection = lastMoveDirection; // yonu dash basinda kilitle; hiz egriyle sonumlenir
         animator.SetFloat("DashX", lastMoveDirection.x);
         animator.SetFloat("DashY", lastMoveDirection.y);
         animator.SetTrigger("Dash");

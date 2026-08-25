@@ -288,7 +288,7 @@ MonoBehaviour:
   attackCooldown: 0.3
   minAttackCooldown: 0.1
   autoAttackRange: 2.5
-  playerDamage: 50
+  playerDamage: 10
   attackRadius: 2.3
   attackVisualAngleOffset: 170
   rotateAttackVisual: 1
@@ -300,11 +300,35 @@ MonoBehaviour:
   shakeMagnitude: 0.055
   hurtShakeDuration: 0.35
   hurtShakeMagnitude: 0.45
-  dashSpeed: 15
-  dashDuration: 0.3
+  dashSpeed: 25
+  dashDuration: 0.4
   dashCooldown: 1.5
   dashPushRadius: 0.55
-  dashPushStep: 0.12
+  dashPushStep: 0.45
+  dashSpeedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1.5
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.15
+      inSlope: -0.5
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   maxHealth: 18
   hurtColor: {r: 0, g: 0, b: 0, a: 1}
   hurtFlashDuration: 0.35
@@ -958,6 +982,7 @@ MonoBehaviour:
   minSpawnInterval: 7
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
+  startingBurstCount: 3
   spawnLineLength: 42.9
   isVerticalLine: 0
   finalWaveMilestoneIndex: 4
@@ -1010,6 +1035,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1318420152}
+  - {fileID: 1581242577}
   m_Father: {fileID: 75036977}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
@@ -1124,9 +1150,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DashButtonUI
   playerRef: {fileID: 19887873}
-  fillImage: {fileID: 0}
-  chargingColor: {r: 0.39607844, g: 0.39607844, b: 0.39607844, a: 0.4745098}
-  readyColor: {r: 0.39607844, g: 0.39607844, b: 0.39607844, a: 1}
+  fillImage: {fileID: 1581242578}
+  cooldownColor: {r: 0, g: 0, b: 0, a: 0.6}
 --- !u!1 &207575290
 GameObject:
   m_ObjectHideFlags: 0
@@ -1207,19 +1232,19 @@ MonoBehaviour:
     requiredHits: 0
     multiplier: 1
   - label: D
-    requiredHits: 1
+    requiredHits: 2
     multiplier: 1.1
   - label: C
-    requiredHits: 2
+    requiredHits: 4
     multiplier: 1.25
   - label: B
-    requiredHits: 3
+    requiredHits: 7
     multiplier: 1.45
   - label: A
-    requiredHits: 4
+    requiredHits: 10
     multiplier: 1.7
   - label: S
-    requiredHits: 5
+    requiredHits: 13
     multiplier: 2
   decayInterval: 4
   tiersLostOnDecay: 1
@@ -1871,7 +1896,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.90588236}
+  m_Color: {r: 0.9528302, g: 0.9528302, b: 0.9528302, a: 0.90588236}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1941,7 +1966,7 @@ MonoBehaviour:
   - {fileID: -5099292496197868168, guid: 48991348b92c88b699e91e4ef5f8a64d, type: 3}
   - {fileID: -2966200626249415253, guid: fe1df9cddfc4e21f79715d915c375499, type: 3}
   - {fileID: -1540426309290004842, guid: ba9d77bbc932db833b0e76981417e0b3, type: 3}
-  frameRate: 12
+  frameRate: 70.588234
   loop: 0
 --- !u!1 &332163805
 GameObject:
@@ -2312,6 +2337,7 @@ MonoBehaviour:
   minSpawnInterval: 7
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
+  startingBurstCount: 3
   spawnLineLength: 37.6
   isVerticalLine: 1
   finalWaveMilestoneIndex: 4
@@ -2411,7 +2437,7 @@ Transform:
   m_GameObject: {fileID: 416553796}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 17.57567, y: -2.29821, z: 0}
+  m_LocalPosition: {x: 15.22, y: -4.03, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5153,6 +5179,7 @@ MonoBehaviour:
   minSpawnInterval: 7
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
+  startingBurstCount: 3
   spawnLineLength: 36.5
   isVerticalLine: 1
   finalWaveMilestoneIndex: 4
@@ -11069,7 +11096,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.1000061, y: -3.199997}
+  m_AnchoredPosition: {x: -6.5, y: -3.25}
   m_SizeDelta: {x: 115.7, y: 111.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1318420153
@@ -12216,6 +12243,81 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1581242576
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1581242577}
+  - component: {fileID: 1581242579}
+  - component: {fileID: 1581242578}
+  m_Layer: 0
+  m_Name: CooldownOverlay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1581242577
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581242576}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 190413095}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1581242578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581242576}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.6}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 3
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 1
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1581242579
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581242576}
+  m_CullTransparentMesh: 1
 --- !u!1 &1596313390
 GameObject:
   m_ObjectHideFlags: 0
@@ -14533,6 +14635,7 @@ MonoBehaviour:
   minSpawnInterval: 7
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
+  startingBurstCount: 3
   spawnLineLength: 40
   isVerticalLine: 0
   finalWaveMilestoneIndex: 4

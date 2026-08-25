@@ -53,6 +53,11 @@ public class EnemyGenerator : MonoBehaviour
              "Global spawn sikligini ETKILEMEZ (o zamanla artmaya devam eder).")]
     [SerializeField] private float typeRampSeconds = 180f;
 
+    [Header("Baslangic Dalgasi")]
+    [Tooltip("Oyun basinda ANINDA spawn edilecek dusman sayisi (o an acik tipler; basta normal). " +
+             "Acilisin bos/yavas hissetmemesi icin. 0 = kapali.")]
+    [SerializeField] private int startingBurstCount = 5;
+
     [Header("Spawn Cizgisi")]
     [Tooltip("Cizginin toplam uzunlugu.")]
     [SerializeField] private float spawnLineLength = 5f;
@@ -76,7 +81,15 @@ public class EnemyGenerator : MonoBehaviour
     #region Unity Callbacks
     private void Start()
     {
+        SpawnStartingBurst();
         ScheduleNextSpawn();
+    }
+
+    /// <summary>Oyun basinda bir grup dusmani aninda spawn eder (acilis bos hissetmesin). O an acik tipler.</summary>
+    private void SpawnStartingBurst()
+    {
+        for (int i = 0; i < startingBurstCount; i++)
+            SpawnEnemyOnLine();
     }
 
     private void Update()

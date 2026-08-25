@@ -110,7 +110,7 @@ MonoBehaviour:
   - {fileID: 3741208118057720978, guid: f23e7535da39f3dfeae40be885d73488, type: 3}
   deathFrameRate: 12
   bodyContactDamage: 1
-  contactDamageCooldown: 1
+  contactDamageCooldown: 0.5
   bulletPrefab: {fileID: 2444472763258079924, guid: c25bd8e887a271ace804010fadee8a4e, type: 3}
   shootCooldown: 4
   delayBetweenShots: 0.8
@@ -122,4 +122,4 @@ MonoBehaviour:
   moveSpeedMultiplierAtMaxDifficulty: 1.15
   coreDropMin: 2
   coreDropMax: 3
-  ultFoodDropChance: 1
+  ultFoodDropChance: 0.209
