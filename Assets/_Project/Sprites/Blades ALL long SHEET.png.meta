@@ -1,0 +1,1468 @@
+fileFormatVersion: 2
+guid: 91d083da6b4f0436782a235788a8bda7
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6731314393950070057
+    second: Blades ALL long SHEET_0
+  - first:
+      213: 2853331712916050095
+    second: Blades ALL long SHEET_1
+  - first:
+      213: -3096687896382204541
+    second: Blades ALL long SHEET_2
+  - first:
+      213: 2357359294616221172
+    second: Blades ALL long SHEET_3
+  - first:
+      213: -6675426526981240331
+    second: Blades ALL long SHEET_4
+  - first:
+      213: -9152587137382862408
+    second: Blades ALL long SHEET_5
+  - first:
+      213: 3882412454490771822
+    second: Blades ALL long SHEET_6
+  - first:
+      213: -2537637462622246525
+    second: Blades ALL long SHEET_7
+  - first:
+      213: 1276369127674185535
+    second: Blades ALL long SHEET_8
+  - first:
+      213: 3592442291710487867
+    second: Blades ALL long SHEET_9
+  - first:
+      213: 6408016785655297161
+    second: Blades ALL long SHEET_10
+  - first:
+      213: -173794534225893489
+    second: Blades ALL long SHEET_11
+  - first:
+      213: -4288441992801891977
+    second: Blades ALL long SHEET_12
+  - first:
+      213: 5230857811721785427
+    second: Blades ALL long SHEET_13
+  - first:
+      213: 6954286549641190115
+    second: Blades ALL long SHEET_14
+  - first:
+      213: 7885192875260020637
+    second: Blades ALL long SHEET_15
+  - first:
+      213: 7084180122025821682
+    second: Blades ALL long SHEET_16
+  - first:
+      213: 7442253822932123434
+    second: Blades ALL long SHEET_17
+  - first:
+      213: -798403001582331019
+    second: Blades ALL long SHEET_18
+  - first:
+      213: 8717693791598792840
+    second: Blades ALL long SHEET_19
+  - first:
+      213: 8188491334075626763
+    second: Blades ALL long SHEET_20
+  - first:
+      213: 6377767024826167954
+    second: Blades ALL long SHEET_21
+  - first:
+      213: -6110032004180878700
+    second: Blades ALL long SHEET_22
+  - first:
+      213: -6023791634189671599
+    second: Blades ALL long SHEET_23
+  - first:
+      213: 2835976423604859573
+    second: Blades ALL long SHEET_24
+  - first:
+      213: 4749622936419252992
+    second: Blades ALL long SHEET_25
+  - first:
+      213: -3105250808462698703
+    second: Blades ALL long SHEET_26
+  - first:
+      213: -3298992753034506569
+    second: Blades ALL long SHEET_27
+  - first:
+      213: 8323532549476379773
+    second: Blades ALL long SHEET_28
+  - first:
+      213: 8761086719049443167
+    second: Blades ALL long SHEET_29
+  - first:
+      213: 3797245787440752703
+    second: Blades ALL long SHEET_30
+  - first:
+      213: 7682501036518907403
+    second: Blades ALL long SHEET_31
+  - first:
+      213: 6985142589156546770
+    second: Blades ALL long SHEET_32
+  - first:
+      213: -833946836184509863
+    second: Blades ALL long SHEET_33
+  - first:
+      213: -8533674722352460837
+    second: Blades ALL long SHEET_34
+  - first:
+      213: 3993600808729303983
+    second: Blades ALL long SHEET_35
+  - first:
+      213: -6073719873657712253
+    second: Blades ALL long SHEET_36
+  - first:
+      213: 202107234792565932
+    second: Blades ALL long SHEET_37
+  - first:
+      213: 1976682118200369416
+    second: Blades ALL long SHEET_38
+  - first:
+      213: -633711612317677993
+    second: Blades ALL long SHEET_39
+  - first:
+      213: 1053768125907880648
+    second: Blades ALL long SHEET_40
+  - first:
+      213: -1651545976576556260
+    second: Blades ALL long SHEET_41
+  - first:
+      213: 1069730790761886114
+    second: Blades ALL long SHEET_42
+  - first:
+      213: 2935309022197418342
+    second: Blades ALL long SHEET_43
+  - first:
+      213: -8250545008016716091
+    second: Blades ALL long SHEET_44
+  - first:
+      213: 3083682760770877969
+    second: Blades ALL long SHEET_45
+  - first:
+      213: 399465604685903121
+    second: Blades ALL long SHEET_46
+  - first:
+      213: -3608581496742224776
+    second: Blades ALL long SHEET_47
+  - first:
+      213: -921203582650694412
+    second: Blades ALL long SHEET_48
+  - first:
+      213: 8844702719276958304
+    second: Blades ALL long SHEET_49
+  - first:
+      213: 7541520878677599474
+    second: Blades ALL long SHEET_50
+  - first:
+      213: -494185672561513311
+    second: Blades ALL long SHEET_51
+  - first:
+      213: 7655177910237745929
+    second: Blades ALL long SHEET_52
+  - first:
+      213: 8390041405766517542
+    second: Blades ALL long SHEET_53
+  - first:
+      213: -1170086770684711850
+    second: Blades ALL long SHEET_54
+  - first:
+      213: -3523446414969430848
+    second: Blades ALL long SHEET_55
+  - first:
+      213: -5667621197156888341
+    second: Blades ALL long SHEET_56
+  - first:
+      213: -2259372652027084591
+    second: Blades ALL long SHEET_57
+  - first:
+      213: 9068277944869056653
+    second: Blades ALL long SHEET_58
+  - first:
+      213: -2975672114480248700
+    second: Blades ALL long SHEET_59
+  - first:
+      213: 2266342571664594405
+    second: Blades ALL long SHEET_60
+  - first:
+      213: -7762785369561041895
+    second: Blades ALL long SHEET_61
+  - first:
+      213: -6177381363031386881
+    second: Blades ALL long SHEET_62
+  - first:
+      213: 2114171339047998697
+    second: Blades ALL long SHEET_63
+  - first:
+      213: 4559284672673327098
+    second: Blades ALL long SHEET_64
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 10
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_0
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 714
+        width: 27
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9252edaf6ce6a6d50800000000000000
+      internalID: 6731314393950070057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_1
+      rect:
+        serializedVersion: 2
+        x: 47
+        y: 713
+        width: 27
+        height: 11
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa0d7b64312199720800000000000000
+      internalID: 2853331712916050095
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_2
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 712
+        width: 20
+        height: 12
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38513e3e3ca5605d0800000000000000
+      internalID: -3096687896382204541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_3
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 686
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f5b093e9c507b020800000000000000
+      internalID: 2357359294616221172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_4
+      rect:
+        serializedVersion: 2
+        x: 47
+        y: 685
+        width: 26
+        height: 15
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f9401f01fe1c53a0800000000000000
+      internalID: -6675426526981240331
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_5
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 684
+        width: 20
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b13c74bd7a7bf080800000000000000
+      internalID: -9152587137382862408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_6
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 652
+        width: 20
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e619975be8911e530800000000000000
+      internalID: 3882412454490771822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_7
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 652
+        width: 21
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3896da73c2088ccd0800000000000000
+      internalID: -2537637462622246525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_8
+      rect:
+        serializedVersion: 2
+        x: 79
+        y: 650
+        width: 16
+        height: 18
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f378b4985f296b110800000000000000
+      internalID: 1276369127674185535
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_9
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 615
+        width: 24
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3d6e711b3bead130800000000000000
+      internalID: 3592442291710487867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_10
+      rect:
+        serializedVersion: 2
+        x: 47
+        y: 615
+        width: 22
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98479bfb059dde850800000000000000
+      internalID: 6408016785655297161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_11
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 615
+        width: 19
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f87af8bbace869df0800000000000000
+      internalID: -173794534225893489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_12
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 585
+        width: 25
+        height: 19
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 779cc2b8ab46c74c0800000000000000
+      internalID: -4288441992801891977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_13
+      rect:
+        serializedVersion: 2
+        x: 47
+        y: 583
+        width: 22
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 350114a277db79840800000000000000
+      internalID: 5230857811721785427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_14
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 583
+        width: 18
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ead3a185c6928060800000000000000
+      internalID: 6954286549641190115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_15
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 547
+        width: 22
+        height: 25
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d97805b7425dd6d60800000000000000
+      internalID: 7885192875260020637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_16
+      rect:
+        serializedVersion: 2
+        x: 47
+        y: 547
+        width: 25
+        height: 25
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f58b329940105260800000000000000
+      internalID: 7084180122025821682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_17
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 546
+        width: 22
+        height: 26
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2f7924db62384760800000000000000
+      internalID: 7442253822932123434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_18
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 506
+        width: 28
+        height: 26
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57b541f33b08be4f0800000000000000
+      internalID: -798403001582331019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_19
+      rect:
+        serializedVersion: 2
+        x: 47
+        y: 506
+        width: 31
+        height: 26
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 880dfdca0587bf870800000000000000
+      internalID: 8717693791598792840
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_20
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 506
+        width: 24
+        height: 26
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b0531fddb7d53a170800000000000000
+      internalID: 8188491334075626763
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_21
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 471
+        width: 36
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 292b6f67151628850800000000000000
+      internalID: 6377767024826167954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_23
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 470
+        width: 37
+        height: 22
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 153a7239c61376ca0800000000000000
+      internalID: -6023791634189671599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_24
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 468
+        width: 30
+        height: 24
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b2b95818896b5720800000000000000
+      internalID: 2835976423604859573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_25
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 445
+        width: 13
+        height: 7
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00b315665ec0ae140800000000000000
+      internalID: 4749622936419252992
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_26
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 420
+        width: 25
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 137161f87dee7e4d0800000000000000
+      internalID: -3105250808462698703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_27
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 419
+        width: 32
+        height: 33
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7be4ac6e19f9732d0800000000000000
+      internalID: -3298992753034506569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_28
+      rect:
+        serializedVersion: 2
+        x: 103
+        y: 418
+        width: 27
+        height: 34
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7ce0f7f0c0238370800000000000000
+      internalID: 8323532549476379773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_29
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 370
+        width: 34
+        height: 34
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f57a557e3f1a59970800000000000000
+      internalID: 8761086719049443167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_32
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 371
+        width: 39
+        height: 33
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d8d02c0d2630f060800000000000000
+      internalID: 6985142589156546770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_33
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 370
+        width: 33
+        height: 34
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 95259ab55c93d64f0800000000000000
+      internalID: -833946836184509863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_35
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 336
+        width: 67
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fabd50bc6ce1c6730800000000000000
+      internalID: 3993600808729303983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_37
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 336
+        width: 68
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cace85095770ec200800000000000000
+      internalID: 202107234792565932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_38
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 335
+        width: 37
+        height: 21
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8012331e9e59e6b10800000000000000
+      internalID: 1976682118200369416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_39
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 304
+        width: 57
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 756c3c965aa9437f0800000000000000
+      internalID: -633711612317677993
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_41
+      rect:
+        serializedVersion: 2
+        x: 79
+        y: 304
+        width: 70
+        height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c13cdef3fa78419e0800000000000000
+      internalID: -1651545976576556260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_42
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 302
+        width: 48
+        height: 22
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a1f8ac8c7278de00800000000000000
+      internalID: 1069730790761886114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_44
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 250
+        width: 69
+        height: 34
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ce8ac9470d208d80800000000000000
+      internalID: -8250545008016716091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_45
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 249
+        width: 68
+        height: 35
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 11a7eb302217bca20800000000000000
+      internalID: 3083682760770877969
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_46
+      rect:
+        serializedVersion: 2
+        x: 175
+        y: 246
+        width: 29
+        height: 38
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1153a4bd9df2b8500800000000000000
+      internalID: 399465604685903121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_49
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 190
+        width: 68
+        height: 38
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0624f6e0342beba70800000000000000
+      internalID: 8844702719276958304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_50
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 190
+        width: 71
+        height: 38
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f425cf484dd8a860800000000000000
+      internalID: 7541520878677599474
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_51
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 188
+        width: 47
+        height: 40
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ac22e5cfbc4429f0800000000000000
+      internalID: -494185672561513311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_53
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 98
+        width: 65
+        height: 66
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6234889c43a6f6470800000000000000
+      internalID: 8390041405766517542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_55
+      rect:
+        serializedVersion: 2
+        x: 93
+        y: 97
+        width: 70
+        height: 67
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cc9f9257243a1fc0800000000000000
+      internalID: -3523446414969430848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_56
+      rect:
+        serializedVersion: 2
+        x: 191
+        y: 98
+        width: 59
+        height: 66
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be05dfdac809851b0800000000000000
+      internalID: -5667621197156888341
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_61
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 15
+        width: 60
+        height: 61
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 914f6bbd5db054490800000000000000
+      internalID: -7762785369561041895
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_63
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 12
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e4944aa1ab075d10800000000000000
+      internalID: 2114171339047998697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blades ALL long SHEET_64
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 10
+        width: 45
+        height: 66
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af7a390f045d54f30800000000000000
+      internalID: 4559284672673327098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: eea8c806cc3361e51b6855f5e25f0405
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Blades ALL long SHEET_0: 6731314393950070057
+      Blades ALL long SHEET_1: 2853331712916050095
+      Blades ALL long SHEET_10: 6408016785655297161
+      Blades ALL long SHEET_11: -173794534225893489
+      Blades ALL long SHEET_12: -4288441992801891977
+      Blades ALL long SHEET_13: 5230857811721785427
+      Blades ALL long SHEET_14: 6954286549641190115
+      Blades ALL long SHEET_15: 7885192875260020637
+      Blades ALL long SHEET_16: 7084180122025821682
+      Blades ALL long SHEET_17: 7442253822932123434
+      Blades ALL long SHEET_18: -798403001582331019
+      Blades ALL long SHEET_19: 8717693791598792840
+      Blades ALL long SHEET_2: -3096687896382204541
+      Blades ALL long SHEET_20: 8188491334075626763
+      Blades ALL long SHEET_21: 6377767024826167954
+      Blades ALL long SHEET_22: -6110032004180878700
+      Blades ALL long SHEET_23: -6023791634189671599
+      Blades ALL long SHEET_24: 2835976423604859573
+      Blades ALL long SHEET_25: 4749622936419252992
+      Blades ALL long SHEET_26: -3105250808462698703
+      Blades ALL long SHEET_27: -3298992753034506569
+      Blades ALL long SHEET_28: 8323532549476379773
+      Blades ALL long SHEET_29: 8761086719049443167
+      Blades ALL long SHEET_3: 2357359294616221172
+      Blades ALL long SHEET_30: 3797245787440752703
+      Blades ALL long SHEET_31: 7682501036518907403
+      Blades ALL long SHEET_32: 6985142589156546770
+      Blades ALL long SHEET_33: -833946836184509863
+      Blades ALL long SHEET_34: -8533674722352460837
+      Blades ALL long SHEET_35: 3993600808729303983
+      Blades ALL long SHEET_36: -6073719873657712253
+      Blades ALL long SHEET_37: 202107234792565932
+      Blades ALL long SHEET_38: 1976682118200369416
+      Blades ALL long SHEET_39: -633711612317677993
+      Blades ALL long SHEET_4: -6675426526981240331
+      Blades ALL long SHEET_40: 1053768125907880648
+      Blades ALL long SHEET_41: -1651545976576556260
+      Blades ALL long SHEET_42: 1069730790761886114
+      Blades ALL long SHEET_43: 2935309022197418342
+      Blades ALL long SHEET_44: -8250545008016716091
+      Blades ALL long SHEET_45: 3083682760770877969
+      Blades ALL long SHEET_46: 399465604685903121
+      Blades ALL long SHEET_47: -3608581496742224776
+      Blades ALL long SHEET_48: -921203582650694412
+      Blades ALL long SHEET_49: 8844702719276958304
+      Blades ALL long SHEET_5: -9152587137382862408
+      Blades ALL long SHEET_50: 7541520878677599474
+      Blades ALL long SHEET_51: -494185672561513311
+      Blades ALL long SHEET_52: 7655177910237745929
+      Blades ALL long SHEET_53: 8390041405766517542
+      Blades ALL long SHEET_54: -1170086770684711850
+      Blades ALL long SHEET_55: -3523446414969430848
+      Blades ALL long SHEET_56: -5667621197156888341
+      Blades ALL long SHEET_57: -2259372652027084591
+      Blades ALL long SHEET_58: 9068277944869056653
+      Blades ALL long SHEET_59: -2975672114480248700
+      Blades ALL long SHEET_6: 3882412454490771822
+      Blades ALL long SHEET_60: 2266342571664594405
+      Blades ALL long SHEET_61: -7762785369561041895
+      Blades ALL long SHEET_62: -6177381363031386881
+      Blades ALL long SHEET_63: 2114171339047998697
+      Blades ALL long SHEET_64: 4559284672673327098
+      Blades ALL long SHEET_7: -2537637462622246525
+      Blades ALL long SHEET_8: 1276369127674185535
+      Blades ALL long SHEET_9: 3592442291710487867
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

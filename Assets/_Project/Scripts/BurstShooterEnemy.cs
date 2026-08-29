@@ -14,6 +14,8 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
 
     [Header("Can Ayarlari")]
     [SerializeField] private float maxHealth = 30f;
+    [Tooltip("Zorluk 1 iken (zamanla) can carpani. Spawn aninda GLOBAL DifficultyFactor ile Lerp'lenir.")]
+    [SerializeField] private float healthMultiplierAtMaxDifficulty = 3f;
 
     [Header("Vurulma Flash Ayarlari")]
     [SerializeField] private Color hitFlashColor = Color.red;
@@ -90,6 +92,8 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _bodyCollider = GetComponent<Collider2D>();
         _animator = GetComponent<Animator>();
+        // Zamanla (global zorluk) can olceklenir — maxHealth yerinde buyutulur ki clamp dogru kalsin.
+        maxHealth *= Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor);
         _currentHealth = maxHealth;
         _nextShootTime = Time.time + shootCooldown;
 

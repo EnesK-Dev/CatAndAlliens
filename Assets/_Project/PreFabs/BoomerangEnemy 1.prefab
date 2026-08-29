@@ -173,6 +173,7 @@ MonoBehaviour:
   moveSpeed: 2
   stopDistance: 4
   maxHealth: 25
+  healthMultiplierAtMaxDifficulty: 3
   hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
   hitFlashDuration: 0.08
   deathFrames:
@@ -201,4 +202,4 @@ MonoBehaviour:
   moveSpeedMultiplierAtMaxDifficulty: 1.15
   coreDropMin: 2
   coreDropMax: 3
-  ultFoodDropChance: 0.1
+  ultFoodDropChance: 0.4

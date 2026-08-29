@@ -8,6 +8,9 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
     [Header("Can Ayarlari")]
     [SerializeField] private float maxHealth;
+    [Tooltip("Zorluk 1 iken (zamanla) can carpani. Spawn aninda GLOBAL DifficultyFactor ile Lerp'lenir — " +
+             "gec spawn olan dusman daha tanktir (oyuncunun artan hasarina karsi denge).")]
+    [SerializeField] private float healthMultiplierAtMaxDifficulty = 3f;
 
     [Header("Vurulma Flash Ayarlari")]
     [SerializeField] private Color hitFlashColor = Color.red;
@@ -194,6 +197,8 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
     private void InitializeHealthSystem()
     {
+        // Zamanla (global zorluk) can olceklenir — maxHealth yerinde buyutulur ki clamp'ler dogru kalsin.
+        maxHealth *= Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor);
         currentHealth = maxHealth;
     }
 

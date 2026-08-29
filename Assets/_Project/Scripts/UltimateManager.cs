@@ -33,6 +33,10 @@ public class UltimateManager : MonoBehaviour
     [Header("Referanslar")]
     [Tooltip("Bos birakilirsa Awake'te otomatik bulunur.")]
     [SerializeField] private player playerRef;
+
+    [Header("Yemek Bonusu")]
+    [Tooltip("Yemek toplaninca doldurulan can (yarim-kalp birimi: 1 = yarim kalp, 2 = tam kalp). 0 = kapali.")]
+    [SerializeField] private float healOnFoodCollect = 1f;
     #endregion
 
     #region Private Fields
@@ -181,6 +185,8 @@ public class UltimateManager : MonoBehaviour
     private void HandleFoodCollected(UltFoodItem instance)
     {
         AddChargeInternal(1);
+        if (playerRef != null && healOnFoodCollect > 0f)
+            playerRef.Heal(healOnFoodCollect); // yemek ayni zamanda can doldurur (yarim kalp)
         ReturnToPool(instance);
     }
 

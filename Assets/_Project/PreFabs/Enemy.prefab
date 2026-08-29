@@ -195,6 +195,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   moveSpeed: 3
   maxHealth: 100
+  healthMultiplierAtMaxDifficulty: 3
   hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
   hitFlashDuration: 0.15
   deathFrames:
@@ -235,4 +236,4 @@ MonoBehaviour:
   coreDropNormal: 1
   coreDropEliteMin: 2
   coreDropEliteMax: 3
-  ultFoodDropChance: 0.1
+  ultFoodDropChance: 0.25

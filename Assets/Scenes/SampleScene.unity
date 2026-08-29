@@ -284,13 +284,13 @@ MonoBehaviour:
   joystick: {fileID: 967692773}
   attackPointObject: {fileID: 329940562}
   attackOffset: 0.9
-  attackDuration: 0.17
+  attackDuration: 0.22
   attackCooldown: 0.3
   minAttackCooldown: 0.1
   autoAttackRange: 2.5
-  playerDamage: 10
+  playerDamage: 60
   attackRadius: 2.3
-  attackVisualAngleOffset: 170
+  attackVisualAngleOffset: 10
   rotateAttackVisual: 1
   enemyLayers:
     serializedVersion: 2
@@ -303,8 +303,8 @@ MonoBehaviour:
   dashSpeed: 25
   dashDuration: 0.4
   dashCooldown: 1.5
-  dashPushRadius: 0.55
-  dashPushStep: 0.45
+  dashPushRadius: 0.7
+  dashPushStep: 0.6
   dashSpeedCurve:
     serializedVersion: 2
     m_Curve:
@@ -982,7 +982,7 @@ MonoBehaviour:
   minSpawnInterval: 7
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
-  startingBurstCount: 3
+  startingBurstCount: 2
   spawnLineLength: 42.9
   isVerticalLine: 0
   finalWaveMilestoneIndex: 4
@@ -1232,19 +1232,19 @@ MonoBehaviour:
     requiredHits: 0
     multiplier: 1
   - label: D
-    requiredHits: 2
+    requiredHits: 5
     multiplier: 1.1
   - label: C
-    requiredHits: 4
+    requiredHits: 10
     multiplier: 1.25
   - label: B
-    requiredHits: 7
+    requiredHits: 20
     multiplier: 1.45
   - label: A
-    requiredHits: 10
+    requiredHits: 35
     multiplier: 1.7
   - label: S
-    requiredHits: 13
+    requiredHits: 50
     multiplier: 2
   decayInterval: 4
   tiersLostOnDecay: 1
@@ -1841,7 +1841,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.12, y: -0.01, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_LocalScale: {x: 1.2, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 19887875}
@@ -1896,7 +1896,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 0}
-  m_Color: {r: 0.9528302, g: 0.9528302, b: 0.9528302, a: 0.90588236}
+  m_Color: {r: 1, g: 0.07817823, b: 0, a: 0.90588236}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1954,20 +1954,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ClawSlashVisual
   frames:
-  - {fileID: -855298285791758126, guid: 3f20ec2948d3abe34879e5b7c26da066, type: 3}
-  - {fileID: 6937817954938267909, guid: a0d41be338821cfe0bd27195aebdbd11, type: 3}
-  - {fileID: -6470460504253458178, guid: 6cd16b5a3ccb5d344a16d43aceaf68c6, type: 3}
-  - {fileID: -4178046375966092550, guid: 7928bc979ca16179e8b0c9f5b0bc6940, type: 3}
-  - {fileID: 4130640169021434097, guid: 43e2c612288bb8606a304f9b009488b0, type: 3}
-  - {fileID: 3465286685962602723, guid: bcbd5db4b9531c0169de139097568b04, type: 3}
-  - {fileID: 7028616704906629411, guid: 625e655aaf1722cb5b26dfa3ebb5de9b, type: 3}
-  - {fileID: 8288426215254106694, guid: 076e08bab5ff28404b9dfb5d6985c560, type: 3}
-  - {fileID: 4113829005332862926, guid: b4d834aaf77c829b79fd572972db9067, type: 3}
-  - {fileID: -5099292496197868168, guid: 48991348b92c88b699e91e4ef5f8a64d, type: 3}
-  - {fileID: -2966200626249415253, guid: fe1df9cddfc4e21f79715d915c375499, type: 3}
-  - {fileID: -1540426309290004842, guid: ba9d77bbc932db833b0e76981417e0b3, type: 3}
-  frameRate: 70.588234
+  - {fileID: 6731314393950070057, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+  - {fileID: 2357359294616221172, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+  - {fileID: 3882412454490771822, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+  - {fileID: 1276369127674185535, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+  - {fileID: -173794534225893489, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+  - {fileID: 6954286549641190115, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+  - {fileID: 7442253822932123434, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+  - {fileID: 8188491334075626763, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+  - {fileID: 2835976423604859573, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+  - {fileID: -3105250808462698703, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+  - {fileID: 8761086719049443167, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+  frameRate: 81.818184
   loop: 0
+  reverse: 0
 --- !u!1 &332163805
 GameObject:
   m_ObjectHideFlags: 0
@@ -2337,7 +2337,7 @@ MonoBehaviour:
   minSpawnInterval: 7
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
-  startingBurstCount: 3
+  startingBurstCount: 2
   spawnLineLength: 37.6
   isVerticalLine: 1
   finalWaveMilestoneIndex: 4
@@ -4872,19 +4872,19 @@ MonoBehaviour:
     description: +10 attack damage
     icon: {fileID: -8285997511256225826, guid: 3bc435cab7be966b485f8901a71b6d86, type: 3}
     type: 0
-    amount: 10
+    amount: 6
     level: 0
   - title: Attack Speed
     description: 'Attack 15% faster '
     icon: {fileID: 8821733720771354900, guid: 85e2e396c26952288a18023bb1735121, type: 3}
     type: 1
-    amount: 0.85
+    amount: 0.9
     level: 0
   - title: Attack Range
     description: ' +1 attack range  '
     icon: {fileID: 2800633506728282453, guid: 8994ed490dcc4f9c5bbd4316e2cd0c37, type: 3}
     type: 2
-    amount: 1
+    amount: 0.35
     level: 0
   - title: 'Max Health  '
     description: '+20 max HP  '
@@ -5023,6 +5023,7 @@ MonoBehaviour:
   initialPoolSize: 20
   scatterRadius: 0.4
   playerRef: {fileID: 19887873}
+  healOnFoodCollect: 1
 --- !u!4 &784298402
 Transform:
   m_ObjectHideFlags: 0
@@ -5179,7 +5180,7 @@ MonoBehaviour:
   minSpawnInterval: 7
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
-  startingBurstCount: 3
+  startingBurstCount: 2
   spawnLineLength: 36.5
   isVerticalLine: 1
   finalWaveMilestoneIndex: 4
@@ -14635,7 +14636,7 @@ MonoBehaviour:
   minSpawnInterval: 7
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
-  startingBurstCount: 3
+  startingBurstCount: 2
   spawnLineLength: 40
   isVerticalLine: 0
   finalWaveMilestoneIndex: 4
