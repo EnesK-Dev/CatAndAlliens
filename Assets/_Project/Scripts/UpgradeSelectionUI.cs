@@ -48,6 +48,11 @@ public class UpgradeSelectionUI : MonoBehaviour
     [Tooltip("Bos birakilirsa Awake'te otomatik bulunur.")]
     [SerializeField] private player playerRef;
 
+    [Header("Kart Sonrasi")]
+    [Tooltip("Kart secilip panel kapaninca dusmanlar bu kadar SANIYE donar (oyuncu serbest kalir). " +
+             "Kalabaligin ortasinda aninda dayak yememek icin nefes alma ani. 0 = kapali.")]
+    [SerializeField] private float enemyFreezeAfterUpgrade = 0.6f;
+
     [Header("Upgrade Havuzu (4 tane onerilir, 3'u rastgele gosterilir)")]
     [SerializeField] private UpgradeDefinition[] upgrades;
     #endregion
@@ -211,6 +216,8 @@ public class UpgradeSelectionUI : MonoBehaviour
         if (panelRoot != null) panelRoot.SetActive(false);
         Time.timeScale = 1f;
         if (playerRef != null) playerRef.SetPaused(false);
+        // Oyuna donunce dusmanlari kisa sure dondur — oyuncu yeniden konumlanabilsin (oyuncu serbest kalir).
+        EnemyFreeze.FreezeFor(enemyFreezeAfterUpgrade);
     }
     #endregion
 }

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -19,6 +20,8 @@ public class player : MonoBehaviour
     [SerializeField] private float autoAttackRange = 2f;
     [SerializeField] private float playerDamage = 25f; // Karakterin vurus hasari
     [SerializeField] private float attackRadius = 0.5f; // Hasar alaninin yaricapi
+    [Tooltip("Vurulunca dusmani oyuncudan uzaga HAFIF geri itme mesafesi (0 = kapali).")]
+    [SerializeField] private float attackKnockback = 0.25f;
     [SerializeField] private float attackVisualAngleOffset = 0f; // Pence PNG'sinin varsayilan yonune gore duzeltme (derece)
     [SerializeField] private bool rotateAttackVisual = true; // Pence dusmana dogru donsun mu? Test icin kapatilabilir
     [SerializeField] private LayerMask enemyLayers; // Dusmanlarin bulundugu Layer
@@ -56,6 +59,8 @@ public class player : MonoBehaviour
     // Vurus suresince hasar taramasi icin — her karede yeni dizi ayirmamak icin tekrar kullanilir
     private const int MaxHitBufferSize = 32;
     private readonly Collider2D[] _hitBuffer = new Collider2D[MaxHitBufferSize];
+    // AoE: bir swing icinde ayni dusmana tekrar vurmayi engeller (her kare taranir). Alloc'suz — Clear ile yeniden kullanilir.
+    private readonly HashSet<Collider2D> _swingHitSet = new HashSet<Collider2D>();
 
     // Pence, vurus suresinin ilk bu oraninda hedefin tam mesafesine uzanir; kalan surede o noktada kalir.
     // Uzak dusmanlarda (menzil upgrade'i) gorselin gercekten degmesini ve overlap'in tam acilimda
@@ -241,10 +246,11 @@ public class player : MonoBehaviour
 
         foreach (Collider2D enemyCollider in enemiesInRange)
         {
-            // EnemyController, BurstShooterEnemy ya da BoomerangEnemy — biri varsa geçerli düşman
+            // EnemyController, BurstShooterEnemy, BoomerangEnemy ya da Boss — biri varsa geçerli hedef
             bool isEnemy = enemyCollider.GetComponent<EnemyController>() != null
                         || enemyCollider.GetComponent<BurstShooterEnemy>() != null
-                        || enemyCollider.GetComponent<BoomerangEnemy>() != null;
+                        || enemyCollider.GetComponent<BoomerangEnemy>() != null
+                        || enemyCollider.GetComponent<BossController>() != null;
             if (!isEnemy) continue;
 
             float distanceToEnemy = Vector2.Distance(transform.position, enemyCollider.transform.position);
@@ -300,11 +306,10 @@ public class player : MonoBehaviour
     if (cameraShake != null)
         cameraShake.TriggerShake(shakeDuration, shakeMagnitude);
 
-    // Bu vuruşta yalnızca EN YAKIN 1 düşmana hasar verilir. Vurulunca döngü artık hasar aramaz.
-    bool hasHitThisSwing = false;
+    // AoE: bu swing boyunca ALANDAKI TUM dusmanlara (dedup ile bir kez) hasar + hafif geri itme.
+    _swingHitSet.Clear();
+    bool comboRegistered = false;
 
-    // Vuruş süresince (attackDuration) her kare taranır; henüz kimseye vurulmadıysa
-    // alandaki en yakın düşman bulunup sadece ona hasar uygulanır (single target).
     float elapsed = 0f;
     while (elapsed < attackDuration)
     {
@@ -317,34 +322,37 @@ public class player : MonoBehaviour
         float currentDistance = Mathf.Lerp(attackOffset, targetDistance, reachT);
         attackPointObject.transform.localPosition = new Vector3(attackDirection.x, attackDirection.y, 0f) * currentDistance;
 
-        if (!hasHitThisSwing)
+        // Alandaki TUM dusmanlari tara; her birine bu swing'de BIR kez hasar + geri itme uygula.
+        Vector3 worldAttackPosition = attackPointObject.transform.position;
+        int hitCount = Physics2D.OverlapCircleNonAlloc(worldAttackPosition, attackRadius, _hitBuffer, enemyLayers);
+        for (int i = 0; i < hitCount; i++)
         {
-            Vector3 worldAttackPosition = attackPointObject.transform.position;
-            int hitCount = Physics2D.OverlapCircleNonAlloc(worldAttackPosition, attackRadius, _hitBuffer, enemyLayers);
-
-            Collider2D closestEnemy = GetClosestEnemyCollider(worldAttackPosition, hitCount);
-            if (closestEnemy != null)
-            {
-                // Combo carpani hasara CARPILIR. ComboManager yoksa 1 doner (etkisiz).
-                ApplyDamage(closestEnemy, playerDamage * ComboManager.Multiplier);
-                ComboManager.RegisterHit(); // Basarili vurus — combo sayaci +1
-                hasHitThisSwing = true;
-            }
+            Collider2D col = _hitBuffer[i];
+            if (col == null || _swingHitSet.Contains(col)) continue; // ayni dusmani tekrar vurma
+            _swingHitSet.Add(col);
+            ApplyDamage(col, playerDamage * ComboManager.Multiplier); // combo carpani CARPILIR
+            ApplyKnockback(col); // hafif geri it
+        }
+        // Combo swing basina 1 kez artar (AoE'de her dusman icin ayri artmasin — combo sismesin).
+        if (_swingHitSet.Count > 0 && !comboRegistered)
+        {
+            ComboManager.RegisterHit();
+            comboRegistered = true;
         }
 
         elapsed += Time.deltaTime;
         yield return null;
     }
 
-    // GARANTI: swing bitti ama overlap dusmani yakalayamadiysa (uzak hedef + dusuk FPS'te olabilir),
-    // nisan alinan dusmana DOGRUDAN hasar uygula. targetEnemy yok olmussa Unity fake-null ile atlanir.
-    if (!hasHitThisSwing && targetEnemy != null)
+    // GARANTI: swing boyunca hic kimse yakalanmadiysa (uzak hedef + dusuk FPS), nisan alinan dusmana vur.
+    if (_swingHitSet.Count == 0 && targetEnemy != null)
     {
         Collider2D targetCollider = targetEnemy.GetComponent<Collider2D>();
         if (targetCollider != null)
         {
             ApplyDamage(targetCollider, playerDamage * ComboManager.Multiplier);
-            ComboManager.RegisterHit(); // Garanti-vurus da combo'yu sayar
+            ApplyKnockback(targetCollider);
+            ComboManager.RegisterHit();
         }
     }
 
@@ -355,32 +363,27 @@ public class player : MonoBehaviour
     isCooldown = false;
 }
 
-    /// <summary>Overlap sonuclari arasindan verilen noktaya en yakin dusman collider'ini dondurur.</summary>
-    private Collider2D GetClosestEnemyCollider(Vector3 fromPosition, int hitCount)
+    /// <summary>Vurulan dusmani oyuncudan uzaga HAFIF geri iter (tek atimlik konum nudge'i). AI kisa surede geri toparlar.</summary>
+    private void ApplyKnockback(Collider2D enemyCollider)
     {
-        Collider2D closest = null;
-        float closestSqr = Mathf.Infinity;
-
-        for (int i = 0; i < hitCount; i++)
-        {
-            Collider2D candidate = _hitBuffer[i];
-            if (candidate == null) continue;
-
-            // sqrMagnitude — karekok maliyetinden kacinmak icin (sadece kiyaslama yapiyoruz)
-            float sqrDistance = ((Vector2)candidate.transform.position - (Vector2)fromPosition).sqrMagnitude;
-            if (sqrDistance < closestSqr)
-            {
-                closestSqr = sqrDistance;
-                closest = candidate;
-            }
-        }
-
-        return closest;
+        if (attackKnockback <= 0f || enemyCollider == null) return;
+        if (enemyCollider.GetComponent<BossController>() != null) return; // boss agir — geri itilmez
+        Vector2 dir = (Vector2)enemyCollider.transform.position - (Vector2)transform.position;
+        dir = dir.sqrMagnitude < 0.0001f ? lastMoveDirection : dir.normalized; // ust uste ise vurus yonune it
+        enemyCollider.transform.position += (Vector3)(dir * attackKnockback);
     }
 
-    /// <summary>Verilen collider'a hasar uygular; uc dusman tipini de destekler.</summary>
+    /// <summary>Verilen collider'a hasar uygular; uc dusman tipini + boss'u destekler.</summary>
     private void ApplyDamage(Collider2D enemyCollider, float damage)
     {
+        // Boss ayri sinif, kendi TakeDamage'i var — once onu dene
+        BossController boss = enemyCollider.GetComponent<BossController>();
+        if (boss != null)
+        {
+            boss.TakeDamage(damage);
+            return;
+        }
+
         EnemyController enemy = enemyCollider.GetComponent<EnemyController>();
         if (enemy != null)
         {

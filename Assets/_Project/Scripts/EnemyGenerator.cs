@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -70,12 +71,26 @@ public class EnemyGenerator : MonoBehaviour
     [SerializeField] private int finalWaveMilestoneIndex = 4;
 
     [Tooltip("Son dalgada iki spawn arasi sabit bekleme (+/- jitter). minSpawnInterval'den KISA olmali ki fark hissedilsin.")]
-    [SerializeField] private float finalWaveSpawnInterval = 0.3f;
+    [SerializeField] private float finalWaveSpawnInterval = 1.8f;
+
+    [Header("Boss Sirasinda")]
+    [Tooltip("Sahnede canli boss varken yeni normal dusman spawn'i dursun mu (mevcutlar yasamaya devam eder).")]
+    [SerializeField] private bool pauseSpawnDuringBoss = true;
+
+    [Header("Eszamanli Dusman Limiti")]
+    [Tooltip("Ekranda ayni anda EN FAZLA kac dusman canli olabilir. Bu sayida dusman varken yeni spawn olmaz " +
+             "(oldurdukce yeni gelir). 'Adim atacak yer kalmamasini' onler — spawn araligi ne olursa olsun " +
+             "yogunluk sinirli kalir. 0 = limitsiz (eski davranis).")]
+    [SerializeField] private int maxAliveEnemies = 25;
     #endregion
 
     #region Private Fields
     private const float IntervalFloor = 0.05f; // araligin altina inemeyecegi guvenli taban
     private float _nextSpawnTime;
+
+    // Spawn ettigimiz dusmanlar — canli sayimi icin. Dusman olunce Destroy edilir, referans "fake null" olur;
+    // her spawn denemesinde temizlenir. Enemy class'larina dokunmadan yogunlugu sinirlamak icin (tek-sorumluluk).
+    private readonly List<GameObject> _aliveEnemies = new List<GameObject>();
     #endregion
 
     #region Unity Callbacks
@@ -96,7 +111,9 @@ public class EnemyGenerator : MonoBehaviour
     {
         if (Time.time >= _nextSpawnTime)
         {
-            SpawnEnemyOnLine();
+            // Boss varken normal spawn duraklar (mevcut dusmanlar silinmez, yasamaya devam eder)
+            if (!(pauseSpawnDuringBoss && BossController.AnyBossAlive))
+                SpawnEnemyOnLine();
             ScheduleNextSpawn();
         }
     }
@@ -139,6 +156,11 @@ public class EnemyGenerator : MonoBehaviour
     /// <summary>Cizgi uzerinde rastgele bir noktaya, weighted random ile secilen tipi spawn eder.</summary>
     private void SpawnEnemyOnLine()
     {
+        // Yogunluk siniri: ekranda zaten maxAliveEnemies kadar dusman varsa bu spawn'i atla.
+        // (Bir sonraki aralikta tekrar denenir; oyuncu oldurdukce yer acilir.)
+        if (maxAliveEnemies > 0 && CountAliveEnemies() >= maxAliveEnemies)
+            return;
+
         EnemySpawnEntry entry = PickWeightedEntry();
         if (entry == null || entry.prefab == null) return;
 
@@ -152,6 +174,7 @@ public class EnemyGenerator : MonoBehaviour
             spawnPosition.x += randomOffset;
 
         GameObject spawned = Instantiate(entry.prefab, spawnPosition, Quaternion.identity);
+        _aliveEnemies.Add(spawned); // canli sayimi icin izle (limit kontrolu bunu kullanir)
 
         // YEREL ZORLUK: bu tip acilalı (unlockMilestone) ne kadar oldu -> 0..1 rampa. Ilk cikinca taban.
         float localFactor = typeRampSeconds > 0f
@@ -198,6 +221,20 @@ public class EnemyGenerator : MonoBehaviour
 
         // Float yuvarlama guvencesi: son gecerli girisi don
         return lastValid;
+    }
+
+    /// <summary>
+    /// Canli dusman sayisini dondurur; bu sirada Destroy edilmis (Unity fake-null) referanslari listeden atar.
+    /// Liste kucuk (en fazla ~limit kadar) oldugu icin maliyeti onemsiz; her spawn denemesinde bir kez cagrilir.
+    /// </summary>
+    private int CountAliveEnemies()
+    {
+        for (int i = _aliveEnemies.Count - 1; i >= 0; i--)
+        {
+            if (_aliveEnemies[i] == null) // olmus/Destroy edilmis dusman
+                _aliveEnemies.RemoveAt(i);
+        }
+        return _aliveEnemies.Count;
     }
 
     /// <summary>Giris gecerli mi ve milestone'una ulasildi mi? unlockMilestone &lt;= 0 ise bastan aciktir (manager yoksa da).</summary>

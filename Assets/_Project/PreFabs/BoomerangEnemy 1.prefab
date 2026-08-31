@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1638060237360796375}
   - component: {fileID: 4668932960150402954}
   - component: {fileID: 281803706044421114}
+  - component: {fileID: 3628730348530122341}
   m_Layer: 8
   m_Name: BoomerangEnemy 1
   m_TagString: Untagged
@@ -175,7 +176,7 @@ MonoBehaviour:
   maxHealth: 25
   healthMultiplierAtMaxDifficulty: 3
   hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
-  hitFlashDuration: 0.08
+  hitFlashDuration: 0.2
   deathFrames:
   - {fileID: -30749221642623036, guid: f23e7535da39f3dfeae40be885d73488, type: 3}
   - {fileID: 2838966693941209132, guid: f23e7535da39f3dfeae40be885d73488, type: 3}
@@ -203,3 +204,27 @@ MonoBehaviour:
   coreDropMin: 2
   coreDropMax: 3
   ultFoodDropChance: 0.4
+--- !u!114 &3628730348530122341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7917102077075687604}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c139e058639a17cad6021e64df8aff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
+  spriteRenderer: {fileID: 1638060237360796375}
+  frames:
+  - {fileID: 1333401826788945531, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: -3445709363609947430, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: 5516209010568758635, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: 3906657198060525574, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: 3896488554439353617, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: 7645769752265994775, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: -6701073169992860884, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  frameRate: 5
+  loop: 1
+  randomizeStartFrame: 1

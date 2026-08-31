@@ -95,7 +95,7 @@ MonoBehaviour:
   maxHealth: 30
   healthMultiplierAtMaxDifficulty: 3
   hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
-  hitFlashDuration: 0.15
+  hitFlashDuration: 0.2
   deathFrames:
   - {fileID: -30749221642623036, guid: f23e7535da39f3dfeae40be885d73488, type: 3}
   - {fileID: 2838966693941209132, guid: f23e7535da39f3dfeae40be885d73488, type: 3}
@@ -117,9 +117,9 @@ MonoBehaviour:
   delayBetweenShots: 0.8
   burstCount: 3
   shooterColor: {r: 0.14901961, g: 0.85882354, b: 0.6392157, a: 1}
-  burstCountAtMaxDifficulty: 6
-  delayBetweenShotsAtMaxDifficulty: 0.2
-  shootCooldownAtMaxDifficulty: 2
+  burstCountAtMaxDifficulty: 4
+  delayBetweenShotsAtMaxDifficulty: 0.35
+  shootCooldownAtMaxDifficulty: 3.5
   moveSpeedMultiplierAtMaxDifficulty: 1.15
   coreDropMin: 2
   coreDropMax: 3

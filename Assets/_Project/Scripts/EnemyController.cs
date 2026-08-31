@@ -86,7 +86,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     private Color baseColor;
     private Coroutine hitFlashRoutine;
     private Collider2D bodyCollider;
-    private Animator animator;
+    private SpriteAnimator spriteAnimator;
     private bool isDying;
     private bool vacuumed; // Ultimate vacuum: AI/collider kapali, transform'u director oyuncuya ceker
     private float effectiveMoveSpeed;
@@ -115,6 +115,13 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         if (isDying || vacuumed) return;
         if (playerTransform == null) return;
 
+        // Donmus: hareket/saldiri yok (velocity FixedUpdate'te de sifirlanir)
+        if (EnemyFreeze.IsFrozen)
+        {
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
         if (isAttacking)
         {
             rb.linearVelocity = Vector2.zero;
@@ -129,6 +136,11 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     private void FixedUpdate()
     {
         if (isDying || vacuumed) return;
+        if (EnemyFreeze.IsFrozen)
+        {
+            if (rb != null) rb.linearVelocity = Vector2.zero;
+            return;
+        }
         MoveTowardsPlayer();
     }
 
@@ -140,6 +152,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
     private void OnCollisionStay2D(Collision2D collision)
     {
+        if (EnemyFreeze.IsFrozen) return; // donmusken temas hasari vermez
         if (Time.time < lastContactDamageTime + contactDamageCooldown) return;
 
         player cat = collision.gameObject.GetComponent<player>();
@@ -151,6 +164,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
     private void OnTriggerStay2D(Collider2D other)
     {
+        if (EnemyFreeze.IsFrozen) return; // donmusken temas hasari vermez
         if (Time.time < lastContactDamageTime + contactDamageCooldown) return;
 
         player cat = other.GetComponent<player>();
@@ -192,7 +206,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         bodyCollider = GetComponent<Collider2D>();
-        animator = GetComponent<Animator>();
+        spriteAnimator = GetComponent<SpriteAnimator>();
     }
 
     private void InitializeHealthSystem()
@@ -365,7 +379,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     /// Ultimate ekran-temizlemesi bu dusmani DROPSUZ ve ANINDA yok eder: core/ultFood birakmaz,
     /// olum animasyonu + duman OYNATMAZ (nuke temiz olsun). UltimateCinematic IMPACT aninda cagirir.
     /// </summary>
-    public void Vaporize() => Die(dropLoot: false, playDeathAnim: false);
+    public void Vaporize() => Die(dropLoot: true, playDeathAnim: false); // ulti ile olen de core+yemek biraksin
 
     /// <summary>
     /// Ultimate CHARGE fazi: dusmani "emilebilir" hale getirir — AI durur, fizik+collider kapanir
@@ -403,8 +417,8 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
         // Olurken AI, hareket ve carpismalari durdur
         StopAllCoroutines();                    // devam eden lazer/flash coroutine'lerini kes
-        if (animator != null)
-            animator.enabled = false;           // Animator'i kapat — yoksa death frame'leri her kare ezer
+        if (spriteAnimator != null)
+            spriteAnimator.enabled = false;     // Kare oynaticiyi kapat — yoksa death frame'leri her kare ezer
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero;

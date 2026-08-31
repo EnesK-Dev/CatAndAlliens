@@ -13,6 +13,9 @@ public class EnemyBullet : MonoBehaviour
     [SerializeField] private float lifetime = 5f;
     [SerializeField] private float damage = 1f;
 
+    [Tooltip("Sprite VARSAYILAN olarak saga (+X) bakiyorsa 0. Ters/yan gorunurse 180/90/-90 dene.")]
+    [SerializeField] private float spriteAngleOffset = 0f;
+
     [Header("Animasyon Ayarlari")]
     [SerializeField] private Sprite[] animationFrames;
     [SerializeField] private float frameRate = 12f;
@@ -70,6 +73,13 @@ public class EnemyBullet : MonoBehaviour
         Vector2 direction = (targetPosition - (Vector2)transform.position).normalized;
         if (_rb != null)
             _rb.linearVelocity = direction * speed;
+
+        // Mermiyi hareket yonune dondur — 360 derece atista "yan yan gitme" olmasin
+        if (direction.sqrMagnitude > 0.0001f)
+        {
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + spriteAngleOffset;
+            transform.rotation = Quaternion.Euler(0f, 0f, angle);
+        }
 
         Destroy(gameObject, lifetime);
     }

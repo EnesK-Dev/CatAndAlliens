@@ -74,7 +74,7 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
     private Coroutine _burstRoutine;
     private Coroutine _hitFlashRoutine;
     private Collider2D _bodyCollider;
-    private Animator _animator;
+    private SpriteAnimator _spriteAnimator;
     private bool _isDying;
     private bool _vacuumed; // Ultimate vacuum: AI/collider kapali, transform'u director oyuncuya ceker
     private float _effectiveMoveSpeed;
@@ -91,7 +91,7 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
         _rb = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _bodyCollider = GetComponent<Collider2D>();
-        _animator = GetComponent<Animator>();
+        _spriteAnimator = GetComponent<SpriteAnimator>();
         // Zamanla (global zorluk) can olceklenir — maxHealth yerinde buyutulur ki clamp dogru kalsin.
         maxHealth *= Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor);
         _currentHealth = maxHealth;
@@ -112,6 +112,7 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
     {
         if (_isDying || _vacuumed) return;
         if (_playerTransform == null || _isAttacking) return;
+        if (EnemyFreeze.IsFrozen) return; // donmusken yeni seri baslatma
 
         if (Time.time >= _nextShootTime)
             _burstRoutine = StartCoroutine(BurstRoutine());
@@ -120,6 +121,11 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
     private void FixedUpdate()
     {
         if (_isDying || _vacuumed) return;
+        if (EnemyFreeze.IsFrozen)
+        {
+            _rb.linearVelocity = Vector2.zero;
+            return;
+        }
         if (_playerTransform == null || _isAttacking)
         {
             _rb.linearVelocity = Vector2.zero;
@@ -149,6 +155,7 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
 
     private void OnCollisionStay2D(Collision2D collision)
     {
+        if (EnemyFreeze.IsFrozen) return; // donmusken temas hasari vermez
         if (Time.time < _lastContactDamageTime + contactDamageCooldown) return;
 
         player cat = collision.gameObject.GetComponent<player>();
@@ -255,7 +262,7 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
     /// Ultimate ekran-temizlemesi bu dusmani DROPSUZ ve ANINDA yok eder: core/ultFood birakmaz,
     /// olum animasyonu + duman OYNATMAZ (nuke temiz olsun). UltimateCinematic IMPACT aninda cagirir.
     /// </summary>
-    public void Vaporize() => Die(dropLoot: false, playDeathAnim: false);
+    public void Vaporize() => Die(dropLoot: true, playDeathAnim: false); // ulti ile olen de core+yemek biraksin
 
     /// <summary>
     /// Ultimate CHARGE fazi: dusmani "emilebilir" hale getirir — AI durur, fizik+collider kapanir
@@ -289,8 +296,8 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
 
         // Olurken AI, hareket ve carpismalari durdur
         StopAllCoroutines();                    // devam eden burst/flash coroutine'lerini kes
-        if (_animator != null)
-            _animator.enabled = false;          // Animator'i kapat — yoksa death frame'leri her kare ezer
+        if (_spriteAnimator != null)
+            _spriteAnimator.enabled = false;    // Kare oynaticiyi kapat — yoksa death frame'leri her kare ezer
         if (_rb != null)
         {
             _rb.linearVelocity = Vector2.zero;

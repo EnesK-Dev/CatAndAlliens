@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 7112373768650624116}
   - component: {fileID: 5649565113438576111}
   - component: {fileID: 8815592559685975083}
-  - component: {fileID: 2915954546834665650}
   - component: {fileID: 4578926171015546155}
+  - component: {fileID: 2830307093007107912}
   m_Layer: 8
   m_Name: Enemy
   m_TagString: Untagged
@@ -113,7 +113,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1333401826788945531, guid: 44d8f3305c026b47c87736491744811c, type: 3}
-  m_Color: {r: 1, g: 0.8419356, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -159,28 +159,6 @@ CapsuleCollider2D:
   m_Offset: {x: 0.006619841, y: 0.0059862435}
   m_Size: {x: 0.80097765, y: 1.0936573}
   m_Direction: 0
---- !u!95 &2915954546834665650
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3971847470037377216}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 678f0a70950bd1d61ba061cffb146952, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &4578926171015546155
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -196,8 +174,8 @@ MonoBehaviour:
   moveSpeed: 3
   maxHealth: 100
   healthMultiplierAtMaxDifficulty: 3
-  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
-  hitFlashDuration: 0.15
+  hitFlashColor: {r: 0.9622642, g: 0.049928807, b: 0.049928807, a: 1}
+  hitFlashDuration: 0.2
   deathFrames:
   - {fileID: -30749221642623036, guid: f23e7535da39f3dfeae40be885d73488, type: 3}
   - {fileID: 2838966693941209132, guid: f23e7535da39f3dfeae40be885d73488, type: 3}
@@ -228,12 +206,36 @@ MonoBehaviour:
   eliteMoveSpeed: 1.5
   laserVisualPrefab: {fileID: 8123456789012345678, guid: 1992a096572d90d17b44989b0b1280c9, type: 3}
   laserChance: 0
-  chargeDurationAtMaxDifficulty: 0.7
-  minAttackCooldownAtMaxDifficulty: 1.5
-  maxAttackCooldownAtMaxDifficulty: 3
+  chargeDurationAtMaxDifficulty: 1.1
+  minAttackCooldownAtMaxDifficulty: 2.5
+  maxAttackCooldownAtMaxDifficulty: 4.5
   moveSpeedMultiplierAtMaxDifficulty: 1.15
   laserWidthMultiplierAtMaxDifficulty: 1.6
   coreDropNormal: 1
   coreDropEliteMin: 2
   coreDropEliteMax: 3
   ultFoodDropChance: 0.25
+--- !u!114 &2830307093007107912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3971847470037377216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c139e058639a17cad6021e64df8aff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
+  spriteRenderer: {fileID: 5649565113438576111}
+  frames:
+  - {fileID: 1333401826788945531, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: -3445709363609947430, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: 5516209010568758635, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: 3906657198060525574, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: 3896488554439353617, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: 7645769752265994775, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: -6701073169992860884, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  frameRate: 5
+  loop: 1
+  randomizeStartFrame: 1

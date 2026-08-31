@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 7647708993160149193, guid: 9301dd4b527b502bb81949696689165f, type: 2}
+  - {fileID: 2100000, guid: fd89b0d49c91a7446b03e968aff402bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -110,7 +110,7 @@ MonoBehaviour:
   m_text: Sample text
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9301dd4b527b502bb81949696689165f, type: 2}
-  m_sharedMaterial: {fileID: 7647708993160149193, guid: 9301dd4b527b502bb81949696689165f, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: fd89b0d49c91a7446b03e968aff402bc, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -197,6 +197,10 @@ MonoBehaviour:
   label: {fileID: 8328297422636086913}
   lifetime: 0.7
   floatDistance: 1
-  horizontalJitter: 0.3
+  horizontalJitter: 0.8
   fadeStartPercent: 0.4
   popScale: 1.2
+  rankScaleStep: 0.25
+  useRankColor: 1
+  lowRankColor: {r: 1, g: 1, b: 1, a: 1}
+  highRankColor: {r: 1, g: 0, b: 0, a: 1}
