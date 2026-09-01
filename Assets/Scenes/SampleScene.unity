@@ -227,6 +227,7 @@ GameObject:
   - component: {fileID: 19887879}
   - component: {fileID: 19887878}
   - component: {fileID: 19887880}
+  - component: {fileID: 19887881}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -535,6 +536,31 @@ MonoBehaviour:
   countByLevel: 0100000002000000030000000300000003000000
   speedPerLevel: 1.5
   damagePerLevel: 6
+--- !u!114 &19887881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 19887871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 784c57015d20e94ccbd75730399508e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrbitalWeapon
+  weaponName: Orbital
+  weaponIcon: {fileID: 1632925732872728751, guid: d296f486b704db05d8098e610c9bb601, type: 3}
+  maxLevel: 5
+  acquireOnStartForTesting: 1
+  orbPrefab: {fileID: 6816250478938210669, guid: decc5532c0ac92bf79ba2927c3355d2b, type: 3}
+  orbCount: 2
+  hitCooldown: 0.4
+  baseRadius: 2
+  baseRotationSpeed: 120
+  baseDamage: 8
+  radiusPerLevel: 0.35
+  rotationSpeedPerLevel: 30
+  damagePerLevel: 4
 --- !u!1 &24674384
 GameObject:
   m_ObjectHideFlags: 0

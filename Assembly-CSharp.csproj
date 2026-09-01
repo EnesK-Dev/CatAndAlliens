@@ -93,6 +93,7 @@
     <Compile Include="Assets/_Project/Scripts/WinUI.cs" />
     <Compile Include="Assets/_Project/Scripts/PlayerBoomerang.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateManager.cs" />
+    <Compile Include="Assets/_Project/Scripts/OrbitalWeapon.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FloatingJoystick.cs" />
     <Compile Include="Assets/_Project/Scripts/BossLaserAttack.cs" />
     <Compile Include="Assets/_Project/Scripts/WinConditionManager.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="Assets/_Project/Scripts/BoomerangEnemy.cs" />
     <Compile Include="Assets/_Project/Scripts/BossHealthBarUI.cs" />
     <Compile Include="Assets/_Project/Scripts/SfxId.cs" />
+    <Compile Include="Assets/_Project/Scripts/OrbitalOrb.cs" />
     <Compile Include="Assets/_Project/Scripts/UltFoodItem.cs" />
     <Compile Include="Assets/_Project/Scripts/IDifficultyScaled.cs" />
     <Compile Include="Assets/_Project/Scripts/ComboUI.cs" />
