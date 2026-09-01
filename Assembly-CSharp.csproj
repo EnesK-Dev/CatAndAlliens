@@ -91,6 +91,7 @@
     <Compile Include="Assets/_Project/Scripts/CameraShake.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateBarUI.cs" />
     <Compile Include="Assets/_Project/Scripts/WinUI.cs" />
+    <Compile Include="Assets/_Project/Scripts/PlayerBoomerang.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateManager.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FloatingJoystick.cs" />
     <Compile Include="Assets/_Project/Scripts/BossLaserAttack.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="Assets/_Project/Scripts/PlayerProjectile.cs" />
     <Compile Include="Assets/_Project/Scripts/UpgradeSelectionUI.cs" />
     <Compile Include="Assets/_Project/Scripts/BossTestSpawner.cs" />
+    <Compile Include="Assets/_Project/Scripts/BoomerangWeapon.cs" />
     <Compile Include="Assets/_Project/Scripts/BoomerangEnemy.cs" />
     <Compile Include="Assets/_Project/Scripts/BossHealthBarUI.cs" />
     <Compile Include="Assets/_Project/Scripts/SfxId.cs" />

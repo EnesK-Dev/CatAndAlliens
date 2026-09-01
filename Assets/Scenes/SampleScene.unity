@@ -226,6 +226,7 @@ GameObject:
   - component: {fileID: 19887877}
   - component: {fileID: 19887879}
   - component: {fileID: 19887878}
+  - component: {fileID: 19887880}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -504,6 +505,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66c08acbb3acc8c6c98c97068c0af5ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponManager
+--- !u!114 &19887880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 19887871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8998393b05b746c6aca470d10672885, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BoomerangWeapon
+  weaponName: Boomerang
+  weaponIcon: {fileID: 4362533118088950298, guid: 576ce76d6b565fdc7b87084ed7dff038, type: 3}
+  maxLevel: 5
+  acquireOnStartForTesting: 1
+  boomerangPrefab: {fileID: 4234833768187124176, guid: 57372e3e33d39ecc79f19c280f78c5a4, type: 3}
+  enemyLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  detectRange: 10
+  outDistance: 5
+  spin: 720
+  catchDistance: 0.6
+  throwStagger: 0.25
+  baseSpeed: 10
+  baseDamage: 12
+  countByLevel: 0100000002000000030000000300000003000000
+  speedPerLevel: 1.5
+  damagePerLevel: 6
 --- !u!1 &24674384
 GameObject:
   m_ObjectHideFlags: 0
