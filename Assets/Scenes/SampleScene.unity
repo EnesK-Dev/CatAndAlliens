@@ -224,6 +224,8 @@ GameObject:
   - component: {fileID: 19887872}
   - component: {fileID: 19887876}
   - component: {fileID: 19887877}
+  - component: {fileID: 19887879}
+  - component: {fileID: 19887878}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -463,6 +465,45 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &19887878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 19887871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 785081b5caeae6f6297c287374a4dee5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoBlasterWeapon
+  weaponName: Auto-Blaster
+  weaponIcon: {fileID: 0}
+  maxLevel: 6
+  acquireOnStartForTesting: 0
+  bulletPrefab: {fileID: 4821125778120566838, guid: 2c53d35d1f4c82bd9affaf07521ceaef, type: 3}
+  enemyLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  range: 8
+  bulletSpeed: 12
+  bulletLifetime: 2
+  baseFireInterval: 0.5
+  baseDamage: 5
+  fireIntervalMultiplierPerLevel: 0.88
+  damagePerLevel: 3
+--- !u!114 &19887879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 19887871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66c08acbb3acc8c6c98c97068c0af5ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponManager
 --- !u!1 &24674384
 GameObject:
   m_ObjectHideFlags: 0
@@ -5055,6 +5096,7 @@ MonoBehaviour:
   - {fileID: 1443192527}
   - {fileID: 1367357217}
   playerRef: {fileID: 19887873}
+  weaponManager: {fileID: 19887879}
   enemyFreezeAfterUpgrade: 0.6
   upgrades:
   - title: Damage Up
@@ -5081,6 +5123,8 @@ MonoBehaviour:
     type: 3
     amount: 20
     level: 0
+  statCardColor: {r: 1, g: 1, b: 1, a: 1}
+  weaponCardColor: {r: 0.55, g: 0.8, b: 1, a: 1}
 --- !u!1 &768823758
 GameObject:
   m_ObjectHideFlags: 0

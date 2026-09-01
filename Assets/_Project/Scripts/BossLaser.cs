@@ -15,11 +15,13 @@ public class BossLaser : MonoBehaviour
     private float _damageCooldown = 0.5f;
     private float _lastHitTime = -99f;
     private float _width = 0.9f;
+    private float _colliderScale = 1f; // collider kalinligi = gorsel kalinlik * bu (1'den kucuk = daha ince hasar alani)
     #endregion
 
     #region Public Methods
     /// <summary>Lazeri kurar (bir kez): animasyonlu gorsel prefab'i orneklenir, collider hazirlanir.</summary>
-    public void Setup(LaserVisual visualPrefab, float damage, float damageCooldown, float width)
+    /// <param name="colliderWidthScale">Collider kalinligi = gorsel kalinlik * bu. 1'den kucuk = hasar alani gorselden ince (adil).</param>
+    public void Setup(LaserVisual visualPrefab, float damage, float damageCooldown, float width, float colliderWidthScale)
     {
         _box = GetComponent<BoxCollider2D>();
         _box.isTrigger = true;
@@ -29,6 +31,7 @@ public class BossLaser : MonoBehaviour
         _damage = damage;
         _damageCooldown = damageCooldown;
         _width = width;
+        _colliderScale = Mathf.Max(0.01f, colliderWidthScale);
 
         if (visualPrefab != null)
         {
@@ -43,10 +46,10 @@ public class BossLaser : MonoBehaviour
     {
         length = Mathf.Max(0.001f, length);
 
-        // Collider (hasar alani)
+        // Collider (hasar alani) — kalinlik gorselden bagimsiz (colliderScale ile inceltilebilir)
         transform.position = origin;
         transform.rotation = Quaternion.Euler(0f, 0f, angleDeg);
-        transform.localScale = new Vector3(length, _width, 1f);
+        transform.localScale = new Vector3(length, _width * _colliderScale, 1f);
 
         // Gorsel (animasyonlu lazer) — origin'den uca
         if (_visual != null)

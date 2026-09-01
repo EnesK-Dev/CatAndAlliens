@@ -21,6 +21,13 @@ public class UpgradeCard : MonoBehaviour
     [SerializeField] private TMP_Text levelText;
 
     [SerializeField] private Button selectButton;
+
+    [Header("Silah Karti (opsiyonel)")]
+    [Tooltip("Kart cercevesi/arka plani — silah kartlarinda renk (tint) uygulanir. Bos ise renk atlanir.")]
+    [SerializeField] private Image frameImage;
+
+    [Tooltip("'NEW WEAPON' etiketi — sadece yeni silah kartinda gorunur. Bos ise atlanir.")]
+    [SerializeField] private GameObject newWeaponBanner;
     #endregion
 
     #region Private Fields
@@ -53,7 +60,8 @@ public class UpgradeCard : MonoBehaviour
     /// <param name="description">Kisa aciklama (Ingilizce).</param>
     /// <param name="displayLevel">Kart secilince ulasilacak seviye (Lv.N).</param>
     /// <param name="onSelected">Tiklaninca cagrilacak callback; parametre optionIndex.</param>
-    public void Bind(int optionIndex, Sprite icon, string title, string description, int displayLevel, Action<int> onSelected)
+    public void Bind(int optionIndex, Sprite icon, string title, string description, int displayLevel,
+                     Color frameColor, bool isNewWeapon, Action<int> onSelected)
     {
         _optionIndex = optionIndex;
         _onSelected = onSelected;
@@ -67,6 +75,10 @@ public class UpgradeCard : MonoBehaviour
         if (titleText != null) titleText.text = title;
         if (descriptionText != null) descriptionText.text = description;
         if (levelText != null) levelText.SetText("Lv.{0}", displayLevel); // alloc yok (TMP)
+
+        // Silah karti gorseli: cerceve rengi (tint) + NEW WEAPON etiketi
+        if (frameImage != null) frameImage.color = frameColor;
+        if (newWeaponBanner != null) newWeaponBanner.SetActive(isNewWeapon);
     }
     #endregion
 

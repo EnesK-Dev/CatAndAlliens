@@ -1,12 +1,12 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// FAZ 5 upgrade paneli. CoreManager.OnThresholdReached'i dinler; esige ulasinca oyunu
-/// duraklatir (Time.timeScale=0 + player.SetPaused), 4 upgrade'den 3'unu rastgele secip
-/// kartlara basar. Oyuncu bir kart secince ilgili stat'i player'a uygular, seviyeyi arttirir,
-/// OnUpgradeSelected firlatir ve paneli kapatip oyunu devam ettirir. God GameManager degil —
-/// sadece upgrade secim akisindan sorumlu, gevsek bagli (static event).
+/// Upgrade paneli. CoreManager.OnThresholdReached'i dinler; esige ulasinca oyunu duraklatir
+/// (timeScale=0 + player.SetPaused) ve DINAMIK bir secenek havuzundan 3 kart gosterir:
+/// stat upgrade'leri + silah ALMA ("NEW WEAPON") + silah YUKSELTME (farkli renk). Secilince
+/// ilgili stat'i uygular ya da silahi alir/yukseltir, paneli kapatir. Gevsek bagli (static event).
 /// </summary>
 public class UpgradeSelectionUI : MonoBehaviour
 {
@@ -20,7 +20,7 @@ public class UpgradeSelectionUI : MonoBehaviour
         GainHealth // Anlik can doldurur (max can DEGISMEZ). NOT: 4. sirada kalmali — sahne serialize'i int deger.
     }
 
-    /// <summary>Bir upgrade seceneginin verisi — Inspector'dan doldurulur (denge burada tutulur).</summary>
+    /// <summary>Bir stat upgrade seceneginin verisi — Inspector'dan doldurulur (denge burada tutulur).</summary>
     [Serializable]
     public class UpgradeDefinition
     {
@@ -35,6 +35,15 @@ public class UpgradeSelectionUI : MonoBehaviour
 
         [HideInInspector] public int level; // kac kez secildi (runtime stack sayaci)
     }
+
+    /// <summary>Panelde gosterilen tek bir kart secenegi (stat ya da silah). Runtime'da uretilir.</summary>
+    private struct CardOption
+    {
+        public bool isWeapon;
+        public int statIndex;      // stat ise upgrades[] indeksi
+        public WeaponBase weapon;  // silah ise
+        public bool isNewWeapon;   // silah henuz alinmadi (NEW WEAPON)
+    }
     #endregion
 
     #region Serialized Fields
@@ -48,25 +57,36 @@ public class UpgradeSelectionUI : MonoBehaviour
     [Tooltip("Bos birakilirsa Awake'te otomatik bulunur.")]
     [SerializeField] private player playerRef;
 
+    [Tooltip("Bos birakilirsa player'dan otomatik bulunur. Silah kartlari icin.")]
+    [SerializeField] private WeaponManager weaponManager;
+
     [Header("Kart Sonrasi")]
-    [Tooltip("Kart secilip panel kapaninca dusmanlar bu kadar SANIYE donar (oyuncu serbest kalir). " +
-             "Kalabaligin ortasinda aninda dayak yememek icin nefes alma ani. 0 = kapali.")]
+    [Tooltip("Kart secilip panel kapaninca dusmanlar bu kadar SANIYE donar (oyuncu serbest kalir).")]
     [SerializeField] private float enemyFreezeAfterUpgrade = 0.6f;
 
-    [Header("Upgrade Havuzu (4 tane onerilir, 3'u rastgele gosterilir)")]
+    [Header("Stat Upgrade Havuzu")]
     [SerializeField] private UpgradeDefinition[] upgrades;
+
+    [Header("Kart Renkleri (frame tint)")]
+    [Tooltip("Normal stat kartlarinin cerceve rengi (beyaz = degismez).")]
+    [SerializeField] private Color statCardColor = Color.white;
+
+    [Tooltip("Silah kartlarinin cerceve rengi (stat'tan farkli — silahi ayirt etmek icin).")]
+    [SerializeField] private Color weaponCardColor = new Color(0.55f, 0.8f, 1f, 1f);
     #endregion
 
     #region Private Fields
     private static UpgradeSelectionUI _instance;
-    private int[] _indices;            // shuffle tamponu — bir kez alloc
-    private int _pendingSelections;    // panel acikken gelen ekstra esikler (sirali islenir)
+    private int _pendingSelections;
     private bool _isOpen;
-    private Action<int> _cardCallback; // her acilista yeniden alloc olmasin diye cache
+    private Action<int> _cardCallback;
+
+    private readonly List<CardOption> _available = new List<CardOption>(); // her acilista yeniden doldurulur
+    private CardOption[] _shown;                                           // o an gosterilen kartlar (slot sirasi)
     #endregion
 
     #region Static API
-    /// <summary>Bir upgrade secilince firlar. Parametre: secilen stat turu.</summary>
+    /// <summary>Bir STAT upgrade secilince firlar. Parametre: secilen stat turu. (Silahlar bunu firlatmaz.)</summary>
     public static event Action<UpgradeType> OnUpgradeSelected;
     #endregion
 
@@ -82,16 +102,12 @@ public class UpgradeSelectionUI : MonoBehaviour
 
         _cardCallback = HandleCardSelected;
 
-        if (playerRef == null)
-            playerRef = FindFirstObjectByType<player>();
+        if (playerRef == null) playerRef = FindFirstObjectByType<player>();
+        if (weaponManager == null && playerRef != null) weaponManager = playerRef.GetComponent<WeaponManager>();
 
-        int count = upgrades != null ? upgrades.Length : 0;
-        _indices = new int[count];
-        for (int i = 0; i < count; i++)
-            _indices[i] = i;
+        _shown = new CardOption[cardSlots != null ? cardSlots.Length : 0];
 
-        if (panelRoot != null)
-            panelRoot.SetActive(false); // baslangicta kapali
+        if (panelRoot != null) panelRoot.SetActive(false);
 
         CoreManager.OnThresholdReached += HandleThresholdReached;
     }
@@ -99,24 +115,17 @@ public class UpgradeSelectionUI : MonoBehaviour
     private void OnDestroy()
     {
         CoreManager.OnThresholdReached -= HandleThresholdReached;
-        if (_instance == this)
-            _instance = null;
+        if (_instance == this) _instance = null;
     }
     #endregion
 
     #region Private Methods
-    /// <summary>Esige ulasinca cagrilir. Panel zaten aciksa siraya alir, degilse acar.</summary>
     private void HandleThresholdReached(int thresholdLevel)
     {
-        if (_isOpen)
-        {
-            _pendingSelections++; // ayni karede birden fazla esik gecilirse sirayla goster
-            return;
-        }
+        if (_isOpen) { _pendingSelections++; return; }
         OpenPanel();
     }
 
-    /// <summary>Paneli acar: oyunu duraklatir ve kartlari doldurur.</summary>
     private void OpenPanel()
     {
         if (panelRoot == null || cardSlots == null || cardSlots.Length == 0)
@@ -133,13 +142,13 @@ public class UpgradeSelectionUI : MonoBehaviour
         PopulateCards();
     }
 
-    /// <summary>4 upgrade'den kart sayisi kadarini rastgele secip slotlara basar.</summary>
+    /// <summary>Dinamik havuzu (stat + silah) kurar, karistirir, slotlara basar.</summary>
     private void PopulateCards()
     {
-        int upgradeCount = upgrades != null ? upgrades.Length : 0;
-        int show = Mathf.Min(cardSlots.Length, upgradeCount);
+        BuildAvailableOptions();
+        ShuffleAvailable();
 
-        ShuffleIndices(upgradeCount);
+        int show = Mathf.Min(cardSlots.Length, _available.Count);
 
         for (int i = 0; i < cardSlots.Length; i++)
         {
@@ -150,36 +159,90 @@ public class UpgradeSelectionUI : MonoBehaviour
             card.gameObject.SetActive(visible);
             if (!visible) continue;
 
-            int optionIndex = _indices[i];
-            UpgradeDefinition def = upgrades[optionIndex];
-            card.Bind(optionIndex, def.icon, def.title, def.description, def.level + 1, _cardCallback);
+            CardOption opt = _available[i];
+            _shown[i] = opt;
+            BindOptionToCard(card, i, opt);
         }
     }
 
-    /// <summary>_indices dizisinin ilk 'count' elemanini Fisher-Yates ile karistirir (alloc yok).</summary>
-    private void ShuffleIndices(int count)
+    /// <summary>Mevcut duruma gore secenek listesini doldurur: tum stat'lar + alinmamis/yukseltilebilir silahlar.</summary>
+    private void BuildAvailableOptions()
     {
-        for (int i = count - 1; i > 0; i--)
+        _available.Clear();
+
+        int statCount = upgrades != null ? upgrades.Length : 0;
+        for (int i = 0; i < statCount; i++)
+            _available.Add(new CardOption { isWeapon = false, statIndex = i });
+
+        if (weaponManager != null && weaponManager.Weapons != null)
+        {
+            foreach (WeaponBase w in weaponManager.Weapons)
+            {
+                if (w == null) continue;
+                if (!w.IsAcquired)
+                    _available.Add(new CardOption { isWeapon = true, weapon = w, isNewWeapon = true });
+                else if (!w.IsMaxed)
+                    _available.Add(new CardOption { isWeapon = true, weapon = w, isNewWeapon = false });
+                // maxed silah havuza girmez
+            }
+        }
+    }
+
+    /// <summary>_available listesini Fisher-Yates ile karistirir (List, ekstra alloc yok).</summary>
+    private void ShuffleAvailable()
+    {
+        for (int i = _available.Count - 1; i > 0; i--)
         {
             int j = UnityEngine.Random.Range(0, i + 1);
-            (_indices[i], _indices[j]) = (_indices[j], _indices[i]);
+            (_available[i], _available[j]) = (_available[j], _available[i]);
         }
     }
 
-    /// <summary>Bir kart secilince cagrilir: stat'i uygula, seviyeyi arttir, event firlat, kapat/devam et.</summary>
-    private void HandleCardSelected(int upgradeIndex)
+    /// <summary>Bir secenegi karta baglar (baslik/aciklama/ikon/level + renk/banner).</summary>
+    private void BindOptionToCard(UpgradeCard card, int slotIndex, CardOption opt)
     {
-        if (upgrades == null || upgradeIndex < 0 || upgradeIndex >= upgrades.Length) return;
+        if (opt.isWeapon)
+        {
+            WeaponBase w = opt.weapon;
+            string title = w.WeaponName;
+            string desc = opt.isNewWeapon ? "New weapon!" : "Level up";
+            int level = opt.isNewWeapon ? 1 : w.Level + 1;
+            card.Bind(slotIndex, w.WeaponIcon, title, desc, level, weaponCardColor, opt.isNewWeapon, _cardCallback);
+        }
+        else
+        {
+            UpgradeDefinition def = upgrades[opt.statIndex];
+            card.Bind(slotIndex, def.icon, def.title, def.description, def.level + 1, statCardColor, false, _cardCallback);
+        }
+    }
 
-        UpgradeDefinition def = upgrades[upgradeIndex];
-        ApplyUpgrade(def);
-        def.level++;
-        OnUpgradeSelected?.Invoke(def.type);
+    /// <summary>Bir kart secilince cagrilir (parametre = slot indeksi). Secenegi uygular, kapat/devam et.</summary>
+    private void HandleCardSelected(int slotIndex)
+    {
+        if (_shown == null || slotIndex < 0 || slotIndex >= _shown.Length) return;
+
+        CardOption opt = _shown[slotIndex];
+
+        if (opt.isWeapon)
+        {
+            if (opt.weapon != null)
+            {
+                if (opt.isNewWeapon) opt.weapon.Acquire();
+                else opt.weapon.LevelUp();
+            }
+        }
+        else if (upgrades != null && opt.statIndex >= 0 && opt.statIndex < upgrades.Length)
+        {
+            UpgradeDefinition def = upgrades[opt.statIndex];
+            ApplyUpgrade(def);
+            def.level++;
+            OnUpgradeSelected?.Invoke(def.type);
+        }
 
         if (_pendingSelections > 0)
         {
             _pendingSelections--;
-            PopulateCards(); // panel acik + duraklatilmis kalir, yeni 3 kart cikar
+            PopulateCards();
         }
         else
         {
@@ -187,7 +250,7 @@ public class UpgradeSelectionUI : MonoBehaviour
         }
     }
 
-    /// <summary>Secilen upgrade turune gore player'in ilgili metodunu cagirir.</summary>
+    /// <summary>Secilen STAT upgrade turune gore player'in ilgili metodunu cagirir.</summary>
     private void ApplyUpgrade(UpgradeDefinition def)
     {
         if (playerRef == null || def == null) return;
@@ -204,19 +267,17 @@ public class UpgradeSelectionUI : MonoBehaviour
                 playerRef.AddAttackRange(def.amount);
                 break;
             case UpgradeType.GainHealth:
-                playerRef.Heal(def.amount); // eksik cani doldurur; max can sabit kalir
+                playerRef.Heal(def.amount);
                 break;
         }
     }
 
-    /// <summary>Paneli kapatir ve oyunu devam ettirir.</summary>
     private void ClosePanel()
     {
         _isOpen = false;
         if (panelRoot != null) panelRoot.SetActive(false);
         Time.timeScale = 1f;
         if (playerRef != null) playerRef.SetPaused(false);
-        // Oyuna donunce dusmanlari kisa sure dondur — oyuncu yeniden konumlanabilsin (oyuncu serbest kalir).
         EnemyFreeze.FreezeFor(enemyFreezeAfterUpgrade);
     }
     #endregion

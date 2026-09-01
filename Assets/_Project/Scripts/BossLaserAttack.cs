@@ -17,8 +17,12 @@ public class BossLaserAttack : MonoBehaviour
     [Tooltip("Animasyonlu lazer gorseli (Laser.prefab / LaserVisual). Bos ise gorsel cizilmez, sadece collider.")]
     [SerializeField] private LaserVisual laserVisualPrefab;
 
-    [Tooltip("Collider (hasar) kalinligi — gorsel isin kalinligina yaklastir.")]
+    [Tooltip("Gorsel isin kalinligi (LaserVisual).")]
     [SerializeField] private float laserWidth = 0.9f;
+
+    [Tooltip("Collider kalinligi = gorsel kalinlik * bu. 1'den kucuk = HASAR ALANI gorselden ince (kenardan siyirinca vurmaz). Collider'i kucultmek icin bunu dusur.")]
+    [Range(0.1f, 1f)]
+    [SerializeField] private float colliderWidthScale = 0.6f;
     [Tooltip("Isin uzunlugu — ekrani kaplayacak kadar buyuk olmali.")]
     [SerializeField] private float laserLength = 20f;
     [SerializeField] private float laserDamage = 2f;
@@ -248,7 +252,7 @@ public class BossLaserAttack : MonoBehaviour
 
         var go = new GameObject("BossLaser");
         var laser = go.AddComponent<BossLaser>(); // RequireComponent BoxCollider2D'yi otomatik ekler
-        laser.Setup(laserVisualPrefab, laserDamage, laserHitCooldown, laserWidth);
+        laser.Setup(laserVisualPrefab, laserDamage, laserHitCooldown, laserWidth, colliderWidthScale);
         _pool.Add(laser);
         return laser;
     }
