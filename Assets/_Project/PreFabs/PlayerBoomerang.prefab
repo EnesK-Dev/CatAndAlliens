@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2691947140329804771}
   - component: {fileID: 5201341862712649725}
   - component: {fileID: 4234833768187124176}
+  - component: {fileID: 7215933409703633800}
   m_Layer: 0
   m_Name: PlayerBoomerang
   m_TagString: Untagged
@@ -169,3 +170,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4607b85a3366f9e5a90ebfb2ad9a2806, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerBoomerang
+--- !u!114 &7215933409703633800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6920034619742831271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c139e058639a17cad6021e64df8aff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
+  spriteRenderer: {fileID: 7187409854329487748}
+  frames:
+  - {fileID: 4592022112667852959, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
+  - {fileID: 327773321540071193, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
+  - {fileID: 7447957170289283348, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
+  - {fileID: -3108902931973990431, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
+  - {fileID: -4319708449840049423, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
+  - {fileID: -4957968747161539743, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
+  - {fileID: 5295221679463767599, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
+  - {fileID: -567279137762290305, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
+  frameRate: 30
+  loop: 1
+  randomizeStartFrame: 0

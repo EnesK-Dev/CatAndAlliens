@@ -1,40 +1,37 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Silah 1 — Auto-Blaster. BurstShooter gibi SUREKLI mermi atar ama oyuncu tarafinda: menzildeki
-/// (ekrandaki) en yakin dusmana nisan alir. Hasari dusuktur. Seviye arttikca ATES HIZI ve HASAR artar.
-/// WeaponBase'ten turer; alinmadan calismaz. Mermi = PlayerProjectile (dusmana hasar).
+/// Silah 1 — Auto-Blaster. Menzildeki en yakin dusmana SUREKLI mermi atar (dusuk hasar).
+/// Ayri yukseltmeler: ATES HIZI ve HASAR (her biri kendi track'i, ayri kart).
 /// </summary>
 public class AutoBlasterWeapon : WeaponBase
 {
     #region Serialized Fields
     [Header("Auto-Blaster")]
-    [Tooltip("Firlatilacak mermi (PlayerProjectile).")]
     [SerializeField] private PlayerProjectile bulletPrefab;
-
-    [Tooltip("Dusman layer'lari — nisan alma icin.")]
     [SerializeField] private LayerMask enemyLayers;
-
-    [Tooltip("Bu menzildeki en yakin dusmana ates eder.")]
     [SerializeField] private float range = 8f;
-
-    [Tooltip("Mermi hizi ve omru.")]
     [SerializeField] private float bulletSpeed = 12f;
     [SerializeField] private float bulletLifetime = 2f;
 
-    [Header("Seviye 1 Degerleri")]
+    [Header("Baslangic (Lv.1) Degerleri")]
     [SerializeField] private float baseFireInterval = 0.5f;
     [SerializeField] private float baseDamage = 5f;
 
-    [Header("Seviye Basi Artis (upgrade)")]
-    [Tooltip("Her seviyede ates araligi bu carpanla azalir (0.88 = %12 hizli).")]
-    [SerializeField] private float fireIntervalMultiplierPerLevel = 0.88f;
+    [Header("Ates Hizi Track'i")]
+    [Tooltip("Her ates-hizi yukseltmesinde araligin carpani (0.88 = %12 hizli).")]
+    [SerializeField] private float fireIntervalMultiplier = 0.88f;
+    [SerializeField] private int maxFireRateLevel = 5;
 
-    [Tooltip("Her seviyede eklenen hasar.")]
+    [Header("Hasar Track'i")]
     [SerializeField] private float damagePerLevel = 3f;
+    [SerializeField] private int maxDamageLevel = 5;
     #endregion
 
     #region Private Fields
+    private int _fireRateLevel;
+    private int _damageLevel;
     private float _nextFireTime;
     private readonly Collider2D[] _hitBuffer = new Collider2D[32];
     #endregion
@@ -42,9 +39,7 @@ public class AutoBlasterWeapon : WeaponBase
     #region Unity Callbacks
     private void Update()
     {
-        // enabled=false iken (alinmadan) Unity Update cagirmaz; buraya ancak alindiktan sonra gelir.
-        if (bulletPrefab == null) return;
-        if (Time.time < _nextFireTime) return;
+        if (bulletPrefab == null || Time.time < _nextFireTime) return;
 
         Transform target = FindNearestEnemy();
         if (target == null) return;
@@ -54,9 +49,22 @@ public class AutoBlasterWeapon : WeaponBase
     }
     #endregion
 
+    #region Overrides
+    public override void CollectUpgrades(List<WeaponUpgradeOption> into)
+    {
+        if (_fireRateLevel < maxFireRateLevel)
+            into.Add(new WeaponUpgradeOption("Blaster Fire Rate", "+Attack speed", _fireRateLevel + 1,
+                () => _fireRateLevel++));
+
+        if (_damageLevel < maxDamageLevel)
+            into.Add(new WeaponUpgradeOption("Blaster Damage", "+" + damagePerLevel + " damage", _damageLevel + 1,
+                () => _damageLevel++));
+    }
+    #endregion
+
     #region Private Methods
-    private float CurrentFireInterval() => baseFireInterval * Mathf.Pow(fireIntervalMultiplierPerLevel, Mathf.Max(0, Level - 1));
-    private float CurrentDamage() => baseDamage + damagePerLevel * Mathf.Max(0, Level - 1);
+    private float CurrentFireInterval() => baseFireInterval * Mathf.Pow(fireIntervalMultiplier, _fireRateLevel);
+    private float CurrentDamage() => baseDamage + damagePerLevel * _damageLevel;
 
     private Transform FindNearestEnemy()
     {

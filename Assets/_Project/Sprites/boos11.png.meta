@@ -158,7 +158,7 @@ TextureImporter:
         serializedVersion: 2
         x: 700
         y: 0
-        width: 700
+        width: 722
         height: 700
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
@@ -178,12 +178,12 @@ TextureImporter:
       name: boss_2
       rect:
         serializedVersion: 2
-        x: 1400
+        x: 1444
         y: 0
-        width: 700
+        width: 656
         height: 700
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      alignment: 9
+      pivot: {x: 0.4422682, y: 0.43953198}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []

@@ -111,8 +111,9 @@ public class EnemyGenerator : MonoBehaviour
     {
         if (Time.time >= _nextSpawnTime)
         {
-            // Boss varken normal spawn duraklar (mevcut dusmanlar silinmez, yasamaya devam eder)
-            if (!(pauseSpawnDuringBoss && BossController.AnyBossAlive))
+            // Boss varken VEYA boss-oncesi bombardimanda spawn duraklar (mevcut dusmanlar silinmez;
+            // bombardimanda bombalardan olurler). Tek-sorumluluk: sadece spawn tarafi.
+            if (!((pauseSpawnDuringBoss && BossController.AnyBossAlive) || BombardmentDirector.IsActive))
                 SpawnEnemyOnLine();
             ScheduleNextSpawn();
         }

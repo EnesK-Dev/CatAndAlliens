@@ -1,10 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// Tum silahlarin taban sinifi. Silah oyuncunun bir component'idir; ALINMADAN once enabled=false
-/// (calismaz). Karttan alininca Acquire() -> Level 1 + enabled=true. Yukseltme karti LevelUp().
-/// Her silah bagimsiz calisir (additive) — eski saldiriyi kapatmaz. Alt siniflar Update/coroutine
-/// icinde kendi atesini yapar ve CurrentX() degerlerinde Level'i kullanir.
+/// (calismaz). Karttan alininca Acquire() -> aktif. Yukseltmeler TEK bir seviye degil; her silahin
+/// BIRDEN COK ayri track'i vardir (hasar/hiz/sayi vb.), her biri ayri kart olarak CollectUpgrades ile
+/// sunulur. Silah bagimsiz calisir (additive) — eski saldiriyi kapatmaz.
 /// </summary>
 public abstract class WeaponBase : MonoBehaviour
 {
@@ -16,57 +17,42 @@ public abstract class WeaponBase : MonoBehaviour
     [Tooltip("Silah ikonu (kart + gorsel). Sonradan atanabilir.")]
     [SerializeField] protected Sprite weaponIcon;
 
-    [Tooltip("Ulasilabilecek en yuksek seviye (Lv.1 = ilk alim).")]
-    [SerializeField] protected int maxLevel = 5;
-
-    [Tooltip("SADECE TEST: oyun basinda kart olmadan otomatik alinir. Kart entegrasyonu (FAZ 2) bitince KAPAT.")]
+    [Tooltip("SADECE TEST: oyun basinda kart olmadan otomatik alinir. Yayinda KAPAT.")]
     [SerializeField] protected bool acquireOnStartForTesting = false;
     #endregion
 
     #region Properties
-    /// <summary>Guncel seviye. 0 = henuz alinmadi.</summary>
-    public int Level { get; protected set; }
-
-    /// <summary>Silah alindi mi (Level > 0).</summary>
-    public bool IsAcquired => Level > 0;
-
-    /// <summary>Maksimum seviyeye ulasildi mi.</summary>
-    public bool IsMaxed => Level >= maxLevel;
+    /// <summary>Silah alindi mi.</summary>
+    public bool IsAcquired { get; private set; }
 
     public string WeaponName => weaponName;
     public Sprite WeaponIcon => weaponIcon;
-    public int MaxLevel => maxLevel;
     #endregion
 
     #region Unity Callbacks
     protected virtual void Awake()
     {
-        if (acquireOnStartForTesting) Acquire(); // TEST: kart olmadan basta al
-        else if (Level <= 0) enabled = false;    // Alinmadan calismasin — karttan alininca aktiflesir
+        if (acquireOnStartForTesting) Acquire(); // TEST
+        else enabled = false;                    // alinmadan calismasin
     }
     #endregion
 
     #region Public Methods
-    /// <summary>Silahi ilk kez alir: Level 1 + aktif eder.</summary>
-    public virtual void Acquire()
+    /// <summary>Silahi ilk kez alir: aktif eder ve baslangic (Lv.1) durumunu uygular.</summary>
+    public void Acquire()
     {
-        if (Level > 0) return;
-        Level = 1;
+        if (IsAcquired) return;
+        IsAcquired = true;
         enabled = true;
-        OnLevelChanged();
+        OnAcquired();
     }
 
-    /// <summary>Silahi bir seviye yukseltir (max'a kadar).</summary>
-    public virtual void LevelUp()
-    {
-        if (Level <= 0 || Level >= maxLevel) return;
-        Level++;
-        OnLevelChanged();
-    }
+    /// <summary>Silahin su an ALINABILIR (max olmayan) yukseltme seceneklerini listeye ekler (ayri kartlar).</summary>
+    public abstract void CollectUpgrades(List<WeaponUpgradeOption> into);
     #endregion
 
     #region Protected Methods
-    /// <summary>Seviye degisince cagrilir (stat'lari yeniden hesaplamak icin). Alt sinif override edebilir.</summary>
-    protected virtual void OnLevelChanged() { }
+    /// <summary>Silah ilk alininca cagrilir (baslangic statlarini uygulamak icin). Alt sinif override edebilir.</summary>
+    protected virtual void OnAcquired() { }
     #endregion
 }

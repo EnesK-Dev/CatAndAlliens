@@ -82,7 +82,7 @@ public class PlayerBoomerang : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        EnemyDamage.Apply(other, _damage); // pierce — hem giderken hem donerken vurur, yok olmaz
+        EnemyDamage.Apply(other, _damage * ComboManager.Multiplier); // pierce; combo carpani vurus aninda
     }
     #endregion
 }

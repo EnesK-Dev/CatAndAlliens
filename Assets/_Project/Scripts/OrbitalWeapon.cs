@@ -1,34 +1,45 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Silah 3 — Orbital. Oyuncunun etrafinda esit aralikli donen orb'lar; dokundugu dusmana surekli
-/// hasar verir. Seviye: DONME HIZI, HASAR ve RADIUS artar. Orb'lar dunya uzayinda ayri objelerdir
-/// (parent degil) ki oyuncu olcegi/donusu onlari bozmasin; konumlari her kare hesaplanir.
+/// Silah 3 — Orbital. Oyuncunun etrafinda esit aralikli donen orb'lar; dokundugu dusmana surekli hasar.
+/// Ayri yukseltmeler: SAYI (1 -> max 3), DONME HIZI, HASAR, RADIUS. Orb'lar dunya uzayinda ayri objeler.
 /// </summary>
 public class OrbitalWeapon : WeaponBase
 {
     #region Serialized Fields
     [Header("Orbital")]
     [SerializeField] private OrbitalOrb orbPrefab;
-
-    [Tooltip("Kac orb doner (esit acilarla dagilir).")]
-    [SerializeField] private int orbCount = 2;
-
     [Tooltip("Ayni dusmana iki vurus arasi minimum sure.")]
     [SerializeField] private float hitCooldown = 0.4f;
 
-    [Header("Seviye 1 Degerleri")]
+    [Tooltip("Orb'un KENDI EKSENINDE donme hizi (derece/sn) — yildizin donmesi hissedilsin. Orbit hizindan bagimsiz. 0 = donmez.")]
+    [SerializeField] private float orbSpinSpeed = 300f;
+
+    [Header("Baslangic (Lv.1) Degerleri")]
     [SerializeField] private float baseRadius = 2f;
     [SerializeField] private float baseRotationSpeed = 120f; // derece/sn
     [SerializeField] private float baseDamage = 8f;
 
-    [Header("Seviye Basi (upgrade)")]
-    [SerializeField] private float radiusPerLevel = 0.35f;
+    [Header("Sayi Track'i (1 -> max 3)")]
+    [Tooltip("Kac kez +1 alinabilir (2 = max 3 orb: 1+2).")]
+    [SerializeField] private int maxCountLevel = 2;
+
+    [Header("Donme Hizi Track'i")]
     [SerializeField] private float rotationSpeedPerLevel = 30f;
+    [SerializeField] private int maxRotationLevel = 5;
+
+    [Header("Hasar Track'i")]
     [SerializeField] private float damagePerLevel = 4f;
+    [SerializeField] private int maxDamageLevel = 5;
+
+    [Header("Radius Track'i")]
+    [SerializeField] private float radiusPerLevel = 0.35f;
+    [SerializeField] private int maxRadiusLevel = 5;
     #endregion
 
     #region Private Fields
+    private int _countLevel, _rotationLevel, _damageLevel, _radiusLevel;
     private OrbitalOrb[] _orbs;
     private float _angle;
     #endregion
@@ -43,42 +54,61 @@ public class OrbitalWeapon : WeaponBase
         Vector2 center = transform.position;
         float step = 360f / Mathf.Max(1, _orbs.Length);
 
+        float spinDelta = orbSpinSpeed * Time.deltaTime;
         for (int i = 0; i < _orbs.Length; i++)
         {
             if (_orbs[i] == null) continue;
             float a = (_angle + i * step) * Mathf.Deg2Rad;
             _orbs[i].transform.position = center + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
+            _orbs[i].transform.Rotate(0f, 0f, spinDelta); // kendi ekseninde don (gorsel canlilik)
         }
     }
 
-    private void OnDestroy()
-    {
-        DestroyOrbs();
-    }
+    private void OnDestroy() => DestroyOrbs();
     #endregion
 
     #region Overrides
-    protected override void OnLevelChanged()
+    protected override void OnAcquired()
     {
-        SpawnOrbsIfNeeded();
-        ConfigureOrbs(); // hasar guncelle
+        EnsureOrbs();
+        ConfigureOrbs();
+    }
+
+    public override void CollectUpgrades(List<WeaponUpgradeOption> into)
+    {
+        if (_countLevel < maxCountLevel)
+            into.Add(new WeaponUpgradeOption("Orbital +1", "One more orb (max 3)", _countLevel + 1,
+                () => { _countLevel++; EnsureOrbs(); ConfigureOrbs(); }));
+        if (_rotationLevel < maxRotationLevel)
+            into.Add(new WeaponUpgradeOption("Orbital Speed", "Spins faster", _rotationLevel + 1,
+                () => _rotationLevel++));
+        if (_damageLevel < maxDamageLevel)
+            into.Add(new WeaponUpgradeOption("Orbital Damage", "+" + damagePerLevel + " damage", _damageLevel + 1,
+                () => { _damageLevel++; ConfigureOrbs(); }));
+        if (_radiusLevel < maxRadiusLevel)
+            into.Add(new WeaponUpgradeOption("Orbital Radius", "Wider orbit", _radiusLevel + 1,
+                () => _radiusLevel++));
     }
     #endregion
 
     #region Private Methods
-    private float CurrentRadius() => baseRadius + radiusPerLevel * Mathf.Max(0, Level - 1);
-    private float CurrentRotationSpeed() => baseRotationSpeed + rotationSpeedPerLevel * Mathf.Max(0, Level - 1);
-    private float CurrentDamage() => baseDamage + damagePerLevel * Mathf.Max(0, Level - 1);
+    private int CurrentOrbCount() => 1 + _countLevel;
+    private float CurrentRadius() => baseRadius + radiusPerLevel * _radiusLevel;
+    private float CurrentRotationSpeed() => baseRotationSpeed + rotationSpeedPerLevel * _rotationLevel;
+    private float CurrentDamage() => baseDamage + damagePerLevel * _damageLevel;
 
-    private void SpawnOrbsIfNeeded()
+    private void EnsureOrbs()
     {
-        if (_orbs != null || orbPrefab == null) return;
+        if (orbPrefab == null) return;
+        int want = CurrentOrbCount();
+        if (_orbs != null && _orbs.Length == want) return;
 
-        _orbs = new OrbitalOrb[Mathf.Max(1, orbCount)];
-        for (int i = 0; i < _orbs.Length; i++)
+        DestroyOrbs();
+        _orbs = new OrbitalOrb[want];
+        for (int i = 0; i < want; i++)
         {
             _orbs[i] = Instantiate(orbPrefab, transform.position, Quaternion.identity);
-            _orbs[i].transform.SetParent(null, true); // dunya uzayinda kalsin (oyuncu scale/flip etkilemesin)
+            _orbs[i].transform.SetParent(null, true);
         }
     }
 

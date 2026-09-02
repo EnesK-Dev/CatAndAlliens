@@ -2033,7 +2033,40 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Credit
+  m_text: 'CREDITS
+
+
+    - Character -
+
+    2D Cat (Street Fighter) by TampG
+
+
+    -
+    Visual Effects -
+
+    Warped Shooting FX by Luis Zuno (ansimuz)
+
+    Muzzle &
+    Blade FX by Reactorcore
+
+
+    - UI & Icons -
+
+    Skill Icons by CraftPix.net
+
+    Pixel
+    Hearts - Art by Nicole Marie T
+
+
+    - Environment -
+
+    Roboden Tileset by
+    quasilyte
+
+
+    Game by Enes Kucukkaya
+
+    Thanks for playing!'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9301dd4b527b502bb81949696689165f, type: 2}
   m_sharedMaterial: {fileID: 7647708993160149193, guid: 9301dd4b527b502bb81949696689165f, type: 2}

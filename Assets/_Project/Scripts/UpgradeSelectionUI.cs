@@ -40,9 +40,10 @@ public class UpgradeSelectionUI : MonoBehaviour
     private struct CardOption
     {
         public bool isWeapon;
-        public int statIndex;      // stat ise upgrades[] indeksi
-        public WeaponBase weapon;  // silah ise
-        public bool isNewWeapon;   // silah henuz alinmadi (NEW WEAPON)
+        public int statIndex;             // stat ise upgrades[] indeksi
+        public WeaponBase weapon;         // silah ise
+        public bool isNewWeapon;          // silah henuz alinmadi (NEW WEAPON)
+        public WeaponUpgradeOption upgrade; // silah yukseltmesi ise (isWeapon && !isNewWeapon)
     }
     #endregion
 
@@ -67,12 +68,25 @@ public class UpgradeSelectionUI : MonoBehaviour
     [Header("Stat Upgrade Havuzu")]
     [SerializeField] private UpgradeDefinition[] upgrades;
 
-    [Header("Kart Renkleri (frame tint)")]
-    [Tooltip("Normal stat kartlarinin cerceve rengi (beyaz = degismez).")]
-    [SerializeField] private Color statCardColor = Color.white;
+    [Header("Kart Cerceve Sprite'lari (kategoriye gore renkli kart)")]
+    [SerializeField] private Sprite damageCardSprite;      // sari
+    [SerializeField] private Sprite attackSpeedCardSprite; // mavi
+    [SerializeField] private Sprite attackRangeCardSprite; // yesil
+    [SerializeField] private Sprite healthCardSprite;      // kirmizi
+    [SerializeField] private Sprite weaponCardSprite;      // mor
 
-    [Tooltip("Silah kartlarinin cerceve rengi (stat'tan farkli — silahi ayirt etmek icin).")]
-    [SerializeField] private Color weaponCardColor = new Color(0.55f, 0.8f, 1f, 1f);
+    [Tooltip("Renkli sprite'lar zaten renkli oldugu icin frame tint beyaz kalir.")]
+    [SerializeField] private Color cardTint = Color.white;
+
+    [Tooltip("Silah karti IKONLARINA uygulanan tint (kartla uyumlu mor). Stat ikonlari beyaz kalir.")]
+    [SerializeField] private Color weaponIconColor = new Color(0.59f, 0.39f, 0.86f, 1f);
+
+    [Header("Ikon Boyutu (kart icindeki ikonun yuksekligi, px)")]
+    [Tooltip("Silah karti ikonunun yuksekligi. 0 = kart prefab'inin varsayilani (175). Buyutmek icin arttir.")]
+    [SerializeField] private float weaponIconHeight = 260f;
+
+    [Tooltip("Stat karti ikonunun yuksekligi. 0 = kart prefab'inin varsayilani (175).")]
+    [SerializeField] private float statIconHeight = 0f;
     #endregion
 
     #region Private Fields
@@ -82,6 +96,7 @@ public class UpgradeSelectionUI : MonoBehaviour
     private Action<int> _cardCallback;
 
     private readonly List<CardOption> _available = new List<CardOption>(); // her acilista yeniden doldurulur
+    private readonly List<WeaponUpgradeOption> _weaponUpgradeBuffer = new List<WeaponUpgradeOption>();
     private CardOption[] _shown;                                           // o an gosterilen kartlar (slot sirasi)
     #endregion
 
@@ -180,10 +195,17 @@ public class UpgradeSelectionUI : MonoBehaviour
             {
                 if (w == null) continue;
                 if (!w.IsAcquired)
+                {
                     _available.Add(new CardOption { isWeapon = true, weapon = w, isNewWeapon = true });
-                else if (!w.IsMaxed)
-                    _available.Add(new CardOption { isWeapon = true, weapon = w, isNewWeapon = false });
-                // maxed silah havuza girmez
+                }
+                else
+                {
+                    // Silahin AYRI yukseltmelerini (track'lerini) ayri kart secenekleri olarak ekle
+                    _weaponUpgradeBuffer.Clear();
+                    w.CollectUpgrades(_weaponUpgradeBuffer);
+                    foreach (var up in _weaponUpgradeBuffer)
+                        _available.Add(new CardOption { isWeapon = true, weapon = w, isNewWeapon = false, upgrade = up });
+                }
             }
         }
     }
@@ -204,15 +226,28 @@ public class UpgradeSelectionUI : MonoBehaviour
         if (opt.isWeapon)
         {
             WeaponBase w = opt.weapon;
-            string title = w.WeaponName;
-            string desc = opt.isNewWeapon ? "New weapon!" : "Level up";
-            int level = opt.isNewWeapon ? 1 : w.Level + 1;
-            card.Bind(slotIndex, w.WeaponIcon, title, desc, level, weaponCardColor, opt.isNewWeapon, _cardCallback);
+            string title = opt.isNewWeapon ? w.WeaponName : opt.upgrade.title;
+            string desc = opt.isNewWeapon ? "New weapon!" : opt.upgrade.description;
+            int level = opt.isNewWeapon ? 1 : opt.upgrade.nextLevel;
+            card.Bind(slotIndex, w.WeaponIcon, weaponIconColor, weaponIconHeight, title, desc, level, weaponCardSprite, cardTint, opt.isNewWeapon, _cardCallback);
         }
         else
         {
             UpgradeDefinition def = upgrades[opt.statIndex];
-            card.Bind(slotIndex, def.icon, def.title, def.description, def.level + 1, statCardColor, false, _cardCallback);
+            card.Bind(slotIndex, def.icon, Color.white, statIconHeight, def.title, def.description, def.level + 1, StatCardSprite(def.type), cardTint, false, _cardCallback);
+        }
+    }
+
+    /// <summary>Stat turune gore kart cerceve sprite'i (kategori rengi).</summary>
+    private Sprite StatCardSprite(UpgradeType type)
+    {
+        switch (type)
+        {
+            case UpgradeType.Damage:      return damageCardSprite;
+            case UpgradeType.AttackSpeed: return attackSpeedCardSprite;
+            case UpgradeType.AttackRange: return attackRangeCardSprite;
+            case UpgradeType.GainHealth:  return healthCardSprite;
+            default:                      return null;
         }
     }
 
@@ -225,10 +260,13 @@ public class UpgradeSelectionUI : MonoBehaviour
 
         if (opt.isWeapon)
         {
-            if (opt.weapon != null)
+            if (opt.isNewWeapon)
             {
-                if (opt.isNewWeapon) opt.weapon.Acquire();
-                else opt.weapon.LevelUp();
+                if (opt.weapon != null) opt.weapon.Acquire();
+            }
+            else
+            {
+                opt.upgrade.apply?.Invoke(); // secilen track'i (hasar/hiz/sayi vb.) arttir
             }
         }
         else if (upgrades != null && opt.statIndex >= 0 && opt.statIndex < upgrades.Length)

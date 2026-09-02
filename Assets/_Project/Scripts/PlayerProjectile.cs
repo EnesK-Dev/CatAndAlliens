@@ -34,7 +34,7 @@ public class PlayerProjectile : MonoBehaviour
     #region Unity Callbacks
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (EnemyDamage.Apply(other, _damage) && !_pierce)
+        if (EnemyDamage.Apply(other, _damage * ComboManager.Multiplier) && !_pierce)
             Destroy(gameObject);
     }
     #endregion

@@ -44,6 +44,19 @@ public class player : MonoBehaviour
     [Tooltip("Dash sirasinda her kare uygulanan KUCUK itme mesafesi. Amac: kalabalıktan cikis, uzaga firlatma DEGIL.")]
     [SerializeField] private float dashPushStep = 0.12f;
 
+    [Tooltip("Dash ile itilen dusman KISA sure yerinde dursun (sonra yurur) — 'duvari ittirme' hissi. Saniye.")]
+    [SerializeField] private float dashPushStunDuration = 0.18f;
+
+    [Header("Dash Afterimage (Sandevistan)")]
+    [Tooltip("Dash sirasinda geride birakilan hayalet klonlar arasi sure (kucuk = daha sik iz).")]
+    [SerializeField] private float dashAfterImageInterval = 0.04f;
+    [Tooltip("Hayaletin baslangic saydamligi.")]
+    [SerializeField] private float dashAfterImageAlpha = 0.5f;
+    [Tooltip("Hayaletin solma suresi.")]
+    [SerializeField] private float dashAfterImageFadeTime = 0.3f;
+    [Tooltip("Hayalet rengi (Sandevistan icin mavi/turkuaz).")]
+    [SerializeField] private Color dashAfterImageColor = new Color(0.3f, 0.8f, 1f, 1f);
+
     [Tooltip("Dash HIZ egrisi (ease-out): yatay=dash ilerlemesi(0-1), dikey=hiz carpani. Basta 1 (tam hiz) " +
              "sona dogru dusuk -> patlama gibi firlar sonra suzulur. Sabit tutarsan (hep 1) 'kosu' gibi hissettirir. " +
              "Mesafe azaldiysa dashSpeed'i yukselt.")]
@@ -61,6 +74,10 @@ public class player : MonoBehaviour
     private readonly Collider2D[] _hitBuffer = new Collider2D[MaxHitBufferSize];
     // AoE: bir swing icinde ayni dusmana tekrar vurmayi engeller (her kare taranir). Alloc'suz — Clear ile yeniden kullanilir.
     private readonly HashSet<Collider2D> _swingHitSet = new HashSet<Collider2D>();
+
+    // Multi-slash (Silah 4): kac yonde vurulacak (1 = normal). MultiSlashWeapon ayarlar.
+    private int _attackDirectionCount = 1;
+    private readonly List<GameObject> _extraClaws = new List<GameObject>(); // ekstra yonlerin claw gorselleri (havuz)
 
     // Pence, vurus suresinin ilk bu oraninda hedefin tam mesafesine uzanir; kalan surede o noktada kalir.
     // Uzak dusmanlarda (menzil upgrade'i) gorselin gercekten degmesini ve overlap'in tam acilimda
@@ -216,9 +233,10 @@ public class player : MonoBehaviour
             return;
         }
 
-        // Deadzone altindaysa tam dur — animasyonla ayni esik, tutarli davranis
+        // Deadzone altindaysa tam dur — animasyonla ayni esik, tutarli davranis.
+        // Hareket hizi combo carpaniyla ARTAR (kullanici istegi: sadece hareket + hasar comboyla artar).
         rb.linearVelocity = moveInput.sqrMagnitude > InputDeadZoneSqr
-            ? moveInput * moveSpeed
+            ? moveInput * (moveSpeed * ComboManager.Multiplier)
             : Vector2.zero;
     }
 
@@ -302,6 +320,12 @@ public class player : MonoBehaviour
 
     attackPointObject.SetActive(true);
 
+    // Multi-slash (Silah 4): birden fazla yonde vur. dirs=1 iken davranis eskisiyle AYNI.
+    int dirs = Mathf.Max(1, _attackDirectionCount);
+    float baseAngleDeg = Mathf.Atan2(attackDirection.y, attackDirection.x) * Mathf.Rad2Deg;
+    float dirStep = 360f / dirs;
+    SetupExtraClaws(dirs, baseAngleDeg, dirStep);
+
     // Kamera sarsıntısı vuruş başına 1 kez (tek anlık, döngüden önce)
     if (cameraShake != null)
         cameraShake.TriggerShake(shakeDuration, shakeMagnitude);
@@ -322,16 +346,24 @@ public class player : MonoBehaviour
         float currentDistance = Mathf.Lerp(attackOffset, targetDistance, reachT);
         attackPointObject.transform.localPosition = new Vector3(attackDirection.x, attackDirection.y, 0f) * currentDistance;
 
-        // Alandaki TUM dusmanlari tara; her birine bu swing'de BIR kez hasar + geri itme uygula.
-        Vector3 worldAttackPosition = attackPointObject.transform.position;
-        int hitCount = Physics2D.OverlapCircleNonAlloc(worldAttackPosition, attackRadius, _hitBuffer, enemyLayers);
-        for (int i = 0; i < hitCount; i++)
+        // Ekstra claw gorsellerini (multi-slash) ayni mesafeye ilerlet
+        UpdateExtraClawPositions(dirs, baseAngleDeg, dirStep, currentDistance);
+
+        // Her YONDE (dirs) overlap tara; her dusmana bu swing'de BIR kez hasar + geri itme (tum yonlerde dedup).
+        for (int d = 0; d < dirs; d++)
         {
-            Collider2D col = _hitBuffer[i];
-            if (col == null || _swingHitSet.Contains(col)) continue; // ayni dusmani tekrar vurma
-            _swingHitSet.Add(col);
-            ApplyDamage(col, playerDamage * ComboManager.Multiplier); // combo carpani CARPILIR
-            ApplyKnockback(col); // hafif geri it
+            float ang = (baseAngleDeg + d * dirStep) * Mathf.Deg2Rad;
+            Vector2 dirVec = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
+            Vector3 worldAttackPosition = (Vector2)transform.position + dirVec * currentDistance;
+            int hitCount = Physics2D.OverlapCircleNonAlloc(worldAttackPosition, attackRadius, _hitBuffer, enemyLayers);
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider2D col = _hitBuffer[i];
+                if (col == null || _swingHitSet.Contains(col)) continue; // ayni dusmani tekrar vurma
+                _swingHitSet.Add(col);
+                ApplyDamage(col, playerDamage * ComboManager.Multiplier); // combo carpani CARPILIR
+                ApplyKnockback(col); // hafif geri it
+            }
         }
         // Combo swing basina 1 kez artar (AoE'de her dusman icin ayri artmasin — combo sismesin).
         if (_swingHitSet.Count > 0 && !comboRegistered)
@@ -357,9 +389,10 @@ public class player : MonoBehaviour
     }
 
     attackPointObject.SetActive(false);
+    DeactivateExtraClaws(); // multi-slash ekstra claw'larini gizle
 
-    // Combo carpani saldiri hizina da uygulanir: carpan buyudukce cooldown KISALIR (bolen).
-    yield return new WaitForSeconds(attackCooldown / ComboManager.Multiplier);
+    // Combo saldiri hizini ETKILEMEZ: cooldown sabit. Combo yalnizca HASAR ve HAREKET hizina uygulanir.
+    yield return new WaitForSeconds(attackCooldown);
     isCooldown = false;
 }
 
@@ -405,6 +438,56 @@ public class player : MonoBehaviour
             boomerang.TakeDamage(damage);
     }
 
+    /// <summary>Multi-slash silahi (Silah 4) cagirir: saldirinin kac YONDE vuracagini ayarlar (1 = normal, max 6).</summary>
+    public void SetAttackDirections(int count) => _attackDirectionCount = Mathf.Max(1, count);
+
+    /// <summary>Ekstra yonler icin claw gorsellerini hazirlar (havuz; gerekli kadar aktif, digerleri gizli).</summary>
+    private void SetupExtraClaws(int dirs, float baseAngleDeg, float step)
+    {
+        int needed = dirs - 1; // 0. yon zaten attackPointObject
+
+        while (_extraClaws.Count < needed) // havuzu gerektikce buyut (attackPointObject kopyalari, ayni parent)
+        {
+            GameObject clone = Instantiate(attackPointObject, attackPointObject.transform.parent);
+            clone.SetActive(false);
+            _extraClaws.Add(clone);
+        }
+
+        for (int i = 0; i < _extraClaws.Count; i++)
+        {
+            GameObject claw = _extraClaws[i];
+            if (claw == null) continue;
+            if (i < needed)
+            {
+                float ang = baseAngleDeg + (i + 1) * step;
+                claw.transform.localRotation = rotateAttackVisual
+                    ? Quaternion.Euler(0f, 0f, ang + attackVisualAngleOffset)
+                    : Quaternion.identity;
+                claw.SetActive(true); // OnEnable claw animasyonunu bastan oynatir
+            }
+            else claw.SetActive(false);
+        }
+    }
+
+    /// <summary>Ekstra claw'lari swing boyunca yonlerine gore ayni mesafeye ilerletir.</summary>
+    private void UpdateExtraClawPositions(int dirs, float baseAngleDeg, float step, float distance)
+    {
+        int needed = dirs - 1;
+        for (int i = 0; i < needed && i < _extraClaws.Count; i++)
+        {
+            if (_extraClaws[i] == null) continue;
+            float ang = (baseAngleDeg + (i + 1) * step) * Mathf.Deg2Rad;
+            _extraClaws[i].transform.localPosition = new Vector3(Mathf.Cos(ang), Mathf.Sin(ang), 0f) * distance;
+        }
+    }
+
+    /// <summary>Tum ekstra claw'lari gizler (swing sonu).</summary>
+    private void DeactivateExtraClaws()
+    {
+        for (int i = 0; i < _extraClaws.Count; i++)
+            if (_extraClaws[i] != null) _extraClaws[i].SetActive(false);
+    }
+
     /// <summary>UI Dash butonuna bağla. Cooldown'daysa veya zaten dash'teyse yoksayar.</summary>
     public void TriggerDash()
     {
@@ -425,10 +508,24 @@ public class player : MonoBehaviour
         animator.SetTrigger("Dash");
 
         // Dash boyunca her kare degen dusmanlari HAFIFCE it (kalabalıktan cikis). Player bu sure boyunca immun.
+        // Ayrica Sandevistan tarzi geride saydam hayalet klonlar birak (telegraph YOK — sadece iz).
         float elapsed = 0f;
+        float aiTimer = 0f;
         while (elapsed < dashDuration)
         {
             PushEnemiesAside();
+
+            if (spriteRenderer != null)
+            {
+                aiTimer += Time.deltaTime;
+                if (aiTimer >= dashAfterImageInterval)
+                {
+                    aiTimer = 0f;
+                    AfterImage.Spawn(spriteRenderer, dashAfterImageColor, dashAfterImageAlpha,
+                                     dashAfterImageFadeTime, spriteRenderer.sortingOrder - 1);
+                }
+            }
+
             elapsed += Time.deltaTime;
             yield return null;
         }
@@ -450,6 +547,11 @@ public class player : MonoBehaviour
             // Tam ust uste ise (yon belirsiz) dash yonunun tersine it — yol acilsin
             dir = dir.sqrMagnitude < 0.0001f ? lastMoveDirection : dir.normalized;
             col.transform.position += (Vector3)(dir * dashPushStep);
+
+            // Itilen dusman KISA sure yerinde dursun (sonra yurur) — 'duvari ittirme' hissi. Boss stun'lanmaz.
+            if (col.TryGetComponent(out EnemyController ec)) ec.ApplyPushStun(dashPushStunDuration);
+            else if (col.TryGetComponent(out BurstShooterEnemy bs)) bs.ApplyPushStun(dashPushStunDuration);
+            else if (col.TryGetComponent(out BoomerangEnemy be)) be.ApplyPushStun(dashPushStunDuration);
         }
     }
 
@@ -471,6 +573,9 @@ public class player : MonoBehaviour
     public void TakeDamage(float amount)
     {
         if (isDead) return;
+        if (isPaused) return; // Upgrade paneli acikken IMMUN — kart secerken hicbir kaynaktan hasar alinmaz
+                              // (timeScale=0 fizigi durdurur ama 'yield return null' tabanli hasar donguleri
+                              //  render karesinde calismaya devam edebilir; tek cikis noktasindan kesin garanti)
         if (isDashing) return; // Dash sirasinda IMMUN — hasar, flash, sarsinti hicbiri tetiklenmez
 
         currentHealth -= amount;

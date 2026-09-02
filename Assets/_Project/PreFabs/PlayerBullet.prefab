@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3773865698186216107}
   - component: {fileID: 7791319285062587030}
   - component: {fileID: 4821125778120566838}
+  - component: {fileID: 2633154271839393239}
   m_Layer: 0
   m_Name: PlayerBullet
   m_TagString: Untagged
@@ -84,15 +85,15 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 6
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 8020143640844766479, guid: 8f6fe87dcd0bb3c31ac0757028430f21, type: 3}
-  m_Color: {r: 0.6, g: 0.95, b: 1, a: 1}
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 0.64, y: 0.32}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!50 &3773865698186216107
 Rigidbody2D:
@@ -169,3 +170,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b83f78d1409482edd8b5753e7e0fe54b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerProjectile
+--- !u!114 &2633154271839393239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8949691110028418862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c139e058639a17cad6021e64df8aff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
+  spriteRenderer: {fileID: 6954638423379671965}
+  frames:
+  - {fileID: -1573182317208373225, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+  - {fileID: 5405597735808489421, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+  - {fileID: -6137623135985537652, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+  - {fileID: -4753716879399036314, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+  - {fileID: -6109053896984900814, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+  - {fileID: -7649277118661735288, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+  - {fileID: 5213107719477829205, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+  - {fileID: 1135147358026722843, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+  frameRate: 10
+  loop: 1
+  randomizeStartFrame: 0

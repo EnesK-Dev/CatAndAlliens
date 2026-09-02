@@ -126,6 +126,13 @@ public class ComboManager : MonoBehaviour
         if (_instance != null)
             _instance.RegisterHitInternal();
     }
+
+    /// <summary>Combo rank'ini N kademe YUKARI tasir (odul). Ornek: bombardimanda hasar yemeyince cagrilir.</summary>
+    public static void GainRank(int steps)
+    {
+        if (_instance != null)
+            _instance.GainRankInternal(steps);
+    }
     #endregion
 
     #region Unity Callbacks
@@ -184,6 +191,22 @@ public class ComboManager : MonoBehaviour
         _timeSinceLastHit = 0f; // Vurdu — decay penceresi sifirlanir
         RecomputeRank();
         OnComboChanged?.Invoke(_count, _tierIndex);
+    }
+
+    /// <summary>Combo rank'ini N kademe yukari tasir; sayaci yeni rank tabanina ceker. Zaten max ise bir sey yapmaz.</summary>
+    private void GainRankInternal(int steps)
+    {
+        if (steps <= 0) return;
+        int target = Mathf.Min(tiers.Length - 1, _tierIndex + steps);
+        if (target == _tierIndex) return; // zaten en ust rank
+
+        int oldTier = _tierIndex;
+        _tierIndex = target;
+        _count = tiers[target].requiredHits; // sayaci yeni rank'in tabanina cek
+        _timeSinceLastHit = 0f;
+
+        OnComboChanged?.Invoke(_count, _tierIndex);
+        OnRankChanged?.Invoke(oldTier, _tierIndex);
     }
 
     /// <summary>Player hasar aldiginda cagrilir (OnPlayerDamaged). Combo'yu tiersLostOnDamage kadar dusurur.</summary>

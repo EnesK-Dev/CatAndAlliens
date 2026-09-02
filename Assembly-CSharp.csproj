@@ -74,6 +74,7 @@
     <Compile Include="Assets/_Project/Scripts/GameLog.cs" />
     <Compile Include="Assets/_Project/Scripts/BossManager.cs" />
     <Compile Include="Assets/_Project/Scripts/HeartUI.cs" />
+    <Compile Include="Assets/_Project/Scripts/BombPlane.cs" />
     <Compile Include="Assets/_Project/Scripts/BossBurstAttack.cs" />
     <Compile Include="Assets/Joystick Pack/Examples/JoystickPlayerExample.cs" />
     <Compile Include="Assets/_Project/Scripts/SpriteAnimator.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="Assets/_Project/Scripts/EnemyGenerator.cs" />
     <Compile Include="Assets/_Project/Scripts/SpaceBackground.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateParticleAura.cs" />
+    <Compile Include="Assets/_Project/Scripts/MultiSlashWeapon.cs" />
     <Compile Include="Assets/_Project/Scripts/BossLaser.cs" />
     <Compile Include="Assets/_Project/Scripts/MainMenuController.cs" />
     <Compile Include="Assets/_Project/Scripts/CameraShake.cs" />
@@ -107,6 +109,7 @@
     <Compile Include="Assets/_Project/Scripts/OrbitalOrb.cs" />
     <Compile Include="Assets/_Project/Scripts/UltFoodItem.cs" />
     <Compile Include="Assets/_Project/Scripts/IDifficultyScaled.cs" />
+    <Compile Include="Assets/_Project/Scripts/BombardmentDirector.cs" />
     <Compile Include="Assets/_Project/Scripts/ComboUI.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/DynamicJoystick.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Base/Joystick.cs" />
@@ -116,6 +119,7 @@
     <Compile Include="Assets/_Project/Scripts/CameraDeathZoom.cs" />
     <Compile Include="Assets/_Project/Scripts/BombRainSystem.cs" />
     <Compile Include="Assets/_Project/Scripts/SfxManager.cs" />
+    <Compile Include="Assets/_Project/Scripts/WeaponUpgradeOption.cs" />
     <Compile Include="Assets/Joystick Pack/Examples/JoystickSetterExample.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateAura.cs" />
     <Compile Include="Assets/_Project/Scripts/WeaponBase.cs" />

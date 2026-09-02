@@ -1,9 +1,9 @@
 using UnityEngine;
 
 /// <summary>
-/// Oyuncunun silahlarini yoneten hafif merkez. Oyuncudaki tum WeaponBase component'lerini toplar;
-/// kart sistemi (FAZ 2) buradan "alinabilir/yukseltilebilir" silahlari sorgular ve secince uygular.
-/// God manager degil — sadece silah koleksiyonundan sorumlu. Silahlar kendi davranislarini kendileri yapar.
+/// Oyuncunun silahlarini toplayan hafif merkez. Kart sistemi (UpgradeSelectionUI) buradan silahlari
+/// sorgular: alinmamislar "NEW WEAPON" karti, alinmislar CollectUpgrades ile AYRI yukseltme kartlari verir.
+/// God manager degil — sadece silah koleksiyonu. Silahlar davranislarini kendileri yapar.
 /// </summary>
 public class WeaponManager : MonoBehaviour
 {
@@ -20,16 +20,6 @@ public class WeaponManager : MonoBehaviour
     private void Awake()
     {
         _weapons = GetComponents<WeaponBase>();
-    }
-    #endregion
-
-    #region Public Methods
-    /// <summary>TEST/kart: bir silahi alir (yoksa) ya da yukseltir (varsa, max degilse).</summary>
-    public void AcquireOrUpgrade(WeaponBase weapon)
-    {
-        if (weapon == null) return;
-        if (!weapon.IsAcquired) weapon.Acquire();
-        else if (!weapon.IsMaxed) weapon.LevelUp();
     }
     #endregion
 }

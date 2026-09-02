@@ -16,6 +16,7 @@ public class BossLaser : MonoBehaviour
     private float _lastHitTime = -99f;
     private float _width = 0.9f;
     private float _colliderScale = 1f; // collider kalinligi = gorsel kalinlik * bu (1'den kucuk = daha ince hasar alani)
+    private bool _armed;               // false = telegraph (ince gorsel, HASAR YOK); true = ateslendi (tam + hasar)
     #endregion
 
     #region Public Methods
@@ -66,6 +67,21 @@ public class BossLaser : MonoBehaviour
     {
         if (_visual != null) _visual.Hide();
     }
+
+    /// <summary>TELEGRAPH modu: isin INCE gorunur (mini-lazer gibi) ve HASAR VERMEZ. Ates oncesi uyari.</summary>
+    public void BeginCharge()
+    {
+        _armed = false;
+        if (_visual != null) _visual.SetChargeMode(true); // incelmis gorsel
+    }
+
+    /// <summary>ATES modu: isin tam kalinliga gecer ve HASAR verir (telegraph bitince cagrilir).</summary>
+    public void Fire()
+    {
+        _armed = true;
+        _lastHitTime = -99f; // atesler atesmez ilk vurus gecikmesiz
+        if (_visual != null) _visual.SetChargeMode(false, _width); // tam kalinlik + animasyon bastan
+    }
     #endregion
 
     #region Unity Callbacks
@@ -81,6 +97,7 @@ public class BossLaser : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D other)
     {
+        if (!_armed) return; // telegraph (ince) asamasinda hasar yok
         if (Time.time < _lastHitTime + _damageCooldown) return;
         player cat = other.GetComponent<player>();
         if (cat == null) return;

@@ -86,7 +86,7 @@ SpriteRenderer:
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1286655522, guid: 7d3d3137d8c98967481dc50693a95d58, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0.9339623, b: 0.21675551, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -196,7 +196,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossController
   isFinalBoss: 0
   bossName: ALIEN OVERLORD
-  maxHealth: 500
+  maxHealth: 2200
   moveSpeed: 1.2
   stopDistance: 1.5
   centerMode: 0
@@ -218,13 +218,22 @@ MonoBehaviour:
   dashSpeed: 20
   dashDistance: 9
   zigzagAmplitude: 2.5
-  arenaCenter: {x: 0, y: 0}
-  arenaHalfSize: {x: 20, y: 18}
-  telegraphColor: {r: 0.29803923, g: 0.8, b: 1, a: 0.78039217}
+  dashDistanceMin: 6
+  dashDistanceMax: 12
+  zigzagAmplitudeMin: 1.5
+  zigzagAmplitudeMax: 4.5
+  zigzagSegmentsMin: 4
+  zigzagSegmentsMax: 7
+  headbuttOvershoot: 3.5
+  retreatChance: 0.22
+  zigzagChance: 0.5
+  arenaCenter: {x: -1.5, y: -0.5}
+  arenaHalfSize: {x: 18, y: 16}
+  telegraphColor: {r: 0, g: 0.93333334, b: 0.21568628, a: 0.69411767}
   telegraphWidth: 0.35
   telegraphArrowSize: 0.4
   leaveAfterImages: 1
   afterImageInterval: 0.045
   afterImageFadeTime: 0.35
   afterImageAlpha: 0.55
-  afterImageColor: {r: 0.3, g: 0.8, b: 1, a: 1}
+  afterImageColor: {r: 0, g: 0.93333334, b: 0.21568628, a: 1}

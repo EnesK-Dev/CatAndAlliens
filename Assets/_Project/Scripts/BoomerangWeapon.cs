@@ -1,9 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Silah 2 — Boomerang. Menzilli: en yakin dusmana bumerang firlatir; ileri gidip geri doner, iki
-/// yonde de hasar verir. Ayni anda ucabilecek bumerang sayisi currentCount ile sinirlidir —
-/// TUTULMADAN (geri donmeden) yenisi atilmaz. Seviye: sayi (max 3), hiz, hasar artar.
+/// Silah 2 — Boomerang. En yakin dusmana bumerang atar; ileri gidip geri doner, iki yonde hasar verir.
+/// Ayni anda ucan sayi currentCount ile sinirli (tutulmadan yenisi atilmaz). Dusman gormezse atmaz;
+/// kediye donunce kisa dinlenir. Ayri yukseltmeler: SAYI (max 3), HIZ, HASAR, DINLENME (cooldown).
 /// </summary>
 public class BoomerangWeapon : WeaponBase
 {
@@ -11,31 +12,40 @@ public class BoomerangWeapon : WeaponBase
     [Header("Boomerang")]
     [SerializeField] private PlayerBoomerang boomerangPrefab;
     [SerializeField] private LayerMask enemyLayers;
-
-    [Tooltip("Bu menzildeki en yakin dusmana nisan alir (yoksa yukari atar).")]
     [SerializeField] private float detectRange = 10f;
-
-    [Tooltip("Bumerang bu kadar ileri gidip geri doner.")]
     [SerializeField] private float outDistance = 5f;
-
     [SerializeField] private float spin = 720f;
     [SerializeField] private float catchDistance = 0.6f;
-
     [Tooltip("Birden fazla bumerang atarken atislar arasi bekleme (ust uste cikmasin).")]
     [SerializeField] private float throwStagger = 0.25f;
 
-    [Header("Seviye 1 Degerleri")]
+    [Header("Baslangic (Lv.1) Degerleri")]
     [SerializeField] private float baseSpeed = 10f;
     [SerializeField] private float baseDamage = 12f;
+    [Tooltip("Kediye donunce bir sonraki atistan once beklenen sure. Cooldown track'i azaltir.")]
+    [SerializeField] private float baseRestCooldown = 1.2f;
 
-    [Header("Seviye Basi (upgrade)")]
-    [Tooltip("Seviye -> ayni anda ucan bumerang sayisi (max 3). Ornek [1,2,3,3,3].")]
-    [SerializeField] private int[] countByLevel = { 1, 2, 3, 3, 3 };
+    [Header("Sayi Track'i (max 3)")]
+    [Tooltip("Kac kez +1 alinabilir (2 = max 3 bumerang: 1+2).")]
+    [SerializeField] private int maxCountLevel = 2;
+
+    [Header("Hiz Track'i")]
     [SerializeField] private float speedPerLevel = 1.5f;
+    [SerializeField] private int maxSpeedLevel = 5;
+
+    [Header("Hasar Track'i")]
     [SerializeField] private float damagePerLevel = 6f;
+    [SerializeField] private int maxDamageLevel = 5;
+
+    [Header("Dinlenme (Cooldown) Track'i")]
+    [Tooltip("Her seviyede dinlenme carpani (0.85 = %15 kisa).")]
+    [SerializeField] private float restCooldownMultiplier = 0.85f;
+    [SerializeField] private float minRestCooldown = 0.2f;
+    [SerializeField] private int maxCooldownLevel = 5;
     #endregion
 
     #region Private Fields
+    private int _countLevel, _speedLevel, _damageLevel, _cooldownLevel;
     private int _inFlight;
     private float _nextThrowTime;
     private readonly Collider2D[] _hitBuffer = new Collider2D[32];
@@ -48,30 +58,34 @@ public class BoomerangWeapon : WeaponBase
         if (_inFlight >= CurrentCount()) return;    // hepsi havada — tutulmadan atma
         if (Time.time < _nextThrowTime) return;
 
-        Throw(AimDirection());
+        Transform target = FindNearestEnemy();
+        if (target == null) return; // dusman gormezse ATMA
+
+        Vector2 dir = (Vector2)target.position - (Vector2)transform.position;
+        Throw(dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector2.right);
         _nextThrowTime = Time.time + throwStagger;
     }
     #endregion
 
-    #region Private Methods
-    private int CurrentCount()
+    #region Overrides
+    public override void CollectUpgrades(List<WeaponUpgradeOption> into)
     {
-        if (countByLevel == null || countByLevel.Length == 0) return 1;
-        return countByLevel[Mathf.Clamp(Level - 1, 0, countByLevel.Length - 1)];
+        if (_countLevel < maxCountLevel)
+            into.Add(new WeaponUpgradeOption("Boomerang +1", "One more boomerang (max 3)", _countLevel + 1, () => _countLevel++));
+        if (_speedLevel < maxSpeedLevel)
+            into.Add(new WeaponUpgradeOption("Boomerang Speed", "Flies faster", _speedLevel + 1, () => _speedLevel++));
+        if (_damageLevel < maxDamageLevel)
+            into.Add(new WeaponUpgradeOption("Boomerang Damage", "+" + damagePerLevel + " damage", _damageLevel + 1, () => _damageLevel++));
+        if (_cooldownLevel < maxCooldownLevel)
+            into.Add(new WeaponUpgradeOption("Boomerang Cooldown", "Throws sooner", _cooldownLevel + 1, () => _cooldownLevel++));
     }
-    private float CurrentSpeed() => baseSpeed + speedPerLevel * Mathf.Max(0, Level - 1);
-    private float CurrentDamage() => baseDamage + damagePerLevel * Mathf.Max(0, Level - 1);
+    #endregion
 
-    private Vector2 AimDirection()
-    {
-        Transform t = FindNearestEnemy();
-        if (t != null)
-        {
-            Vector2 d = (Vector2)t.position - (Vector2)transform.position;
-            if (d.sqrMagnitude > 0.0001f) return d.normalized;
-        }
-        return Vector2.up; // dusman yoksa varsayilan yon
-    }
+    #region Private Methods
+    private int CurrentCount() => 1 + _countLevel;
+    private float CurrentSpeed() => baseSpeed + speedPerLevel * _speedLevel;
+    private float CurrentDamage() => baseDamage + damagePerLevel * _damageLevel;
+    private float CurrentRestCooldown() => Mathf.Max(minRestCooldown, baseRestCooldown * Mathf.Pow(restCooldownMultiplier, _cooldownLevel));
 
     private Transform FindNearestEnemy()
     {
@@ -97,7 +111,8 @@ public class BoomerangWeapon : WeaponBase
 
     private void OnBoomerangReturned()
     {
-        _inFlight = Mathf.Max(0, _inFlight - 1); // tutuldu — yenisi atilabilir
+        _inFlight = Mathf.Max(0, _inFlight - 1);
+        _nextThrowTime = Mathf.Max(_nextThrowTime, Time.time + CurrentRestCooldown()); // donunce kisa dinlen
     }
     #endregion
 }

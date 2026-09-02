@@ -126,6 +126,11 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
             _rb.linearVelocity = Vector2.zero;
             return;
         }
+        if (Time.time < _pushStunUntil) // dash ile itildi — kisa sure yerinde dur (duvar hissi)
+        {
+            _rb.linearVelocity = Vector2.zero;
+            return;
+        }
         if (_playerTransform == null || _isAttacking)
         {
             _rb.linearVelocity = Vector2.zero;
@@ -142,6 +147,14 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
         {
             _rb.linearVelocity = Vector2.zero;
         }
+    }
+
+    private float _pushStunUntil;
+
+    /// <summary>Dash ile itilince kisa sure yerinde dursun (sonra yurumeye devam) — 'duvari ittirme' hissi.</summary>
+    public void ApplyPushStun(float duration)
+    {
+        if (duration > 0f) _pushStunUntil = Mathf.Max(_pushStunUntil, Time.time + duration);
     }
 
     private void OnDisable()

@@ -32,6 +32,9 @@ public class BossLaserAttack : MonoBehaviour
     [SerializeField] private float firstAttackDelay = 2f;
     [SerializeField] private float betweenAttacks = 2.5f;
 
+    [Tooltip("Ates ONCESI ince 'sarj' isininin (telegraph) suresi — mini-lazer gibi uyari. Bu surede hasar YOK.")]
+    [SerializeField] private float telegraphDuration = 0.6f;
+
     [Header("Atak 1 — Takip Eden Lazer")]
     [SerializeField] private float atk1GrowTime = 0.6f;
     [SerializeField] private float atk1FollowTime = 4.5f;
@@ -105,21 +108,26 @@ public class BossLaserAttack : MonoBehaviour
     private IEnumerator Attack1_Follow()
     {
         BossLaser laser = GetLaser();
-        SfxManager.Play(SfxId.LaserFire);
+        laser.BeginCharge(); // ince telegraph — henuz hasar yok
         Vector2 origin = transform.position;
         float angle = AngleToPlayer(origin);
 
-        float t = 0f;
-        while (t < atk1GrowTime)
+        // TELEGRAPH: ince isin oyuncuyu nisan alir (mini-lazer gibi uyari)
+        float ch = 0f;
+        while (ch < telegraphDuration)
         {
             if (Dead()) { laser.gameObject.SetActive(false); yield break; }
             origin = transform.position;
-            laser.SetBeam(origin, angle, Mathf.Lerp(0f, laserLength, t / atk1GrowTime));
-            t += Time.deltaTime;
+            angle = Mathf.MoveTowardsAngle(angle, AngleToPlayer(origin), atk1TurnSpeed * Time.deltaTime);
+            laser.SetBeam(origin, angle, laserLength);
+            ch += Time.deltaTime;
             yield return null;
         }
 
-        t = 0f;
+        laser.Fire(); // tam isin + hasar
+        SfxManager.Play(SfxId.LaserFire);
+
+        float t = 0f;
         while (t < atk1FollowTime)
         {
             if (Dead()) break;
@@ -137,22 +145,25 @@ public class BossLaserAttack : MonoBehaviour
     private IEnumerator Attack2_FourWayRotate(bool clockwise)
     {
         var lasers = new BossLaser[4];
-        for (int i = 0; i < 4; i++) lasers[i] = GetLaser();
-        SfxManager.Play(SfxId.LaserFire);
+        for (int i = 0; i < 4; i++) { lasers[i] = GetLaser(); lasers[i].BeginCharge(); }
 
         float baseAngle = 0f;
         float dir = clockwise ? -1f : 1f;
 
-        float grow = 0.4f, t = 0f;
-        while (t < grow)
+        // TELEGRAPH: ince 4 isin belirir (hasar yok)
+        float ch = 0f;
+        while (ch < telegraphDuration)
         {
             if (Dead()) { DeactivateAll(lasers); yield break; }
-            Set4(lasers, transform.position, baseAngle, Mathf.Lerp(0f, laserLength, t / grow));
-            t += Time.deltaTime;
+            Set4(lasers, transform.position, baseAngle, laserLength);
+            ch += Time.deltaTime;
             yield return null;
         }
 
-        t = 0f;
+        foreach (var l in lasers) l.Fire(); // tam isin + hasar
+        SfxManager.Play(SfxId.LaserFire);
+
+        float t = 0f;
         while (t < atk2Duration)
         {
             if (Dead()) break;
@@ -172,26 +183,27 @@ public class BossLaserAttack : MonoBehaviour
     {
         if (_player == null) yield break;
 
-        BossLaser a = GetLaser();
-        BossLaser b = GetLaser();
-        SfxManager.Play(SfxId.LaserFire);
+        BossLaser a = GetLaser(); a.BeginCharge();
+        BossLaser b = GetLaser(); b.BeginCharge();
 
         Vector2 origin = transform.position;
         float centerAngle = AngleToPlayer(origin);
 
-        // buyume (kama acikligi sabit, isin uzar)
-        float grow = 0.4f, gt = 0f;
-        while (gt < grow)
+        // TELEGRAPH: ince kama (2 isin) oyuncuyu ortaya alir (hasar yok)
+        float ct = 0f;
+        while (ct < telegraphDuration)
         {
             if (Dead()) { a.gameObject.SetActive(false); b.gameObject.SetActive(false); yield break; }
             origin = transform.position;
             centerAngle = AngleToPlayer(origin);
-            float len = Mathf.Lerp(0f, laserLength, gt / grow);
-            a.SetBeam(origin, centerAngle + atk3Spread, len);
-            b.SetBeam(origin, centerAngle - atk3Spread, len);
-            gt += Time.deltaTime;
+            a.SetBeam(origin, centerAngle + atk3Spread, laserLength);
+            b.SetBeam(origin, centerAngle - atk3Spread, laserLength);
+            ct += Time.deltaTime;
             yield return null;
         }
+
+        a.Fire(); b.Fire(); // tam isin + hasar
+        SfxManager.Play(SfxId.LaserFire);
 
         // kapanma: yari-aci spread -> closeSpread (copstik kapanir). Merkezi hafif takip et (adil ama zorlar).
         float t = 0f;

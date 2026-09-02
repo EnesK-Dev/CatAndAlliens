@@ -106,6 +106,15 @@ public class BossManager : MonoBehaviour
         BossController prefabToUse = wave.bossPrefab != null ? wave.bossPrefab : bossPrefab;
         if (prefabToUse == null) return;
 
+        // Boss'tan ONCE bombardiman: alani temizler, oyuncuyu zorlar; bitince boss spawn olur.
+        // Director yoksa/zaten calisyorsa Trigger callback'i ANINDA cagirir (boss beklemez).
+        BombardmentDirector.Trigger(() => SpawnBoss(prefabToUse, wave));
+    }
+
+    /// <summary>Boss'u oyuncunun yaninda spawn eder ve tint/final/can'ini uygular. Bombardiman bitince cagrilir.</summary>
+    private void SpawnBoss(BossController prefabToUse, BossWave wave)
+    {
+        if (prefabToUse == null) return;
         Vector3 basePos = playerRef != null ? playerRef.transform.position : Vector3.zero;
         BossController boss = Instantiate(prefabToUse, basePos + (Vector3)spawnOffset, Quaternion.identity);
         boss.Initialize(wave.tint, wave.isFinalBoss, wave.maxHealth); // Awake sonrasi, Start oncesi

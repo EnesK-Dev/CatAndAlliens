@@ -28,7 +28,7 @@ public class OrbitalOrb : MonoBehaviour
         if (_lastHit.TryGetValue(other, out float last) && Time.time - last < _hitCooldown)
             return;
 
-        if (EnemyDamage.Apply(other, _damage))
+        if (EnemyDamage.Apply(other, _damage * ComboManager.Multiplier)) // combo carpani vurus aninda
             _lastHit[other] = Time.time;
     }
     #endregion

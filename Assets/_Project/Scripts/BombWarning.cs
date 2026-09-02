@@ -22,6 +22,13 @@ public class BombWarning : MonoBehaviour
     private LayerMask playerLayer;
     private Action onFinished;
     private Coroutine bombCoroutine;
+
+    // Bombardiman modu: patlama dusmanlara da hasar verir (alan temizleme). 0/bos ise sadece player.
+    private LayerMask enemyLayers;
+    private float enemyExplosionDamage;
+
+    // Alloc'suz overlap tamponu (mobil: patlama sik olabilir).
+    private static readonly Collider2D[] _overlapBuffer = new Collider2D[24];
     #endregion
 
     #region Unity Callbacks
@@ -41,6 +48,15 @@ public class BombWarning : MonoBehaviour
         explosionDamage = damage;
         playerLayer = layer;
         onFinished = onComplete;
+        enemyLayers = default; // varsayilan: dusman hasari yok (BombardmentDirector ayrica acar)
+        enemyExplosionDamage = 0f;
+    }
+
+    /// <summary>Bombardiman modu: patlama ayrica DUSMANLARA da hasar versin (alan temizleme). Initialize sonrasi cagrilir.</summary>
+    public void ConfigureEnemyDamage(LayerMask enemies, float enemyDamage)
+    {
+        enemyLayers = enemies;
+        enemyExplosionDamage = enemyDamage;
     }
 
     /// <summary>Bombayı verilen pozisyonda başlatır: uyarı → patlama → pool'a dön.</summary>
@@ -115,12 +131,21 @@ public class BombWarning : MonoBehaviour
 
     private void ApplyExplosionDamage()
     {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, explosionRadius, playerLayer);
-        foreach (Collider2D hit in hits)
+        // Player'a hasar (alloc'suz)
+        int pc = Physics2D.OverlapCircleNonAlloc(transform.position, explosionRadius, _overlapBuffer, playerLayer);
+        for (int i = 0; i < pc; i++)
         {
-            player playerComponent = hit.GetComponent<player>();
+            player playerComponent = _overlapBuffer[i].GetComponent<player>();
             if (playerComponent != null)
                 playerComponent.TakeDamage(explosionDamage);
+        }
+
+        // Bombardiman modu: dusmanlara da hasar (alani temizler)
+        if (enemyExplosionDamage > 0f && enemyLayers.value != 0)
+        {
+            int ec = Physics2D.OverlapCircleNonAlloc(transform.position, explosionRadius, _overlapBuffer, enemyLayers);
+            for (int i = 0; i < ec; i++)
+                EnemyDamage.Apply(_overlapBuffer[i], enemyExplosionDamage);
         }
     }
 

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3422590506484576476}
   - component: {fileID: 3514087053579818266}
   - component: {fileID: 6816250478938210669}
+  - component: {fileID: 3027064075785255938}
   m_Layer: 0
   m_Name: OrbitalOrb
   m_TagString: Untagged
@@ -84,15 +85,15 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 6
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 1632925732872728751, guid: d296f486b704db05d8098e610c9bb601, type: 3}
-  m_Color: {r: 0.5, g: 0.95, b: 1, a: 1}
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1.6666666, y: 1.6666666}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!50 &3422590506484576476
 Rigidbody2D:
@@ -169,3 +170,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 423946547a3c222c1b3c5396d2489e17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OrbitalOrb
+--- !u!114 &3027064075785255938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4325840992612107717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c139e058639a17cad6021e64df8aff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
+  spriteRenderer: {fileID: 3639639047816751638}
+  frames:
+  - {fileID: 6860044026167460383, guid: 95ee6a420838fed52bdaa968702b1afe, type: 3}
+  - {fileID: 8164111759684346477, guid: 95ee6a420838fed52bdaa968702b1afe, type: 3}
+  - {fileID: 7563315316535806080, guid: 95ee6a420838fed52bdaa968702b1afe, type: 3}
+  - {fileID: -5423668791053046555, guid: 95ee6a420838fed52bdaa968702b1afe, type: 3}
+  - {fileID: 1367416281718544924, guid: 95ee6a420838fed52bdaa968702b1afe, type: 3}
+  - {fileID: -3777523137838113386, guid: 95ee6a420838fed52bdaa968702b1afe, type: 3}
+  - {fileID: -3880321354916442090, guid: 95ee6a420838fed52bdaa968702b1afe, type: 3}
+  - {fileID: 4046066733458728056, guid: 95ee6a420838fed52bdaa968702b1afe, type: 3}
+  frameRate: 10
+  loop: 1
+  randomizeStartFrame: 0

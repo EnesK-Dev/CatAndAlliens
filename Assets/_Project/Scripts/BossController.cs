@@ -85,8 +85,32 @@ public class BossController : MonoBehaviour
     [Tooltip("Dash toplam mesafesi (birim).")]
     [SerializeField] private float dashDistance = 9f;
 
-    [Tooltip("Zigzag pattern'de yanal sapma buyuklugu (birim).")]
+    [Tooltip("Zigzag pattern'de yanal sapma buyuklugu (birim). (Eski alan — artik min/max araligi kullaniliyor.)")]
     [SerializeField] private float zigzagAmplitude = 2.5f;
+
+    [Header("Dash Cesitliligi (rastgele patern)")]
+    [Tooltip("Dash mesafesi bu aralikta rastgele — bazen yakina, bazen uzaga.")]
+    [SerializeField] private float dashDistanceMin = 6f;
+    [SerializeField] private float dashDistanceMax = 12f;
+
+    [Tooltip("Zigzag yanal sapmasi bu aralikta rastgele — bazen daha genis kivrim.")]
+    [SerializeField] private float zigzagAmplitudeMin = 1.5f;
+    [SerializeField] private float zigzagAmplitudeMax = 4.5f;
+
+    [Tooltip("Zigzag segment sayisi bu aralikta rastgele — bazen daha uzun/kivrimli zigzag.")]
+    [SerializeField] private int zigzagSegmentsMin = 4;
+    [SerializeField] private int zigzagSegmentsMax = 7;
+
+    [Tooltip("Kafa atma (headbutt) dash'inde oyuncunun ne kadar OTESINE dalinsin (birim).")]
+    [SerializeField] private float headbuttOvershoot = 3.5f;
+
+    [Range(0f, 1f)]
+    [Tooltip("Dash'in GERI CEKILME (retreat: oyuncudan uzaga) olma olasiligi.")]
+    [SerializeField] private float retreatChance = 0.22f;
+
+    [Range(0f, 1f)]
+    [Tooltip("Retreat degilse: ZIGZAG yaklasma olasiligi; kalani DUZ kafa atma.")]
+    [SerializeField] private float zigzagChance = 0.5f;
 
     [Tooltip("Dash yolu bu dikdortgene clamp'lenir — boss duvara girip sikismaz. Merkez + yari-boyut (dunya).")]
     [SerializeField] private Vector2 arenaCenter = Vector2.zero;
@@ -119,6 +143,11 @@ public class BossController : MonoBehaviour
     [SerializeField] private Color afterImageColor = new Color(0.3f, 0.8f, 1f, 1f);
     #endregion
 
+    #region Nested Types
+    /// <summary>Dash saldiri paterni: duz kafa atma, kivrilarak yaklasma, ya da geri cekilme.</summary>
+    private enum DashPattern { HeadbuttStraight, ZigzagApproach, Retreat }
+    #endregion
+
     #region Private Fields
     private Rigidbody2D _rb;
     private SpriteRenderer _spriteRenderer;
@@ -139,6 +168,9 @@ public class BossController : MonoBehaviour
 
     // Canli boss sayaci (spawn pause icin)
     private static int _aliveCount;
+
+    // Hasar popup'i boss'un merkezinden bu kadar YUKARIDA cikar (buyuk sprite'ta gomulmesin).
+    private const float PopupYOffset = 1.5f;
     #endregion
 
     #region Static API
@@ -202,7 +234,12 @@ public class BossController : MonoBehaviour
 
         if (Time.time >= _nextAttackTime)
         {
-            StartCoroutine(DashAttackRoutine(UnityEngine.Random.value < 0.5f)); // duz/zigzag rastgele
+            // Patern rastgele: uzaklas (retreat) / zigzag yaklas / duz kafa atma
+            DashPattern pat;
+            if (UnityEngine.Random.value < retreatChance) pat = DashPattern.Retreat;
+            else if (UnityEngine.Random.value < zigzagChance) pat = DashPattern.ZigzagApproach;
+            else pat = DashPattern.HeadbuttStraight;
+            StartCoroutine(DashAttackRoutine(pat));
         }
     }
 
@@ -219,11 +256,14 @@ public class BossController : MonoBehaviour
         if (EnemyFreeze.IsFrozen)
         {
             if (_rb != null) _rb.linearVelocity = Vector2.zero;
+            ClampInsideArena();
             return;
         }
 
         if (centerMode) MoveToCenter(); // lazer boss: ortaya git, sabit dur
         else MoveTowardsPlayer();
+
+        ClampInsideArena(); // arena disina TASMA — duvara takilma/sikisma engellenir
     }
 
     private void OnCollisionStay2D(Collision2D collision) => TryContactDamage(collision.gameObject);
@@ -246,8 +286,15 @@ public class BossController : MonoBehaviour
             maxHealth = maxHealthOverride;
             _currentHealth = maxHealth;
         }
-        baseColor = tint;
-        if (_spriteRenderer != null) _spriteRenderer.color = tint;
+
+        // Beyaz tint = "dogal" -> prefab'in kendi SpriteRenderer rengini KORU (ornek: yesil boss).
+        // Awake'te baseColor zaten prefab renginden okundu; sadece renkli bir tint verildiyse ez.
+        bool tintIsNatural = tint.r > 0.99f && tint.g > 0.99f && tint.b > 0.99f && tint.a > 0.99f;
+        if (!tintIsNatural)
+        {
+            baseColor = tint;
+            if (_spriteRenderer != null) _spriteRenderer.color = tint;
+        }
     }
 
     /// <summary>Oyuncunun saldirisi cagirir (player.ApplyDamage boss'u tanir). Can azaltir, flash'lar, biterse olur.</summary>
@@ -257,7 +304,7 @@ public class BossController : MonoBehaviour
 
         _currentHealth -= amount;
         OnBossHealthChanged?.Invoke(Mathf.Max(0f, _currentHealth), maxHealth);
-        DamagePopupManager.Show(transform.position, amount); // hasar sayisi (dusmanlarla ayni his)
+        DamagePopupManager.Show(transform.position + Vector3.up * PopupYOffset, amount); // hasar sayisi (dusmanlarla ayni his) — sprite ustunde
         FlashHit();
 
         if (_currentHealth <= 0f)
@@ -373,6 +420,18 @@ public class BossController : MonoBehaviour
         if (_telegraphArrow != null) _telegraphArrow.gameObject.SetActive(false);
     }
 
+    /// <summary>Boss'un guncel konumunu arena dikdortgenine clamp'ler — normal harekette de disari tasmasin/sikismasin.</summary>
+    private void ClampInsideArena()
+    {
+        Vector2 p = _rb != null ? _rb.position : (Vector2)transform.position;
+        Vector3 c = ClampToArena(p);
+        if (((Vector2)c - p).sqrMagnitude > 0.0000001f)
+        {
+            if (_rb != null) _rb.position = c;
+            else transform.position = c;
+        }
+    }
+
     /// <summary>Bir noktayi arena dikdortgenine clamp'ler (boss yaricapi kadar iceride) — dash duvara girmesin.</summary>
     private Vector3 ClampToArena(Vector3 p)
     {
@@ -387,30 +446,53 @@ public class BossController : MonoBehaviour
     /// Telegraph -> hizli dash -> afterimage. zigzag=false: oyuncuya DUZ cizgi dash. zigzag=true: yanal
     /// sapmali ZIGZAG yol. Dash sirasinda konumu bu coroutine kontrol eder (FixedUpdate hareketi duraklar).
     /// </summary>
-    private IEnumerator DashAttackRoutine(bool zigzag)
+    private IEnumerator DashAttackRoutine(DashPattern pattern)
     {
         _isAttacking = true;
         if (_rb != null) _rb.linearVelocity = Vector2.zero;
 
-        // Yol noktalarini hesapla (dunya konumu) — oyuncuya dogru
+        // Oyuncuya yon + mesafe
         Vector2 start = transform.position;
-        Vector2 dir = _playerTransform != null ? ((Vector2)_playerTransform.position - start) : Vector2.right;
-        if (dir.sqrMagnitude < 0.0001f) dir = Vector2.right;
-        dir.Normalize();
+        Vector2 toPlayer = _playerTransform != null ? ((Vector2)_playerTransform.position - start) : Vector2.right;
+        float distToPlayer = toPlayer.magnitude;
+        Vector2 dir = toPlayer.sqrMagnitude > 0.0001f ? toPlayer.normalized : Vector2.right;
+
+        // Paterne gore: yon (yaklas/uzaklas), mesafe ve zigzag parametreleri rastgele
+        bool zigzag = false;
+        float dist;
+        float amp = 0f;
+        int segs = 1;
+        switch (pattern)
+        {
+            case DashPattern.HeadbuttStraight: // oyuncunun icinden gec — kafa atma
+                dist = distToPlayer + headbuttOvershoot;
+                break;
+            case DashPattern.Retreat:          // oyuncudan UZAGA dash
+                dir = -dir;
+                dist = UnityEngine.Random.Range(dashDistanceMin, dashDistanceMax);
+                break;
+            default:                           // ZigzagApproach — kivrilarak yaklas
+                zigzag = true;
+                dist = UnityEngine.Random.Range(dashDistanceMin, dashDistanceMax);
+                amp = UnityEngine.Random.Range(zigzagAmplitudeMin, zigzagAmplitudeMax);
+                segs = UnityEngine.Random.Range(zigzagSegmentsMin, zigzagSegmentsMax + 1);
+                break;
+        }
+        dist = Mathf.Max(1f, dist);
 
         var path = new List<Vector3> { start };
         if (!zigzag)
         {
-            path.Add((Vector3)start + (Vector3)(dir * dashDistance));
+            path.Add((Vector3)start + (Vector3)(dir * dist));
         }
         else
         {
             Vector2 perp = new Vector2(-dir.y, dir.x);
-            const int segs = 4;
-            float segLen = dashDistance / segs;
+            segs = Mathf.Max(2, segs);
+            float segLen = dist / segs;
             for (int i = 1; i <= segs; i++)
             {
-                float lateral = (i == segs) ? 0f : ((i % 2 == 1) ? 1f : -1f) * zigzagAmplitude;
+                float lateral = (i == segs) ? 0f : ((i % 2 == 1) ? 1f : -1f) * amp;
                 path.Add((Vector3)start + (Vector3)(dir * (segLen * i) + perp * lateral));
             }
         }
@@ -433,6 +515,7 @@ public class BossController : MonoBehaviour
         while (tEl < telegraphDuration)
         {
             if (_isDying) { HideTelegraph(); _isAttacking = false; yield break; }
+            if (_rb != null) _rb.linearVelocity = Vector2.zero; // charge sirasinda TAM DUR (yurumesin)
             float g = Mathf.Clamp01(tEl / growDur);
             for (int i = 0; i < path.Count; i++)
                 _telegraph.SetPosition(i, Vector3.Lerp(start, path[i], g));

@@ -197,7 +197,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossController
   isFinalBoss: 0
   bossName: BURST OVERLORD
-  maxHealth: 500
+  maxHealth: 3800
   moveSpeed: 1.2
   stopDistance: 1.5
   centerMode: 1
@@ -219,8 +219,17 @@ MonoBehaviour:
   dashSpeed: 20
   dashDistance: 9
   zigzagAmplitude: 2.5
-  arenaCenter: {x: 0, y: 0}
-  arenaHalfSize: {x: 20, y: 18}
+  dashDistanceMin: 6
+  dashDistanceMax: 12
+  zigzagAmplitudeMin: 1.5
+  zigzagAmplitudeMax: 4.5
+  zigzagSegmentsMin: 4
+  zigzagSegmentsMax: 7
+  headbuttOvershoot: 3.5
+  retreatChance: 0.22
+  zigzagChance: 0.5
+  arenaCenter: {x: -1.5, y: -0.5}
+  arenaHalfSize: {x: 18, y: 16}
   telegraphColor: {r: 0.29803923, g: 0.8, b: 1, a: 0.78039217}
   telegraphWidth: 0.35
   telegraphArrowSize: 0.4

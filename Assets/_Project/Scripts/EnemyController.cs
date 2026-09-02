@@ -141,7 +141,20 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
             if (rb != null) rb.linearVelocity = Vector2.zero;
             return;
         }
+        if (Time.time < _pushStunUntil) // dash ile itildi — kisa sure yerinde dur (duvar hissi)
+        {
+            if (rb != null) rb.linearVelocity = Vector2.zero;
+            return;
+        }
         MoveTowardsPlayer();
+    }
+
+    private float _pushStunUntil;
+
+    /// <summary>Dash ile itilince kisa sure yerinde dursun (sonra yurumeye devam) — 'duvari ittirme' hissi.</summary>
+    public void ApplyPushStun(float duration)
+    {
+        if (duration > 0f) _pushStunUntil = Mathf.Max(_pushStunUntil, Time.time + duration);
     }
 
     private void OnDestroy()
