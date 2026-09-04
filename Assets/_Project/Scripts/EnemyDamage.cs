@@ -25,4 +25,24 @@ public static class EnemyDamage
 
         return false;
     }
+
+    /// <summary>
+    /// NUKE (boss-oncesi bombardiman) hasari: dusmanlari NukeKill ile oldurur (core birakir, ultFood BIRAKMAZ).
+    /// Boss'a DEGMEZ (bombardiman boss'u vurmaz). Dusman disi collider'da false doner.
+    /// </summary>
+    public static bool ApplyNuke(Collider2D col, float damage)
+    {
+        if (col == null) return false;
+
+        EnemyController enemy = col.GetComponent<EnemyController>();
+        if (enemy != null) { enemy.NukeKill(damage); return true; }
+
+        BurstShooterEnemy burst = col.GetComponent<BurstShooterEnemy>();
+        if (burst != null) { burst.NukeKill(damage); return true; }
+
+        BoomerangEnemy boom = col.GetComponent<BoomerangEnemy>();
+        if (boom != null) { boom.NukeKill(damage); return true; }
+
+        return false; // boss vb. — nuke hasar vermez
+    }
 }

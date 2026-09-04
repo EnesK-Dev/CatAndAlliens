@@ -12,10 +12,10 @@ GameObject:
   - component: {fileID: 7112373768650624116}
   - component: {fileID: 5649565113438576111}
   - component: {fileID: 8815592559685975083}
-  - component: {fileID: 4578926171015546155}
   - component: {fileID: 2830307093007107912}
+  - component: {fileID: 578195630352048340}
   m_Layer: 8
-  m_Name: Enemy
+  m_Name: Splitter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -113,7 +113,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 1333401826788945531, guid: 44d8f3305c026b47c87736491744811c, type: 3}
-  m_Color: {r: 0, g: 0.93333334, b: 0.21568628, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -159,7 +159,7 @@ CapsuleCollider2D:
   m_Offset: {x: 0.006619841, y: 0.0059862435}
   m_Size: {x: 0.80097765, y: 1.0936573}
   m_Direction: 0
---- !u!114 &4578926171015546155
+--- !u!114 &2830307093007107912
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -168,9 +168,33 @@ MonoBehaviour:
   m_GameObject: {fileID: 3971847470037377216}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 444f6475ee30d275f9c85083e1151124, type: 3}
+  m_Script: {fileID: 11500000, guid: d6c139e058639a17cad6021e64df8aff, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: '::'
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
+  spriteRenderer: {fileID: 5649565113438576111}
+  frames:
+  - {fileID: 1333401826788945531, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: -3445709363609947430, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: 5516209010568758635, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: 3906657198060525574, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: 3896488554439353617, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: 7645769752265994775, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  - {fileID: -6701073169992860884, guid: 44d8f3305c026b47c87736491744811c, type: 3}
+  frameRate: 5
+  loop: 1
+  randomizeStartFrame: 1
+--- !u!114 &578195630352048340
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3971847470037377216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc9f9e5d18419f0848997b70651e0493, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SplitterEnemy
   moveSpeed: 3
   maxHealth: 100
   healthMultiplierAtMaxDifficulty: 3
@@ -190,21 +214,6 @@ MonoBehaviour:
   - {fileID: 7494746325631294619, guid: f23e7535da39f3dfeae40be885d73488, type: 3}
   - {fileID: 3741208118057720978, guid: f23e7535da39f3dfeae40be885d73488, type: 3}
   deathFrameRate: 12
-  enableDash: 1
-  dashIntervalMin: 4
-  dashIntervalMax: 8
-  dashChargeTime: 0.5
-  dashTelegraphColor: {r: 0.3272993, g: 1, b: 0.25098038, a: 0.5254902}
-  dashTelegraphWidth: 0.12
-  dashArrowSize: 0
-  dashDistance: 2.5
-  dashSpeed: 14
-  dashAtPlayerChance: 0.5
-  leaveDashAfterImage: 1
-  dashAfterImageInterval: 0.05
-  dashAfterImageAlpha: 0.3
-  dashAfterImageFadeTime: 0.25
-  dashAfterImageColor: {r: 0, g: 1, b: 0.02082038, a: 1}
   laserDamage: 1
   bodyContactDamage: 1
   contactDamageCooldown: 1
@@ -230,27 +239,9 @@ MonoBehaviour:
   coreDropEliteMin: 2
   coreDropEliteMax: 3
   ultFoodDropChance: 0.25
---- !u!114 &2830307093007107912
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3971847470037377216}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6c139e058639a17cad6021e64df8aff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
-  spriteRenderer: {fileID: 5649565113438576111}
-  frames:
-  - {fileID: 1333401826788945531, guid: 44d8f3305c026b47c87736491744811c, type: 3}
-  - {fileID: -3445709363609947430, guid: 44d8f3305c026b47c87736491744811c, type: 3}
-  - {fileID: 5516209010568758635, guid: 44d8f3305c026b47c87736491744811c, type: 3}
-  - {fileID: 3906657198060525574, guid: 44d8f3305c026b47c87736491744811c, type: 3}
-  - {fileID: 3896488554439353617, guid: 44d8f3305c026b47c87736491744811c, type: 3}
-  - {fileID: 7645769752265994775, guid: 44d8f3305c026b47c87736491744811c, type: 3}
-  - {fileID: -6701073169992860884, guid: 44d8f3305c026b47c87736491744811c, type: 3}
-  frameRate: 5
-  loop: 1
-  randomizeStartFrame: 1
+  splitChildPrefab: {fileID: 3971847470037377216, guid: 4b622fb260dca95a480e6d08863f11c0, type: 3}
+  splitCount: 2
+  splitDepth: 1
+  childHealthFactor: 0.6
+  childScale: 0.6
+  spawnSpread: 0.6

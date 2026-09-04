@@ -68,6 +68,7 @@
     <Compile Include="Assets/_Project/Scripts/player.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FixedJoystick.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyDamage.cs" />
+    <Compile Include="Assets/_Project/Scripts/KamikazeEnemy.cs" />
     <Compile Include="Assets/_Project/Scripts/BoomerangProjectile.cs" />
     <Compile Include="Assets/_Project/Scripts/SceneLoader.cs" />
     <Compile Include="Assets/_Project/Scripts/ClawSlashVisual.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Assets/_Project/Scripts/DashButtonUI.cs" />
     <Compile Include="Assets/_Project/Scripts/WeaponManager.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/VariableJoystick.cs" />
+    <Compile Include="Assets/_Project/Scripts/SplitterEnemy.cs" />
     <Compile Include="Assets/_Project/Scripts/BombWarning.cs" />
     <Compile Include="Assets/_Project/Scripts/DamageScreenFlash.cs" />
     <Compile Include="Assets/_Project/Scripts/GameOverUI.cs" />
@@ -93,6 +95,7 @@
     <Compile Include="Assets/_Project/Scripts/CameraShake.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateBarUI.cs" />
     <Compile Include="Assets/_Project/Scripts/WinUI.cs" />
+    <Compile Include="Assets/_Project/Scripts/BombardmentBannerUI.cs" />
     <Compile Include="Assets/_Project/Scripts/PlayerBoomerang.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateManager.cs" />
     <Compile Include="Assets/_Project/Scripts/OrbitalWeapon.cs" />

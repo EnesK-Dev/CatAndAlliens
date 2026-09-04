@@ -24,12 +24,16 @@ public class ComboManager : MonoBehaviour
         [Tooltip("Bu rank aktifken hasar VE saldiri hizina uygulanan carpan (1 = etkisiz).")]
         public float multiplier = 1f;
 
+        [Tooltip("Bu rank'in RENGI — combo yazisi ve hasar sayilari bu renkte. Inspector'daki renk karesinden elle sec.")]
+        public Color color = Color.white;
+
         /// <summary>Inspector-dostu ctor + kod tarafi varsayilanlar icin.</summary>
-        public ComboTier(string label, int requiredHits, float multiplier)
+        public ComboTier(string label, int requiredHits, float multiplier, Color color)
         {
             this.label = label;
             this.requiredHits = requiredHits;
             this.multiplier = multiplier;
+            this.color = color;
         }
     }
     #endregion
@@ -40,12 +44,12 @@ public class ComboManager : MonoBehaviour
     [SerializeField]
     private ComboTier[] tiers =
     {
-        new ComboTier("E", 0, 1.00f),
-        new ComboTier("D", 10, 1.10f),
-        new ComboTier("C", 25, 1.25f),
-        new ComboTier("B", 45, 1.45f),
-        new ComboTier("A", 70, 1.70f),
-        new ComboTier("S", 100, 2.00f),
+        new ComboTier("E", 0, 1.00f, new Color(0.85f, 0.85f, 0.85f)), // gri/beyaz
+        new ComboTier("D", 10, 1.10f, new Color(0.40f, 0.90f, 0.45f)), // yesil
+        new ComboTier("C", 25, 1.25f, new Color(0.35f, 0.75f, 1.00f)), // mavi
+        new ComboTier("B", 45, 1.45f, new Color(0.70f, 0.45f, 1.00f)), // mor
+        new ComboTier("A", 70, 1.70f, new Color(1.00f, 0.60f, 0.20f)), // turuncu
+        new ComboTier("S", 100, 2.00f, new Color(1.00f, 0.85f, 0.20f)), // altin
     };
 
     [Header("Kirilma Kurallari (Karma)")]
@@ -72,22 +76,16 @@ public class ComboManager : MonoBehaviour
     #endregion
 
     #region Rank Renk Paleti
-    // Rank'lara karsilik gelen renkler. Kod-tabanli tek kaynak: hem ComboUI hem DamageNumber
-    // buradan okur, boylece renkler her yerde tutarli. Asset/tema gelince buradan degistirilir.
-    // Sira tiers[] ile ayni: E, D, C, B, A, S.
-    private static readonly Color[] RankColors =
-    {
-        new Color(0.85f, 0.85f, 0.85f), // E - gri/beyaz
-        new Color(0.40f, 0.90f, 0.45f), // D - yesil
-        new Color(0.35f, 0.75f, 1.00f), // C - mavi
-        new Color(0.70f, 0.45f, 1.00f), // B - mor
-        new Color(1.00f, 0.60f, 0.20f), // A - turuncu
-        new Color(1.00f, 0.85f, 0.20f), // S - altin
-    };
+    // Rank renkleri artik tiers[] icindeki 'color' alanindan gelir (Inspector'da her rank'in renk
+    // karesinden ELLE secilir). Tek kaynak: hem ComboUI hem DamageNumber buradan okur.
 
-    /// <summary>Verilen rank indeksinin rengini dondurur (sinir disi indeks guvenli sekilde kirpilir).</summary>
-    public static Color RankColorAt(int index) =>
-        RankColors[Mathf.Clamp(index, 0, RankColors.Length - 1)];
+    /// <summary>Verilen rank indeksinin rengini (tiers[index].color) dondurur; manager yoksa beyaz.</summary>
+    public static Color RankColorAt(int index)
+    {
+        if (_instance != null && _instance.tiers != null && _instance.tiers.Length > 0)
+            return _instance.tiers[Mathf.Clamp(index, 0, _instance.tiers.Length - 1)].color;
+        return Color.white;
+    }
 
     /// <summary>Guncel rank'in rengi.</summary>
     public static Color CurrentRankColor => RankColorAt(RankIndex);

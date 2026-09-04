@@ -146,7 +146,7 @@ public class player : MonoBehaviour
         HandleMovementInput();
         UpdateAnimationState();
         HandleVampireHunterAttack();
-        if (Keyboard.current != null && Keyboard.current.leftShiftKey.wasPressedThisFrame) TriggerDash();
+        if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame) TriggerDash();
         if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame) UltimateManager.TryActivate(); // E = ulti (hazirsa)
     }
 

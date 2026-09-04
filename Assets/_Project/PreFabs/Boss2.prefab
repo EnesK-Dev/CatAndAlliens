@@ -202,6 +202,10 @@ MonoBehaviour:
   stopDistance: 1.5
   centerMode: 1
   centerPoint: {x: 0, y: 0}
+  kiteMode: 0
+  kiteCenter: {x: -1.5, y: -0.5}
+  kiteRadius: 8
+  kiteMoveSpeed: 3.5
   facePlayer: 1
   spriteFacesRight: 1
   bodyContactDamage: 2
@@ -251,8 +255,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossLaserAttack
   laserVisualPrefab: {fileID: 8123456789012345678, guid: 1992a096572d90d17b44989b0b1280c9, type: 3}
-  laserWidth: 3
-  colliderWidthScale: 0.6
+  laserWidth: 2.3
+  colliderWidthScale: 0.462
   laserLength: 40
   laserDamage: 2
   laserHitCooldown: 1
@@ -261,10 +265,12 @@ MonoBehaviour:
   telegraphDuration: 0.6
   atk1GrowTime: 0.6
   atk1FollowTime: 4.5
-  atk1TurnSpeed: 15
+  atk1TurnSpeed: 20
   atk2Duration: 6
   atk2RotSpeed: 45
   atk3Spread: 28
   atk3CloseSpread: 4
+  atk3CloseSpeed: 14
+  atk3CenterTrackSpeed: 35
   atk3CloseTime: 2.5
   atk3HoldTime: 0.7

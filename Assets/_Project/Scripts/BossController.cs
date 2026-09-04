@@ -39,6 +39,17 @@ public class BossController : MonoBehaviour
     [Tooltip("centerMode acikken boss'un oturacagi merkez nokta (dunya konumu).")]
     [SerializeField] private Vector2 centerPoint = Vector2.zero;
 
+    [Header("Kite Modu (boss 3: merkezdeki dairede oyuncudan kac)")]
+    [Tooltip("true ise boss oyuncudan KACAR ama harita merkezindeki dairesel alanda kalir (kenar/kose yok).")]
+    [SerializeField] private bool kiteMode = false;
+    [Tooltip("Kacis dairesinin merkezi (dunya konumu) — genelde harita ortasi.")]
+    [SerializeField] private Vector2 kiteCenter = new Vector2(-1.5f, -0.5f);
+    [Tooltip("Kacis dairesinin yaricapi — boss bu daireden disari cikmaz.")]
+    [SerializeField] private float kiteRadius = 8f;
+
+    [Tooltip("Kite (boss 3) HAREKET HIZI — oyuncudan kacma hizi. Sadece kiteMode acikken kullanilir.")]
+    [SerializeField] private float kiteMoveSpeed = 3.5f;
+
     [Header("Yon Cevirme")]
     [Tooltip("Boss oyuncuya gore saga/sola donsun mu (flipX).")]
     [SerializeField] private bool facePlayer = true;
@@ -194,6 +205,9 @@ public class BossController : MonoBehaviour
 
     /// <summary>Boss olum surecinde mi (attack modulleri bunu kontrol eder).</summary>
     public bool IsDying => _isDying;
+
+    /// <summary>Boss'un temel rengi (tint). Attack modulleri gorsel (ok vb.) icin boss rengini kullanir.</summary>
+    public Color BaseColor => baseColor;
     #endregion
 
     #region Unity Callbacks
@@ -260,7 +274,8 @@ public class BossController : MonoBehaviour
             return;
         }
 
-        if (centerMode) MoveToCenter(); // lazer boss: ortaya git, sabit dur
+        if (kiteMode) KiteMovement();       // burst boss: merkez dairede oyuncudan kac
+        else if (centerMode) MoveToCenter(); // lazer boss: ortaya git, sabit dur
         else MoveTowardsPlayer();
 
         ClampInsideArena(); // arena disina TASMA — duvara takilma/sikisma engellenir
@@ -335,6 +350,27 @@ public class BossController : MonoBehaviour
             _rb.linearVelocity = (centerPoint - pos).normalized * (moveSpeed * 3f); // merkeze biraz hizli gel
         else
             _rb.linearVelocity = Vector2.zero; // oturdu — sabit
+    }
+
+    /// <summary>
+    /// Kite: oyuncudan KACAR, ama merkez daireden cikmaz. Daire kenarina yaklastikca yon merkeze dogru
+    /// bukulur (kenar/koseye sikismaz). Boss ortada donerek oyuncudan uzaklasir.
+    /// </summary>
+    private void KiteMovement()
+    {
+        if (_playerTransform == null) { _rb.linearVelocity = Vector2.zero; return; }
+
+        Vector2 pos = transform.position;
+        Vector2 flee = pos - (Vector2)_playerTransform.position;
+        flee = flee.sqrMagnitude > 0.0001f ? flee.normalized : UnityEngine.Random.insideUnitCircle.normalized;
+
+        Vector2 toCenter = kiteCenter - pos;
+        float d = toCenter.magnitude;
+        float edge = Mathf.InverseLerp(kiteRadius * 0.6f, kiteRadius, d); // 0 = ic (kac), 1 = kenar (merkeze don)
+        Vector2 dir = Vector2.Lerp(flee, d > 0.01f ? toCenter / d : flee, edge);
+        if (dir.sqrMagnitude < 0.0001f) dir = flee;
+
+        _rb.linearVelocity = dir.normalized * kiteMoveSpeed; // kite'a OZEL hiz (boss 3)
     }
 
     private void MoveTowardsPlayer()
@@ -424,8 +460,17 @@ public class BossController : MonoBehaviour
     private void ClampInsideArena()
     {
         Vector2 p = _rb != null ? _rb.position : (Vector2)transform.position;
-        Vector3 c = ClampToArena(p);
-        if (((Vector2)c - p).sqrMagnitude > 0.0000001f)
+        Vector2 c = ClampToArena(p);
+
+        // Kite modu: ayrica MERKEZ DAIRESINE clamp (kenar/koseye kacamasin)
+        if (kiteMode)
+        {
+            Vector2 fromCenter = c - kiteCenter;
+            if (fromCenter.magnitude > kiteRadius)
+                c = kiteCenter + fromCenter.normalized * kiteRadius;
+        }
+
+        if ((c - p).sqrMagnitude > 0.0000001f)
         {
             if (_rb != null) _rb.position = c;
             else transform.position = c;

@@ -40,6 +40,20 @@ public class LaserVisual : MonoBehaviour
 
     #region Public Methods
     /// <summary>
+    /// Lazerin tum parcalarini, ateleyen dusman/boss'un sorting order'inin ALTINA alir — lazer emitter'in
+    /// ARKASINDA cizilsin. Body en altta, cap'ler bir uzerinde (yine emitter'in altinda). Setup'ta bir kez cagrilir.
+    /// </summary>
+    public void SetSortingBehind(int emitterSortingOrder)
+    {
+        if (startCapRenderer == null && startCap != null) startCapRenderer = startCap.GetComponent<SpriteRenderer>();
+        if (endCapRenderer == null && endCap != null) endCapRenderer = endCap.GetComponent<SpriteRenderer>();
+
+        if (bodyRenderer != null) bodyRenderer.sortingOrder = emitterSortingOrder - 2;
+        if (startCapRenderer != null) startCapRenderer.sortingOrder = emitterSortingOrder - 1;
+        if (endCapRenderer != null) endCapRenderer.sortingOrder = emitterSortingOrder - 1;
+    }
+
+    /// <summary>
     /// Lazer görselini iki dünya koordinatı arasına konumlandırır ve boyutlandırır.
     /// Her frame çağrılabilir.
     /// </summary>

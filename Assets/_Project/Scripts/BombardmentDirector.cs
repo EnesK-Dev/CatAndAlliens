@@ -38,6 +38,21 @@ public class BombardmentDirector : MonoBehaviour
     [Tooltip("Oyuncu hasar yemezse KAC saniyede bir +1 combo rank kazanir.")]
     [SerializeField] private float rankRewardInterval = 3f;
 
+    [Header("Uyari (bombalar baslamadan ONCE)")]
+    [Tooltip("Bombalar baslamadan once ekran kirmizi yanip soner + ses; bu KADAR saniye. 0 = uyari yok.")]
+    [SerializeField] private float warningLeadTime = 1.3f;
+    [Tooltip("Kirmizi yanip-sonme sayisi.")]
+    [SerializeField] private int warningPulses = 3;
+    [Range(0f, 1f)]
+    [SerializeField] private float warningPeakAlpha = 0.55f;
+    [SerializeField] private float warningPulseUp = 0.12f;
+    [SerializeField] private float warningPulseDown = 0.22f;
+
+    [Header("Harita Siniri (disina bomba dusmesin)")]
+    [Tooltip("Bomba SADECE bu dikdortgen icine duser (harita zemini). Merkez + yari-boyut (dunya).")]
+    [SerializeField] private Vector2 mapCenter = new Vector2(-1.5f, -0.5f);
+    [SerializeField] private Vector2 mapHalf = new Vector2(20f, 18f);
+
     [Header("Alan (oyuncu etrafi, dunya birimi)")]
     [Tooltip("Bombardimanin kapladigi yari-genislik/yukseklik (oyuncu merkezli). Ekrani kaplamali.")]
     [SerializeField] private Vector2 areaHalfExtent = new Vector2(12f, 8f);
@@ -91,6 +106,7 @@ public class BombardmentDirector : MonoBehaviour
     private Coroutine _routine;
     private float _rankTimer;
     private Action _onFinished;
+    private Color _bossColor = Color.white; // gelecek boss'un rengi ("BOSS FIGHT" banner'i icin)
     private int _lastPattern = -1; // ayni deseni ust uste secme (okunur kalsin)
     #endregion
 
@@ -101,20 +117,25 @@ public class BombardmentDirector : MonoBehaviour
     /// <summary>Bombardiman baslayinca firlar.</summary>
     public static event Action OnBombardmentStarted;
 
-    /// <summary>Bombardiman bitince firlar (boss'tan hemen once).</summary>
-    public static event Action OnBombardmentFinished;
+    /// <summary>Uyari fazi baslayinca firlar — (sure, yanip-sonme sayisi). Banner ("BOMB RAIN") bunu dinler.</summary>
+    public static event Action<float, int> OnBombardmentWarning;
+
+    /// <summary>Bombardiman bitince firlar (boss'tan hemen once). Parametre: gelecek boss'un rengi ("BOSS FIGHT" banner'i icin).</summary>
+    public static event Action<Color> OnBombardmentFinished;
 
     /// <summary>
     /// Bombardimani baslatir; bitince onFinished cagrilir (BossManager boss'u o an spawn eder).
     /// Director yoksa ya da zaten calisyorsa onFinished ANINDA cagrilir (boss beklemesin).
     /// </summary>
-    public static void Trigger(Action onFinished)
+    /// <param name="bossColor">Gelecek boss'un rengi — "BOSS FIGHT" yazisinin rengi.</param>
+    public static void Trigger(Color bossColor, Action onFinished)
     {
         if (_instance == null || IsActive || _instance.bombWarningPrefab == null)
         {
             onFinished?.Invoke();
             return;
         }
+        _instance._bossColor = bossColor;
         _instance.Play(onFinished);
     }
     #endregion
@@ -171,6 +192,17 @@ public class BombardmentDirector : MonoBehaviour
         player.OnPlayerDamaged += HandlePlayerDamaged; // hasar yerse odul sayaci sifirlanir
         OnBombardmentStarted?.Invoke();
 
+        // UYARI: bombalar baslamadan once ekran kirmizi yanip soner + ses (oyuncu hazirlanir). Bu surede enemy
+        // spawn zaten durdu (IsActive), bomba yok.
+        if (warningLeadTime > 0f)
+        {
+            DamageScreenFlash.WarningBlink(warningPulses, warningPeakAlpha, warningPulseUp, warningPulseDown);
+            SfxManager.Play(SfxId.BombardmentWarning);
+            OnBombardmentWarning?.Invoke(warningLeadTime, warningPulses); // "BOMB RAIN" banner'i yanip sonsun
+            float w = 0f;
+            while (w < warningLeadTime) { w += Time.deltaTime; yield return null; }
+        }
+
         float t = 0f, waveT = 0f;
         LaunchRandomWave(); // ilk dalga hemen
         while (t < duration)
@@ -195,7 +227,7 @@ public class BombardmentDirector : MonoBehaviour
         player.OnPlayerDamaged -= HandlePlayerDamaged;
         IsActive = false;
         _routine = null;
-        OnBombardmentFinished?.Invoke();
+        OnBombardmentFinished?.Invoke(_bossColor); // "BOSS FIGHT" banner'i (boss renginde)
         _onFinished?.Invoke(); // boss spawn
         _onFinished = null;
     }
@@ -292,9 +324,12 @@ public class BombardmentDirector : MonoBehaviour
         plane.FlyLine(start, end, planeSpeed, bombInterval, bombSideGap, DropBomb, null);
     }
 
-    /// <summary>Ucagin altina bir bomba birakir (havuzdan).</summary>
+    /// <summary>Ucagin altina bir bomba birakir (havuzdan). Harita disina duseni atlar (garip gorunmesin).</summary>
     private void DropBomb(Vector2 pos)
     {
+        if (Mathf.Abs(pos.x - mapCenter.x) > mapHalf.x || Mathf.Abs(pos.y - mapCenter.y) > mapHalf.y)
+            return; // harita disi — bomba dusurme
+
         BombWarning bomb = GetBomb();
         if (bomb == null) return; // havuz bos — bu bombayi atla
         bomb.Activate(pos);       // parametreler havuz kurulumunda bir kez ayarlandi

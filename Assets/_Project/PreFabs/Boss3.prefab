@@ -198,10 +198,14 @@ MonoBehaviour:
   isFinalBoss: 0
   bossName: BURST OVERLORD
   maxHealth: 3800
-  moveSpeed: 1.2
+  moveSpeed: 3.5
   stopDistance: 1.5
-  centerMode: 1
+  centerMode: 0
   centerPoint: {x: 0, y: 0}
+  kiteMode: 1
+  kiteCenter: {x: -1.5, y: -0.5}
+  kiteRadius: 8
+  kiteMoveSpeed: 1
   facePlayer: 1
   spriteFacesRight: 1
   bodyContactDamage: 2
@@ -263,7 +267,9 @@ MonoBehaviour:
   atk2Rings: 3
   atk2RingGap: 0.5
   atk3Count: 16
-  atk3Duration: 5
+  atk3Duration: 8
   atk3FireInterval: 0.32
   atk3CorridorHalfWidth: 26
   atk3CorridorRotSpeed: 28
+  corridorArrowDistance: 2.5
+  corridorArrowSize: 1.3

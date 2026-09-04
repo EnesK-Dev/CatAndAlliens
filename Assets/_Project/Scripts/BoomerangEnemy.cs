@@ -270,7 +270,16 @@ public class BoomerangEnemy : MonoBehaviour, IDifficultyScaled
     /// Ultimate ekran-temizlemesi bu dusmani DROPSUZ ve ANINDA yok eder: core/ultFood birakmaz,
     /// olum animasyonu + duman OYNATMAZ (nuke temiz olsun). UltimateCinematic IMPACT aninda cagirir.
     /// </summary>
-    public void Vaporize() => Die(dropLoot: true, playDeathAnim: false); // ulti ile olen de core+yemek biraksin
+    public void Vaporize() { _noFoodDrop = true; Die(dropLoot: true, playDeathAnim: false); } // nuke/ulti: core EVET, yemek HAYIR
+
+    private bool _noFoodDrop; // nuke (bombardiman) ile olurse: SADECE core, ultFood YOK
+
+    /// <summary>Boss-oncesi bombardiman (nuke) bu dusmani oldururken cagirir: core birakir ama ultFood BIRAKMAZ.</summary>
+    public void NukeKill(float damage)
+    {
+        _noFoodDrop = true;
+        TakeDamage(damage);
+    }
 
     /// <summary>
     /// Ultimate CHARGE fazi: dusmani "emilebilir" hale getirir — AI durur, fizik+collider kapanir
@@ -298,7 +307,7 @@ public class BoomerangEnemy : MonoBehaviour, IDifficultyScaled
             CoreManager.SpawnCores(transform.position, Random.Range(coreDropMin, coreDropMax + 1));
 
             // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
-            if (Random.value < ultFoodDropChance)
+            if (!_noFoodDrop && Random.value < ultFoodDropChance)
                 UltimateManager.SpawnFood(transform.position, enemyColor, 1);
         }
 

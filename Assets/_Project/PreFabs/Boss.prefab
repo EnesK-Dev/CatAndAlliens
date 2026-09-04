@@ -197,10 +197,13 @@ MonoBehaviour:
   isFinalBoss: 0
   bossName: ALIEN OVERLORD
   maxHealth: 2200
-  moveSpeed: 1.2
+  moveSpeed: 2.6
   stopDistance: 1.5
   centerMode: 0
   centerPoint: {x: 0, y: 0}
+  kiteMode: 0
+  kiteCenter: {x: -1.5, y: -0.5}
+  kiteRadius: 8
   facePlayer: 1
   spriteFacesRight: 1
   bodyContactDamage: 2
@@ -213,8 +216,8 @@ MonoBehaviour:
   coreDropMax: 30
   healOnDeath: 0
   useDashAttack: 1
-  attackInterval: 4
-  telegraphDuration: 0.85
+  attackInterval: 2
+  telegraphDuration: 0.6
   dashSpeed: 20
   dashDistance: 9
   zigzagAmplitude: 2.5

@@ -47,12 +47,18 @@ public class BossBurstAttack : MonoBehaviour
     [SerializeField] private float atk3CorridorHalfWidth = 26f;
     [Tooltip("Koridorun donme hizi (derece/sn). 0 = sabit koridor.")]
     [SerializeField] private float atk3CorridorRotSpeed = 28f;
+
+    [Tooltip("Guvenli koridoru gosteren OK — boss'tan bu kadar uzakta (dunya birimi). Boss renginde.")]
+    [SerializeField] private float corridorArrowDistance = 2.5f;
+    [Tooltip("Koridor okunun boyutu.")]
+    [SerializeField] private float corridorArrowSize = 1.3f;
     #endregion
 
     #region Private Fields
     private BossController _boss;
     private Transform _player;
     private Coroutine _loop;
+    private Transform _corridorArrow; // guvenli koridor yon oku (runtime mesh, boss renginde)
     #endregion
 
     #region Unity Callbacks
@@ -64,7 +70,7 @@ public class BossBurstAttack : MonoBehaviour
     }
 
     private void OnEnable() { _loop = StartCoroutine(AttackLoop()); }
-    private void OnDisable() { if (_loop != null) StopCoroutine(_loop); }
+    private void OnDisable() { if (_loop != null) StopCoroutine(_loop); HideCorridorArrow(); }
     #endregion
 
     #region Attack Loop
@@ -125,17 +131,30 @@ public class BossBurstAttack : MonoBehaviour
     /// <summary>Her yone SUREKLI atis, ama tek bir guvenli koridor (o yone ates yok). Koridor yavas doner; oyuncu orada durur.</summary>
     private IEnumerator Attack3_SafeCorridor()
     {
+        EnsureCorridorArrow();
         float corridor = Random.Range(0f, 360f);
-        float t = 0f;
+        float t = 0f, sinceFire = atk3FireInterval; // ilk karede ates
+        if (_corridorArrow != null) _corridorArrow.gameObject.SetActive(true);
+
         while (t < atk3Duration)
         {
-            if (Dead()) yield break;
-            FireRing(atk3Count, 0f, bulletScale, corridor, atk3CorridorHalfWidth);
-            SfxManager.Play(SfxId.BurstShot);
-            corridor += atk3CorridorRotSpeed * atk3FireInterval; // koridor doner
-            yield return new WaitForSeconds(atk3FireInterval);
-            t += atk3FireInterval;
+            if (Dead()) { HideCorridorArrow(); yield break; }
+
+            corridor += atk3CorridorRotSpeed * Time.deltaTime; // koridor SMOOTH doner (kare-kare)
+            UpdateCorridorArrow(corridor);                      // oku guvenli yone (boss renginde) yerlestir
+
+            sinceFire += Time.deltaTime;
+            if (sinceFire >= atk3FireInterval)
+            {
+                sinceFire -= atk3FireInterval;
+                FireRing(atk3Count, 0f, bulletScale, corridor, atk3CorridorHalfWidth);
+                SfxManager.Play(SfxId.BurstShot);
+            }
+
+            t += Time.deltaTime;
+            yield return null;
         }
+        HideCorridorArrow();
     }
     #endregion
 
@@ -175,6 +194,51 @@ public class BossBurstAttack : MonoBehaviour
         EnemyBullet b = Instantiate(bulletPrefab, origin, Quaternion.identity);
         if (scale != 1f) b.transform.localScale *= scale;
         b.Initialize(target); // hedefe dogru hiz verir
+    }
+
+    /// <summary>Guvenli koridor yon okunu (koddan mesh ucgen, BOSS RENGINDE) bir kez olusturur — Sandevistan telegraph'i gibi.</summary>
+    private void EnsureCorridorArrow()
+    {
+        if (_corridorArrow != null) return;
+
+        var go = new GameObject("CorridorArrow");
+        go.transform.SetParent(transform, false);
+        var mf = go.AddComponent<MeshFilter>();
+        var mr = go.AddComponent<MeshRenderer>();
+
+        float len = corridorArrowSize, halfW = corridorArrowSize * 0.7f;
+        var mesh = new Mesh();
+        mesh.vertices = new[] { new Vector3(len, 0f, 0f), new Vector3(0f, halfW, 0f), new Vector3(0f, -halfW, 0f) };
+        mesh.triangles = new[] { 0, 1, 2, 0, 2, 1 }; // cift tarafli
+        Color c = _boss != null ? _boss.BaseColor : Color.white;
+        mesh.colors = new[] { c, c, c };
+        mesh.RecalculateBounds();
+        mf.sharedMesh = mesh;
+
+        Shader sh = Shader.Find("Sprites/Default") ?? Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color");
+        var mat = new Material(sh) { color = c };
+        mr.sharedMaterial = mat;
+        var sr = _boss != null ? _boss.GetComponent<SpriteRenderer>() : null;
+        if (sr != null) mr.sortingLayerID = sr.sortingLayerID;
+        mr.sortingOrder = 4; // mermilerin/karakterin ustunde gorunur
+
+        go.SetActive(false);
+        _corridorArrow = go.transform;
+    }
+
+    /// <summary>Oku guvenli koridor yonune (aci) yerlestirir — boss'tan corridorArrowDistance uzakta, o yone bakar.</summary>
+    private void UpdateCorridorArrow(float angleDeg)
+    {
+        if (_corridorArrow == null) return;
+        float rad = angleDeg * Mathf.Deg2Rad;
+        Vector2 dir = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+        _corridorArrow.position = (Vector2)transform.position + dir * corridorArrowDistance;
+        _corridorArrow.rotation = Quaternion.Euler(0f, 0f, angleDeg);
+    }
+
+    private void HideCorridorArrow()
+    {
+        if (_corridorArrow != null) _corridorArrow.gameObject.SetActive(false);
     }
     #endregion
 }

@@ -214,7 +214,7 @@ MonoBehaviour:
   coreDropNormal: 1
   coreDropEliteMin: 2
   coreDropEliteMax: 3
-  ultFoodDropChance: 0.35
+  ultFoodDropChance: 0.247
 --- !u!114 &3743581823330301967
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -393,4 +393,4 @@ MonoBehaviour:
   body: {fileID: 6575532523028562060}
   bodyRenderer: {fileID: 1062838880136394287}
   endCap: {fileID: 514440267324299255}
-  capSizeUnits: 0.86
+  capSizeUnits: 2.01

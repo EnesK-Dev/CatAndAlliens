@@ -20,6 +20,35 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     [SerializeField] private Sprite[] deathFrames;
     [SerializeField] private float deathFrameRate = 12f;
 
+    [Header("Dash (siradan dusman — seyrek, kisa, duz)")]
+    [Tooltip("Aciksa bu dusman ara sira KISA bir dash atar (elite/lazer olanlar atmaz). Sadece normal Enemy'de ac.")]
+    [SerializeField] private bool enableDash = false;
+    [Tooltip("Iki dash arasi rastgele bekleme araligi (sn) — seyrek olsun.")]
+    [SerializeField] private float dashIntervalMin = 4f;
+    [SerializeField] private float dashIntervalMax = 8f;
+    [Tooltip("Dash oncesi CHARGE suresi — bu surede ok telegraph gorunur ve dusman durur (oyuncu tepki verebilir).")]
+    [SerializeField] private float dashChargeTime = 0.5f;
+
+    [Header("Dash Telegraph (ok)")]
+    [Tooltip("Telegraph (cizgi + ok) rengi.")]
+    [SerializeField] private Color dashTelegraphColor = new Color(1f, 0.25f, 0.25f, 0.9f);
+    [SerializeField] private float dashTelegraphWidth = 0.12f;
+    [Tooltip("Dash mesafesi — kisa tut (zayif his).")]
+    [SerializeField] private float dashDistance = 2.5f;
+    [Tooltip("Dash hizi (birim/sn).")]
+    [SerializeField] private float dashSpeed = 14f;
+    [Range(0f, 1f)]
+    [Tooltip("Dash'in oyuncuya dogru olma olasiligi; kalani rastgele yon (sag/sol/herhangi).")]
+    [SerializeField] private float dashAtPlayerChance = 0.5f;
+
+    [Tooltip("Dash sirasinda HAFIF afterimage (Sandevistan'in kisik hali) biraksin mi.")]
+    [SerializeField] private bool leaveDashAfterImage = true;
+    [SerializeField] private float dashAfterImageInterval = 0.05f;
+    [Range(0f, 1f)]
+    [SerializeField] private float dashAfterImageAlpha = 0.3f;
+    [SerializeField] private float dashAfterImageFadeTime = 0.25f;
+    [SerializeField] private Color dashAfterImageColor = new Color(0.7f, 0.9f, 1f, 1f);
+
     [Header("Lazer Saldiri Ayarlari")]
     [SerializeField] private float laserDamage = 2f; // 1 tam kalp = 2 yarim-kalp birimi
 
@@ -108,17 +137,27 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         ComputeEffectiveMoveSpeed();
         FindTargetPlayer();
         SpawnLaserVisual();
+
+        _nextDashTime = Time.time + Random.Range(dashIntervalMin, dashIntervalMax); // spawn'da hemen dash atmasin
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         if (isDying || vacuumed) return;
         if (playerTransform == null) return;
+        if (_isDashing) return; // dash coroutine hareketi kontrol ediyor
 
         // Donmus: hareket/saldiri yok (velocity FixedUpdate'te de sifirlanir)
         if (EnemyFreeze.IsFrozen)
         {
             rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
+        // Seyrek/kisa dash — SADECE normal dusman (elite lazer atar, dash atmaz)
+        if (enableDash && !canUseLaser && Time.time >= _nextDashTime)
+        {
+            StartCoroutine(EnemyDashRoutine());
             return;
         }
 
@@ -136,6 +175,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     private void FixedUpdate()
     {
         if (isDying || vacuumed) return;
+        if (_isDashing) return; // dash sirasinda velocity'yi coroutine yonetir
         if (EnemyFreeze.IsFrozen)
         {
             if (rb != null) rb.linearVelocity = Vector2.zero;
@@ -156,6 +196,106 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     {
         if (duration > 0f) _pushStunUntil = Mathf.Max(_pushStunUntil, Time.time + duration);
     }
+
+    private bool _isDashing;
+    private float _nextDashTime;
+
+    /// <summary>Seyrek/kisa/duz dash: yon sec -> CHARGE (ok telegraph, dusman durur) -> tek yonde hizli kayma + hafif afterimage.</summary>
+    private System.Collections.IEnumerator EnemyDashRoutine()
+    {
+        _isDashing = true;
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+
+        // Yon: bazen oyuncuya, bazen rastgele — telegraph icin ONCE sec
+        Vector2 dir;
+        if (playerTransform != null && Random.value < dashAtPlayerChance)
+            dir = ((Vector2)playerTransform.position - (Vector2)transform.position).normalized;
+        else
+            dir = Random.insideUnitCircle.normalized;
+        if (dir.sqrMagnitude < 0.0001f) dir = Vector2.right;
+
+        // CHARGE: ok telegraph goster, dusman durur (oyuncu tepki verebilsin)
+        EnsureDashTelegraph();
+        ShowDashTelegraph(dir);
+        float c = 0f;
+        while (c < dashChargeTime)
+        {
+            if (isDying) { HideDashTelegraph(); _isDashing = false; yield break; }
+            if (rb != null) rb.linearVelocity = Vector2.zero;
+            if (!EnemyFreeze.IsFrozen) c += Time.deltaTime; // donunca charge de duraklasin
+            yield return null;
+        }
+        HideDashTelegraph();
+
+        // DASH: secilen yonde kisa hizli kayma + hafif afterimage
+        Vector2 startPos = transform.position;
+        float aiTimer = 0f;
+        while (Vector2.Distance(transform.position, startPos) < dashDistance)
+        {
+            if (isDying) break;
+            if (EnemyFreeze.IsFrozen) { if (rb != null) rb.linearVelocity = Vector2.zero; yield return null; continue; }
+
+            if (rb != null) rb.linearVelocity = dir * dashSpeed;
+
+            if (leaveDashAfterImage && spriteRenderer != null)
+            {
+                aiTimer += Time.deltaTime;
+                if (aiTimer >= dashAfterImageInterval)
+                {
+                    aiTimer = 0f;
+                    AfterImage.Spawn(spriteRenderer, dashAfterImageColor, dashAfterImageAlpha, dashAfterImageFadeTime, spriteRenderer.sortingOrder - 1);
+                }
+            }
+            yield return null;
+        }
+
+        if (rb != null) rb.linearVelocity = Vector2.zero;
+        _isDashing = false;
+        _nextDashTime = Time.time + Random.Range(dashIntervalMin, dashIntervalMax);
+    }
+
+    #region Dash Telegraph (ok)
+    private LineRenderer _dashLine;
+    private static Material _dashTelegraphMat; // tum dusmanlar paylasir (alloc/leak yok)
+
+    /// <summary>Telegraph cizgisi + ucundaki ok'u (koddan mesh) bir kez olusturur (baslangicta gizli).</summary>
+    private void EnsureDashTelegraph()
+    {
+        if (_dashLine != null) return;
+
+        if (_dashTelegraphMat == null)
+        {
+            Shader sh = Shader.Find("Sprites/Default") ?? Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color");
+            _dashTelegraphMat = new Material(sh);
+        }
+        int order = (spriteRenderer != null ? spriteRenderer.sortingOrder : 0) + 1;
+
+        var lgo = new GameObject("DashTelegraph");
+        lgo.transform.SetParent(transform, false);
+        _dashLine = lgo.AddComponent<LineRenderer>();
+        _dashLine.useWorldSpace = true;
+        _dashLine.numCapVertices = 2;
+        _dashLine.material = _dashTelegraphMat;
+        _dashLine.startColor = _dashLine.endColor = dashTelegraphColor;
+        _dashLine.startWidth = _dashLine.endWidth = dashTelegraphWidth;
+        _dashLine.sortingOrder = order;
+        _dashLine.positionCount = 2;
+        _dashLine.enabled = false;
+    }
+
+    /// <summary>Telegraph'i verilen yonde gosterir (sadece cizgi — dusmandan dash hedefine).</summary>
+    private void ShowDashTelegraph(Vector2 dir)
+    {
+        Vector2 origin = transform.position;
+        Vector2 end = origin + dir * dashDistance;
+        if (_dashLine != null) { _dashLine.enabled = true; _dashLine.SetPosition(0, origin); _dashLine.SetPosition(1, end); }
+    }
+
+    private void HideDashTelegraph()
+    {
+        if (_dashLine != null) _dashLine.enabled = false;
+    }
+    #endregion
 
     private void OnDestroy()
     {
@@ -224,8 +364,9 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
     private void InitializeHealthSystem()
     {
-        // Zamanla (global zorluk) can olceklenir — maxHealth yerinde buyutulur ki clamp'ler dogru kalsin.
-        maxHealth *= Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor);
+        // Can dışarıdan set edildiyse (ornek: splitter yavrusu) tekrar zorlukla olcekleme (cift-olcek olmasin).
+        if (!_healthOverridden)
+            maxHealth *= Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor);
         currentHealth = maxHealth;
     }
 
@@ -269,6 +410,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         if (!canUseLaser || laserVisualPrefab == null) return;
 
         laserVisualInstance = Instantiate(laserVisualPrefab);
+        laserVisualInstance.SetSortingBehind(spriteRenderer != null ? spriteRenderer.sortingOrder : 0); // lazer dusmanin ARKASINDA
         laserVisualInstance.Hide();
     }
 
@@ -392,7 +534,53 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     /// Ultimate ekran-temizlemesi bu dusmani DROPSUZ ve ANINDA yok eder: core/ultFood birakmaz,
     /// olum animasyonu + duman OYNATMAZ (nuke temiz olsun). UltimateCinematic IMPACT aninda cagirir.
     /// </summary>
-    public void Vaporize() => Die(dropLoot: true, playDeathAnim: false); // ulti ile olen de core+yemek biraksin
+    public void Vaporize() { _noFoodDrop = true; _suppressDeathEffects = true; Die(dropLoot: true, playDeathAnim: false); } // nuke/ulti: core EVET, yemek + olum-efekti HAYIR
+
+    private bool _noFoodDrop;          // nuke (bombardiman) ile olurse: SADECE core, ultFood YOK
+    private bool _suppressDeathEffects; // nuke/ulti ile olurse: alt sinif olum efekti (patlama/bolunme) YOK
+    private bool _healthOverridden;    // can disaridan set edildi (splitter yavrusu) -> zorlukla tekrar olcekleme
+
+    /// <summary>Boss-oncesi bombardiman (nuke) bu dusmani oldururken cagirir: core birakir, ultFood + olum-efekti YOK.</summary>
+    public void NukeKill(float damage)
+    {
+        _noFoodDrop = true;
+        _suppressDeathEffects = true; // kitle temizliginde kamikaze zinciri / splitter cogalmasi olmasin
+        TakeDamage(damage);
+    }
+
+    /// <summary>
+    /// Olum aninda ALT SINIFLAR icin hook (kamikaze patlama, splitter bolunme). suppressed=true ise nuke/ulti
+    /// ile olundu -> efekt uygulanmamali (zincir/cogalma engeli). Taban sinifta bos.
+    /// </summary>
+    protected virtual void OnDeath(bool suppressed) { }
+
+    /// <summary>Alt siniflar icin: oyuncuyu bu dusmanla oldurmeden dusmani KENDISI oldurur (ornek: kamikaze patlamasi).</summary>
+    protected void KillSelf(bool dropLoot = true) => Die(dropLoot);
+
+    /// <summary>Alt siniflarin oyuncu konumuna erismesi icin (kovaladigi hedef).</summary>
+    protected Transform PlayerTransform => playerTransform;
+
+    /// <summary>Bu dusmanin temel rengi (flash sonrasi donulen). Splitter yavrularini kendi rengine boyamak icin okur.</summary>
+    protected Color BaseColor => baseColor;
+
+    /// <summary>Dis sistem (ornek: splitter) bu dusmanin rengini ayarlar — hem gorsel hem flash-donus rengi. Awake sonrasi cagrilmali.</summary>
+    public void SetTint(Color c)
+    {
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null) spriteRenderer.color = c;
+        baseColor = c;
+    }
+
+    /// <summary>Bu dusmanin GUNCEL max canini dondurur (zorlukla olceklenmis). Splitter yavru canini bundan hesaplar.</summary>
+    protected float CurrentMaxHealth => maxHealth;
+
+    /// <summary>Can'i dışarıdan set eder (Instantiate sonrasi, Start oncesi). Zorlukla yeniden olceklenmez.</summary>
+    public void SetMaxHealth(float hp)
+    {
+        maxHealth = hp;
+        currentHealth = hp;
+        _healthOverridden = true;
+    }
 
     /// <summary>
     /// Ultimate CHARGE fazi: dusmani "emilebilir" hale getirir — AI durur, fizik+collider kapanir
@@ -424,9 +612,11 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
             CoreManager.SpawnCores(transform.position, coreAmount);
 
             // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
-            if (Random.value < ultFoodDropChance)
+            if (!_noFoodDrop && Random.value < ultFoodDropChance)
                 UltimateManager.SpawnFood(transform.position, baseColor, 1);
         }
+
+        OnDeath(_suppressDeathEffects); // alt sinif hook: kamikaze patlama / splitter bolunme (nuke/ulti'de bastirilir)
 
         // Olurken AI, hareket ve carpismalari durdur
         StopAllCoroutines();                    // devam eden lazer/flash coroutine'lerini kes
@@ -453,18 +643,22 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         StartCoroutine(DeathRoutine());
     }
 
+    /// <summary>Olum animasyonunda oynatilacak kareler. Alt sinif override edebilir (ornek: kamikaze patlama kareleri).</summary>
+    protected virtual Sprite[] GetDeathFrames() => deathFrames;
+
     private System.Collections.IEnumerator DeathRoutine()
     {
         // Flash yarim kalmis olabilir — rengi kendi rengine (elite ise mor) sifirla
         if (spriteRenderer != null)
             spriteRenderer.color = baseColor;
 
-        if (deathFrames != null && deathFrames.Length > 0 && spriteRenderer != null)
+        Sprite[] frames = GetDeathFrames(); // alt sinif override edebilir (kamikaze patlama kareleri)
+        if (frames != null && frames.Length > 0 && spriteRenderer != null)
         {
             float frameDuration = 1f / Mathf.Max(1f, deathFrameRate);
-            for (int i = 0; i < deathFrames.Length; i++)
+            for (int i = 0; i < frames.Length; i++)
             {
-                spriteRenderer.sprite = deathFrames[i];
+                spriteRenderer.sprite = frames[i];
                 yield return new WaitForSeconds(frameDuration);
             }
         }

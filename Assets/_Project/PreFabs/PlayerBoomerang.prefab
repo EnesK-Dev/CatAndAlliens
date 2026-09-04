@@ -184,14 +184,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
   spriteRenderer: {fileID: 7187409854329487748}
   frames:
-  - {fileID: 4592022112667852959, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
-  - {fileID: 327773321540071193, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
-  - {fileID: 7447957170289283348, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
-  - {fileID: -3108902931973990431, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
-  - {fileID: -4319708449840049423, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
-  - {fileID: -4957968747161539743, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
-  - {fileID: 5295221679463767599, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
-  - {fileID: -567279137762290305, guid: 264ab5e8ce4f5a55fa261e69c923d431, type: 3}
+  - {fileID: 3087964426633769476, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+  - {fileID: 6216987119186573744, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+  - {fileID: -3837635312754191731, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+  - {fileID: -6805911876024215359, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+  - {fileID: -8599583714137160278, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+  - {fileID: -3022046300027521177, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+  - {fileID: 8506075715940618912, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+  - {fileID: 1003436089857415129, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
   frameRate: 30
   loop: 1
   randomizeStartFrame: 0

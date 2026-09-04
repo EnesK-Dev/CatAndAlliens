@@ -131,6 +131,9 @@ public class BombWarning : MonoBehaviour
 
     private void ApplyExplosionDamage()
     {
+        // Oyun duraklatildiysa (upgrade kart paneli / olum, timeScale=0) HIC hasar verme.
+        if (Time.timeScale == 0f) return;
+
         // Player'a hasar (alloc'suz)
         int pc = Physics2D.OverlapCircleNonAlloc(transform.position, explosionRadius, _overlapBuffer, playerLayer);
         for (int i = 0; i < pc; i++)
@@ -140,12 +143,12 @@ public class BombWarning : MonoBehaviour
                 playerComponent.TakeDamage(explosionDamage);
         }
 
-        // Bombardiman modu: dusmanlara da hasar (alani temizler)
+        // Bombardiman modu: dusmanlara da hasar (alani temizler). BOSS bombadan hasar ALMAZ.
         if (enemyExplosionDamage > 0f && enemyLayers.value != 0)
         {
             int ec = Physics2D.OverlapCircleNonAlloc(transform.position, explosionRadius, _overlapBuffer, enemyLayers);
             for (int i = 0; i < ec; i++)
-                EnemyDamage.Apply(_overlapBuffer[i], enemyExplosionDamage);
+                EnemyDamage.ApplyNuke(_overlapBuffer[i], enemyExplosionDamage); // core birakir, ultFood BIRAKMAZ; boss'a degmez
         }
     }
 

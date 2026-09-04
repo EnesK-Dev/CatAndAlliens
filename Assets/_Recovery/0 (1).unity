@@ -496,7 +496,7 @@ MonoBehaviour:
   bulletSpeed: 12
   bulletLifetime: 2
   baseFireInterval: 0.5
-  baseDamage: 10
+  baseDamage: 5
   fireIntervalMultiplier: 0.88
   maxFireRateLevel: 5
   damagePerLevel: 3
@@ -538,7 +538,7 @@ MonoBehaviour:
   catchDistance: 0.6
   throwStagger: 0.25
   baseSpeed: 10
-  baseDamage: 25
+  baseDamage: 12
   baseRestCooldown: 1.2
   maxCountLevel: 2
   speedPerLevel: 1.5
@@ -568,7 +568,7 @@ MonoBehaviour:
   orbSpinSpeed: 300
   baseRadius: 2
   baseRotationSpeed: 120
-  baseDamage: 30
+  baseDamage: 8
   maxCountLevel: 2
   rotationSpeedPerLevel: 30
   maxRotationLevel: 5
@@ -1177,7 +1177,7 @@ MonoBehaviour:
   minSpawnInterval: 7
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
-  startingBurstCount: 0
+  startingBurstCount: 2
   spawnLineLength: 42.9
   isVerticalLine: 0
   finalWaveMilestoneIndex: 4
@@ -2724,7 +2724,7 @@ MonoBehaviour:
   minSpawnInterval: 7
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
-  startingBurstCount: 0
+  startingBurstCount: 2
   spawnLineLength: 37.6
   isVerticalLine: 1
   finalWaveMilestoneIndex: 4
@@ -4728,8 +4728,8 @@ MonoBehaviour:
   planeSpeed: 12
   bombInterval: 0.18
   vSpacing: 2.5
-  planeShadowSize: {x: 10, y: 5}
-  planeShadowColor: {r: 0, g: 0, b: 0, a: 0.7294118}
+  planeShadowSize: {x: 5, y: 2.5}
+  planeShadowColor: {r: 0, g: 0, b: 0, a: 0.6}
   planeSortingOrder: 6
   bombSideGap: 0.9
   swoopRadiusMin: 5
@@ -5823,7 +5823,7 @@ MonoBehaviour:
   minSpawnInterval: 7
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
-  startingBurstCount: 0
+  startingBurstCount: 2
   spawnLineLength: 36.5
   isVerticalLine: 1
   finalWaveMilestoneIndex: 4
@@ -13083,14 +13083,6 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 4c0994cdbc8cd25e7b7763d6b2748643, type: 3}
     volume: 1
     pitchRange: {x: 1, y: 1}
-  - id: 18
-    clips: []
-    volume: 1
-    pitchRange: {x: 1, y: 1}
-  - id: 19
-    clips: []
-    volume: 1
-    pitchRange: {x: 1, y: 1}
   voiceCount: 8
   sRankLoop:
     id: 11
@@ -15704,7 +15696,7 @@ MonoBehaviour:
   minSpawnInterval: 7
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
-  startingBurstCount: 0
+  startingBurstCount: 2
   spawnLineLength: 40
   isVerticalLine: 0
   finalWaveMilestoneIndex: 4

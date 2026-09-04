@@ -50,12 +50,21 @@ public class BossLaserAttack : MonoBehaviour
     [SerializeField] private float atk3Spread = 28f;
     [Tooltip("Kapaninca ulasilan yari-aci (derece). Kucuk = neredeyse tam kapanir (copstik).")]
     [SerializeField] private float atk3CloseSpread = 4f;
+
+    [Tooltip("Kama KAPANMA hizi (derece/sn) — SABIT hiz. Buyuk = daha hizli kapanir.")]
+    [SerializeField] private float atk3CloseSpeed = 14f;
+    [Tooltip("Kapanirken merkezin oyuncuyu takip hizi (derece/sn). 0 = takip yok (sadece kapanir).")]
+    [SerializeField] private float atk3CenterTrackSpeed = 35f;
+
+    [Tooltip("(Kullanilmiyor — eski hold tabanli kapanmadan kaldi.)")]
     [SerializeField] private float atk3CloseTime = 2.5f;
+    [Tooltip("(Kullanilmiyor — artik hold yok, direkt kapanip biter.)")]
     [SerializeField] private float atk3HoldTime = 0.7f;
     #endregion
 
     #region Private Fields
     private BossController _boss;
+    private int _bossSortingOrder = 1; // boss sprite sorting order — lazer bunun ALTINA (arkasina) cizilir
     private Transform _player;
     private readonly List<BossLaser> _pool = new List<BossLaser>();
     private Coroutine _loop;
@@ -65,6 +74,8 @@ public class BossLaserAttack : MonoBehaviour
     private void Awake()
     {
         _boss = GetComponent<BossController>();
+        var bossSr = GetComponent<SpriteRenderer>();
+        if (bossSr != null) _bossSortingOrder = bossSr.sortingOrder;
         player p = FindFirstObjectByType<player>();
         if (p != null) _player = p.transform;
     }
@@ -205,29 +216,16 @@ public class BossLaserAttack : MonoBehaviour
         a.Fire(); b.Fire(); // tam isin + hasar
         SfxManager.Play(SfxId.LaserFire);
 
-        // kapanma: yari-aci spread -> closeSpread (copstik kapanir). Merkezi hafif takip et (adil ama zorlar).
-        float t = 0f;
-        while (t < atk3CloseTime)
+        // KAPANMA: kama SABIT HIZLA (deg/sn) direkt kapanir — bekleme/hold YOK. Kacis: dash ile isinlarin arasindan gec.
+        float s = atk3Spread;
+        while (s > atk3CloseSpread + 0.01f)
         {
             if (Dead()) break;
             origin = transform.position;
-            centerAngle = Mathf.MoveTowardsAngle(centerAngle, AngleToPlayer(origin), 40f * Time.deltaTime);
-            float s = Mathf.Lerp(atk3Spread, atk3CloseSpread, t / atk3CloseTime);
+            centerAngle = Mathf.MoveTowardsAngle(centerAngle, AngleToPlayer(origin), atk3CenterTrackSpeed * Time.deltaTime);
+            s = Mathf.MoveTowards(s, atk3CloseSpread, atk3CloseSpeed * Time.deltaTime); // sabit hizli kapanma
             a.SetBeam(origin, centerAngle + s, laserLength);
             b.SetBeam(origin, centerAngle - s, laserLength);
-            t += Time.deltaTime;
-            yield return null;
-        }
-
-        // kapali tut (dash penceresi)
-        float hold = 0f;
-        while (hold < atk3HoldTime)
-        {
-            if (Dead()) break;
-            origin = transform.position;
-            a.SetBeam(origin, centerAngle + atk3CloseSpread, laserLength);
-            b.SetBeam(origin, centerAngle - atk3CloseSpread, laserLength);
-            hold += Time.deltaTime;
             yield return null;
         }
 
@@ -264,7 +262,7 @@ public class BossLaserAttack : MonoBehaviour
 
         var go = new GameObject("BossLaser");
         var laser = go.AddComponent<BossLaser>(); // RequireComponent BoxCollider2D'yi otomatik ekler
-        laser.Setup(laserVisualPrefab, laserDamage, laserHitCooldown, laserWidth, colliderWidthScale);
+        laser.Setup(laserVisualPrefab, laserDamage, laserHitCooldown, laserWidth, colliderWidthScale, _bossSortingOrder);
         _pool.Add(laser);
         return laser;
     }

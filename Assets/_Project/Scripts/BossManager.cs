@@ -108,7 +108,18 @@ public class BossManager : MonoBehaviour
 
         // Boss'tan ONCE bombardiman: alani temizler, oyuncuyu zorlar; bitince boss spawn olur.
         // Director yoksa/zaten calisyorsa Trigger callback'i ANINDA cagirir (boss beklemez).
-        BombardmentDirector.Trigger(() => SpawnBoss(prefabToUse, wave));
+        // Boss rengini gecir — "BOSS FIGHT" yazisi bu renkte cikar.
+        Color bossColor = EffectiveBossColor(prefabToUse, wave.tint);
+        BombardmentDirector.Trigger(bossColor, () => SpawnBoss(prefabToUse, wave));
+    }
+
+    /// <summary>Boss'un GORUNECEK rengi: tint beyaz (dogal) ise prefab'in kendi rengi, degilse tint. (BossController.Initialize ile ayni mantik.)</summary>
+    private Color EffectiveBossColor(BossController prefab, Color tint)
+    {
+        bool natural = tint.r > 0.99f && tint.g > 0.99f && tint.b > 0.99f && tint.a > 0.99f;
+        if (!natural) return tint;
+        var sr = prefab != null ? prefab.GetComponent<SpriteRenderer>() : null;
+        return sr != null ? sr.color : Color.white;
     }
 
     /// <summary>Boss'u oyuncunun yaninda spawn eder ve tint/final/can'ini uygular. Bombardiman bitince cagrilir.</summary>

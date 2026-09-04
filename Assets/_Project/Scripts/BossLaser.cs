@@ -22,7 +22,7 @@ public class BossLaser : MonoBehaviour
     #region Public Methods
     /// <summary>Lazeri kurar (bir kez): animasyonlu gorsel prefab'i orneklenir, collider hazirlanir.</summary>
     /// <param name="colliderWidthScale">Collider kalinligi = gorsel kalinlik * bu. 1'den kucuk = hasar alani gorselden ince (adil).</param>
-    public void Setup(LaserVisual visualPrefab, float damage, float damageCooldown, float width, float colliderWidthScale)
+    public void Setup(LaserVisual visualPrefab, float damage, float damageCooldown, float width, float colliderWidthScale, int emitterSortingOrder)
     {
         _box = GetComponent<BoxCollider2D>();
         _box.isTrigger = true;
@@ -37,6 +37,7 @@ public class BossLaser : MonoBehaviour
         if (visualPrefab != null)
         {
             _visual = Instantiate(visualPrefab);
+            _visual.SetSortingBehind(emitterSortingOrder); // lazer boss'un ARKASINDA cizilsin
             _visual.SetChargeMode(false, width); // ates modu + kalinligi collider'a yaklastir (bir kez)
             _visual.Hide();
         }
