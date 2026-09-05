@@ -89,7 +89,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
+  - {fileID: 2100000, guid: 853854adb7f64cbe88b3aa1bd37d4422, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -174,8 +174,8 @@ MonoBehaviour:
   moveSpeed: 3
   maxHealth: 100
   healthMultiplierAtMaxDifficulty: 3
-  hitFlashColor: {r: 0.9622642, g: 0.049928807, b: 0.049928807, a: 1}
-  hitFlashDuration: 0.2
+  hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
+  hitFlashDuration: 0.07
   deathFrames:
   - {fileID: -30749221642623036, guid: f23e7535da39f3dfeae40be885d73488, type: 3}
   - {fileID: 2838966693941209132, guid: f23e7535da39f3dfeae40be885d73488, type: 3}
@@ -196,7 +196,6 @@ MonoBehaviour:
   dashChargeTime: 0.5
   dashTelegraphColor: {r: 0.3272993, g: 1, b: 0.25098038, a: 0.5254902}
   dashTelegraphWidth: 0.12
-  dashArrowSize: 0
   dashDistance: 2.5
   dashSpeed: 14
   dashAtPlayerChance: 0.5

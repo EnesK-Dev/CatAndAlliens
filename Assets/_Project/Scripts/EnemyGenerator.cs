@@ -113,7 +113,7 @@ public class EnemyGenerator : MonoBehaviour
         {
             // Boss varken VEYA boss-oncesi bombardimanda spawn duraklar (mevcut dusmanlar silinmez;
             // bombardimanda bombalardan olurler). Tek-sorumluluk: sadece spawn tarafi.
-            if (!((pauseSpawnDuringBoss && BossController.AnyBossAlive) || BombardmentDirector.IsActive))
+            if (!((pauseSpawnDuringBoss && BossController.AnyBossAlive) || BombardmentDirector.IsActive || SplitterEnemy.BossLineageAlive))
                 SpawnEnemyOnLine();
             ScheduleNextSpawn();
         }
@@ -174,7 +174,7 @@ public class EnemyGenerator : MonoBehaviour
         else
             spawnPosition.x += randomOffset;
 
-        GameObject spawned = Instantiate(entry.prefab, spawnPosition, Quaternion.identity);
+        GameObject spawned = PoolManager.Spawn(entry.prefab, spawnPosition, Quaternion.identity); // havuzdan (Instantiate yerine)
         _aliveEnemies.Add(spawned); // canli sayimi icin izle (limit kontrolu bunu kullanir)
 
         // YEREL ZORLUK: bu tip acilalı (unlockMilestone) ne kadar oldu -> 0..1 rampa. Ilk cikinca taban.
@@ -225,14 +225,16 @@ public class EnemyGenerator : MonoBehaviour
     }
 
     /// <summary>
-    /// Canli dusman sayisini dondurur; bu sirada Destroy edilmis (Unity fake-null) referanslari listeden atar.
+    /// Canli dusman sayisini dondurur; bu sirada Destroy edilmis (fake-null) VEYA havuza donmus (inactive)
+    /// referanslari listeden atar. Havuz: despawn edilen dusman null degildir ama pasiftir — onu da 'olu' say.
     /// Liste kucuk (en fazla ~limit kadar) oldugu icin maliyeti onemsiz; her spawn denemesinde bir kez cagrilir.
     /// </summary>
     private int CountAliveEnemies()
     {
         for (int i = _aliveEnemies.Count - 1; i >= 0; i--)
         {
-            if (_aliveEnemies[i] == null) // olmus/Destroy edilmis dusman
+            GameObject e = _aliveEnemies[i];
+            if (e == null || !e.activeSelf) // olmus/Destroy edilmis VEYA havuza donmus (pasif)
                 _aliveEnemies.RemoveAt(i);
         }
         return _aliveEnemies.Count;

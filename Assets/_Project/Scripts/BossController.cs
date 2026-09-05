@@ -127,6 +127,9 @@ public class BossController : MonoBehaviour
     [SerializeField] private Vector2 arenaCenter = Vector2.zero;
     [SerializeField] private Vector2 arenaHalfSize = new Vector2(20f, 18f);
 
+    [Tooltip("Boss duvara ne kadar yaklasabilsin (dunya birimi). KUCUK = duvara daha cok yaklasir (oyuncu duvar kenarinda kolayca kacamaz/kampleyemez). Eskiden boss yaricapi kullaniliyordu, cok geride duruyordu.")]
+    [SerializeField] private float wallClearance = 0.4f;
+
     [Tooltip("Kirmizi telegraph izinin rengi.")]
     [SerializeField] private Color telegraphColor = new Color(1f, 0.12f, 0.12f, 0.85f);
 
@@ -172,6 +175,9 @@ public class BossController : MonoBehaviour
 
     // Dash saldirisi
     private bool _isAttacking;
+    // Dis atak modulu (ornek: KamikazeBossAttack) atak yaparken hareketi durdurmak icin. Boss yururken atak
+    // yapinca sabit kalsin diye modul bunu true/false yapar.
+    private bool _externalAttacking;
     private float _nextAttackTime;
     private LineRenderer _telegraph;   // kirmizi iz (runtime'da olusturulur)
     private Transform _telegraphArrow; // izin ucundaki kirmizi ucgen (ok ucu)
@@ -208,6 +214,12 @@ public class BossController : MonoBehaviour
 
     /// <summary>Boss'un temel rengi (tint). Attack modulleri gorsel (ok vb.) icin boss rengini kullanir.</summary>
     public Color BaseColor => baseColor;
+
+    /// <summary>
+    /// Dis atak modulu (ornek: KamikazeBossAttack) atak yaparken TRUE der -> boss hareketi durur (yurumez).
+    /// Atak bitince FALSE -> boss yine yurur. Boss'un kendi dash/lazer sistemine dokunmaz.
+    /// </summary>
+    public void SetExternalAttacking(bool value) => _externalAttacking = value;
     #endregion
 
     #region Unity Callbacks
@@ -222,7 +234,11 @@ public class BossController : MonoBehaviour
         player p = FindFirstObjectByType<player>();
         if (p != null) _playerTransform = p.transform;
 
-        if (_spriteRenderer != null) baseColor = _spriteRenderer.color; // Inspector'da verilen renk = temel renk
+        if (_spriteRenderer != null)
+        {
+            baseColor = _spriteRenderer.color; // Inspector'da verilen renk = temel renk
+            FlashFx.SetTint(_spriteRenderer, baseColor); // gorsel tint _Color'dan gelir (URP 2D)
+        }
 
         // Boss yaricapi (dash clamp'i icin) — collider'dan
         if (_bodyCollider is CircleCollider2D cc)
@@ -267,6 +283,11 @@ public class BossController : MonoBehaviour
         if (_isDying) return;
         UpdateFacing(); // oyuncuya gore sag/sol don (donmus olsa bile gorsel)
         if (_isAttacking) return; // dash coroutine'i konumu kendi kontrol ediyor
+        if (_externalAttacking) // dis atak modulu (ornek: KamikazeBossAttack) atak yaparken TAM DUR
+        {
+            if (_rb != null) _rb.linearVelocity = Vector2.zero;
+            return;
+        }
         if (EnemyFreeze.IsFrozen)
         {
             if (_rb != null) _rb.linearVelocity = Vector2.zero;
@@ -310,6 +331,7 @@ public class BossController : MonoBehaviour
             baseColor = tint;
             if (_spriteRenderer != null) _spriteRenderer.color = tint;
         }
+        if (_spriteRenderer != null) FlashFx.SetTint(_spriteRenderer, baseColor); // gorsel tint _Color'dan gelir (URP 2D)
     }
 
     /// <summary>Oyuncunun saldirisi cagirir (player.ApplyDamage boss'u tanir). Can azaltir, flash'lar, biterse olur.</summary>
@@ -480,8 +502,10 @@ public class BossController : MonoBehaviour
     /// <summary>Bir noktayi arena dikdortgenine clamp'ler (boss yaricapi kadar iceride) — dash duvara girmesin.</summary>
     private Vector3 ClampToArena(Vector3 p)
     {
-        float mx = Mathf.Max(0f, arenaHalfSize.x - _bossRadius);
-        float my = Mathf.Max(0f, arenaHalfSize.y - _bossRadius);
+        // Eskiden _bossRadius kadar iceride tutuluyordu -> boss duvardan cok uzakta duruyordu, oyuncu kenarda kampliyordu.
+        // Artik kucuk wallClearance kadar -> boss duvara yaklasip oyuncuyu kostebekleyebilir.
+        float mx = Mathf.Max(0f, arenaHalfSize.x - wallClearance);
+        float my = Mathf.Max(0f, arenaHalfSize.y - wallClearance);
         p.x = Mathf.Clamp(p.x, arenaCenter.x - mx, arenaCenter.x + mx);
         p.y = Mathf.Clamp(p.y, arenaCenter.y - my, arenaCenter.y + my);
         return p;
@@ -633,9 +657,9 @@ public class BossController : MonoBehaviour
 
     private IEnumerator HitFlashRoutine()
     {
-        _spriteRenderer.color = hitFlashColor;
+        FlashFx.Set(_spriteRenderer, hitFlashColor, 1f);
         yield return new WaitForSeconds(hitFlashDuration);
-        _spriteRenderer.color = baseColor;
+        FlashFx.Set(_spriteRenderer, hitFlashColor, 0f);
         _hitFlashRoutine = null;
     }
 
@@ -668,6 +692,7 @@ public class BossController : MonoBehaviour
 
     private IEnumerator DeathRoutine()
     {
+        FlashFx.Clear(_spriteRenderer); // yarim kalmis flash'i kapat (death frame'ler flash renginde gorunmesin)
         if (deathFrames != null && deathFrames.Length > 0 && _spriteRenderer != null)
         {
             float frameTime = deathFrameRate > 0f ? 1f / deathFrameRate : 0.1f;

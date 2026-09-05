@@ -13,9 +13,6 @@ public class OrbitalWeapon : WeaponBase
     [Tooltip("Ayni dusmana iki vurus arasi minimum sure.")]
     [SerializeField] private float hitCooldown = 0.4f;
 
-    [Tooltip("Orb'un KENDI EKSENINDE donme hizi (derece/sn) — yildizin donmesi hissedilsin. Orbit hizindan bagimsiz. 0 = donmez.")]
-    [SerializeField] private float orbSpinSpeed = 300f;
-
     [Header("Baslangic (Lv.1) Degerleri")]
     [SerializeField] private float baseRadius = 2f;
     [SerializeField] private float baseRotationSpeed = 120f; // derece/sn
@@ -54,13 +51,12 @@ public class OrbitalWeapon : WeaponBase
         Vector2 center = transform.position;
         float step = 360f / Mathf.Max(1, _orbs.Length);
 
-        float spinDelta = orbSpinSpeed * Time.deltaTime;
         for (int i = 0; i < _orbs.Length; i++)
         {
             if (_orbs[i] == null) continue;
             float a = (_angle + i * step) * Mathf.Deg2Rad;
             _orbs[i].transform.position = center + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
-            _orbs[i].transform.Rotate(0f, 0f, spinDelta); // kendi ekseninde don (gorsel canlilik)
+            // Orb'lar SADECE oyuncunun etrafinda doner; kendi ekseninde donme KALDIRILDI.
         }
     }
 

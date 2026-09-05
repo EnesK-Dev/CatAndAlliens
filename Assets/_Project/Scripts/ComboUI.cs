@@ -26,6 +26,11 @@ public class ComboUI : MonoBehaviour
     [Tooltip("Tam ekran flash Image'i (rank-up ve S-pulse icin).")]
     [SerializeField] private Image flashImage;
 
+    [Tooltip("Ilerleme dolgusu maskesi (RectMask2D, pivot ALT). Yuksekligi ilerlemeyle buyur -> harf kopyasi asagidan yukari acilir.")]
+    [SerializeField] private RectTransform rankFillMask;
+    [Tooltip("Rank harfinin KOPYASI (maske icinde). Sonraki rank renginde; maskeyle kirpilir -> dolgu tam harfin icinde kalir.")]
+    [SerializeField] private TMP_Text rankFillLabel;
+
     [Header("Vurus Punch")]
     [Tooltip("Her vuruste rank harfinin siçrayacagi olcek.")]
     [SerializeField] private float hitPunchScale = 1.25f;
@@ -97,6 +102,8 @@ public class ComboUI : MonoBehaviour
             _punch = Mathf.Lerp(_punch, 1f, Time.deltaTime * punchReturnSpeed);
             _rankRect.localScale = Vector3.one * _punch;
         }
+
+        UpdateRankProgress();
 
         // S-tier sustained pulse — rank-up flash calismiyorken devreye girer
         if (_atMax && _rankUpRoutine == null)
@@ -187,6 +194,21 @@ public class ComboUI : MonoBehaviour
         HideRankUp();
         _rankUpRoutine = null;
         if (!_atMax) SetFlashAlpha(0f);
+    }
+
+    /// <summary>Sonraki rank'e ilerlemeyi dolguyla gosterir: normalde VURUS ilerlemesi, bombardimanda ZAMAN ilerlemesi. Renk = sonraki rank.</summary>
+    private void UpdateRankProgress()
+    {
+        if (rankFillMask == null || rankFillLabel == null || rankLabel == null) return;
+        float prog = BombardmentDirector.IsActive ? BombardmentDirector.RankRewardProgress : ComboManager.TierProgress;
+
+        rankFillLabel.text = ComboManager.RankLabel;        // ayni harf
+        rankFillLabel.color = ComboManager.NextRankColor;   // sonraki rank rengi (tam opak)
+
+        // Maske yuksekligi = ilerleme * harf yuksekligi (pivot alt -> asagidan yukari acilir)
+        float full = rankLabel.rectTransform.rect.height;
+        var sd = rankFillMask.sizeDelta;
+        rankFillMask.sizeDelta = new Vector2(sd.x, full * Mathf.Clamp01(prog));
     }
 
     private void HideRankUp()

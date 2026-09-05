@@ -10,6 +10,14 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class PlayerBoomerang : MonoBehaviour
 {
+    #region Serialized Fields
+    [Header("Knockback (vurus hissi)")]
+    [Tooltip("Gidiste dusmani oyuncudan UZAKLASTIRMA, donuste YAKLASTIRMA hizi.")]
+    [SerializeField] private float knockbackSpeed = 4f;
+    [Tooltip("Itmenin suresi (sn) — sonra sonumlenir.")]
+    [SerializeField] private float knockbackDuration = 0.15f;
+    #endregion
+
     #region Private Fields
     private Rigidbody2D _rb;
     private Transform _owner;
@@ -84,7 +92,11 @@ public class PlayerBoomerang : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        EnemyDamage.Apply(other, _damage * ComboManager.Multiplier); // pierce; combo carpani vurus aninda
+        // Gidiste dusmani oyuncudan UZAKLASTIR, donuste oyuncuya YAKLASTIR (cek)
+        Vector2 ownerPos = _owner != null ? (Vector2)_owner.position : _startPos;
+        Vector2 enemyPos = (Vector2)other.transform.position;
+        Vector2 knockDir = _returning ? (ownerPos - enemyPos) : (enemyPos - ownerPos);
+        EnemyDamage.Apply(other, _damage * ComboManager.Multiplier, knockDir, knockbackSpeed, knockbackDuration); // pierce; combo carpani vurus aninda
     }
     #endregion
 

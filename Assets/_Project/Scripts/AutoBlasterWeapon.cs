@@ -84,8 +84,10 @@ public class AutoBlasterWeapon : WeaponBase
     private void FireAt(Vector3 targetPos)
     {
         Vector2 dir = (Vector2)targetPos - (Vector2)transform.position;
-        PlayerProjectile bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
-        bullet.Launch(dir, bulletSpeed, CurrentDamage(), bulletLifetime);
+        // Havuzdan cek (Instantiate yerine) — hizli ateste GC sicramasini onler
+        GameObject go = PoolManager.Spawn(bulletPrefab.gameObject, transform.position, Quaternion.identity);
+        PlayerProjectile bullet = go.GetComponent<PlayerProjectile>();
+        if (bullet != null) bullet.Launch(dir, bulletSpeed, CurrentDamage(), bulletLifetime);
     }
     #endregion
 }

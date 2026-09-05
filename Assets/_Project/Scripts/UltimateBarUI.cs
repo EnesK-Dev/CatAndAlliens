@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,6 +31,21 @@ public class UltimateBarUI : MonoBehaviour
 
     [Tooltip("Ultimate dolmakta iken ikon rengi (soluk/gri).")]
     [SerializeField] private Color chargingColor = new Color(1f, 1f, 1f, 0.35f);
+
+    [Header("Yemek Pulse (dolunca belli etsin)")]
+    [Tooltip("Sarj artinca (yemek yeninca) pulse'lanacak obje. Bos ise bar Image'inin RectTransform'u kullanilir.")]
+    [SerializeField] private RectTransform pulseTarget;
+
+    [Tooltip("Pulse'in tepe olcegi (1.3 = %30 buyur, sonra 1'e doner).")]
+    [SerializeField] private float pulseScale = 1.3f;
+
+    [Tooltip("Pulse suresi (sn) — buyu+kucul tek seferde bu surede olur.")]
+    [SerializeField] private float pulseDuration = 0.28f;
+    #endregion
+
+    #region Private Fields
+    private float _lastNormalized;
+    private Coroutine _pulseRoutine;
     #endregion
 
     #region Unity Callbacks
@@ -41,7 +57,10 @@ public class UltimateBarUI : MonoBehaviour
         if (ultButton != null)
             ultButton.onClick.AddListener(HandleUltButtonClicked);
 
-        // Baslangic durumunu hemen ciz (UI gec enable olsa bile dogru gorunsun)
+        if (pulseTarget == null && barImage != null) pulseTarget = barImage.rectTransform;
+
+        // Baslangic durumunu hemen ciz (UI gec enable olsa bile dogru gorunsun). Baslangicta pulse ATMASIN.
+        _lastNormalized = UltimateManager.Charge01;
         HandleChargeChanged(UltimateManager.Charge01);
         HandleReadyChanged(UltimateManager.IsReady);
     }
@@ -53,6 +72,8 @@ public class UltimateBarUI : MonoBehaviour
 
         if (ultButton != null)
             ultButton.onClick.RemoveListener(HandleUltButtonClicked);
+
+        if (_pulseRoutine != null) { StopCoroutine(_pulseRoutine); _pulseRoutine = null; }
     }
     #endregion
 
@@ -69,6 +90,30 @@ public class UltimateBarUI : MonoBehaviour
         idx = Mathf.Clamp(idx, 0, frames.Length - 1);
         if (frames[idx] != null)
             barImage.sprite = frames[idx];
+
+        // Sarj ARTTIYSA (yemek yeninca) barı pulse'la — oyuncu dolusunu fark etsin. Azalma/sifirlamada atmaz.
+        if (normalized > _lastNormalized + 0.0001f && pulseTarget != null)
+        {
+            if (_pulseRoutine != null) StopCoroutine(_pulseRoutine);
+            _pulseRoutine = StartCoroutine(PulseRoutine());
+        }
+        _lastNormalized = normalized;
+    }
+
+    /// <summary>Barı bir kez buyutup 1'e dondurur (sin egrisi -> yumusak buyu/kucul). Yemek yeninca cagrilir.</summary>
+    private IEnumerator PulseRoutine()
+    {
+        float t = 0f;
+        while (t < pulseDuration)
+        {
+            t += Time.unscaledDeltaTime; // pause/timeScale'den bagimsiz
+            float n = Mathf.Clamp01(t / pulseDuration);
+            float s = 1f + (pulseScale - 1f) * Mathf.Sin(n * Mathf.PI); // 1 -> tepe -> 1
+            pulseTarget.localScale = new Vector3(s, s, 1f);
+            yield return null;
+        }
+        pulseTarget.localScale = Vector3.one;
+        _pulseRoutine = null;
     }
 
     /// <summary>Hazir olma durumu degisince butonu aktif/pasif eder ve ikon rengini gunceller.</summary>

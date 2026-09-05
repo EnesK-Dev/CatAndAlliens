@@ -26,6 +26,43 @@ public class SplitterEnemy : EnemyController
 
     [Tooltip("Cocuklarin dogum noktasi sacilimi (dunya birimi).")]
     [SerializeField] private float spawnSpread = 0.6f;
+
+    [Tooltip("Yavrularin hiz carpani (parent base hizina gore). 1.3 = %30 hizli. Split cocuklari biraz hizlansin.")]
+    [SerializeField] private float childSpeedMultiplier = 1.3f;
+
+    [Tooltip("SPLITTER BOSS soyu mu? Aciksa tum parcalar (1+2+4+8+16) olene kadar oyun ilerlemesi DURUR (boss dovusu). Normal splitter'da KAPALI.")]
+    [SerializeField] private bool isBossLineage = false;
+    #endregion
+
+    #region Boss Soyu (dovus takibi)
+    private static int _lineageAlive;
+
+    /// <summary>Splitter boss soyundan CANLI parca var mi. Difficulty/EnemyGenerator ilerlemeyi durdurmak icin okur.</summary>
+    public static bool BossLineageAlive => _lineageAlive > 0;
+
+    /// <summary>Bu parca boss soyundan mi (bombardiman onu OLDURMEMELI — spawn ani havada kalan bombaya kurban gitmesin).</summary>
+    public bool IsBossLineage => isBossLineage;
+
+    protected override void OnEnable() { base.OnEnable(); if (isBossLineage) _lineageAlive++; }
+    protected override void OnDisable() { base.OnDisable(); if (isBossLineage) _lineageAlive = Mathf.Max(0, _lineageAlive - 1); }
+    #endregion
+
+    #region Pool Reset
+    private int _baseSplitDepth;
+
+    /// <summary>Base splitDepth'i yakala (havuz reset'i icin) — SADECE ilk Instantiate.</summary>
+    protected override void Awake()
+    {
+        base.Awake();
+        _baseSplitDepth = splitDepth;
+    }
+
+    /// <summary>Havuzdan yeniden kullanimda splitDepth'i base'e dondur (birikmesin/0'da kalmasin). SetSplitDepth sonra ezebilir.</summary>
+    protected override void ResetForSpawn()
+    {
+        base.ResetForSpawn();
+        splitDepth = _baseSplitDepth;
+    }
     #endregion
 
     #region Public Methods
@@ -44,7 +81,7 @@ public class SplitterEnemy : EnemyController
         for (int i = 0; i < splitCount; i++)
         {
             Vector2 offset = Random.insideUnitCircle * spawnSpread;
-            GameObject child = Instantiate(splitChildPrefab, (Vector2)transform.position + offset, Quaternion.identity);
+            GameObject child = PoolManager.Spawn(splitChildPrefab, (Vector2)transform.position + offset, Quaternion.identity); // havuzdan
             if (!Mathf.Approximately(childScale, 1f)) child.transform.localScale *= childScale;
 
             var ec = child.GetComponent<EnemyController>();
@@ -52,6 +89,8 @@ public class SplitterEnemy : EnemyController
             {
                 ec.SetTint(BaseColor);                                          // parent rengini al (yesil olmasin)
                 if (childHealthFactor > 0f) ec.SetMaxHealth(CurrentMaxHealth * childHealthFactor); // her kusak zayifla
+                ec.SetDashEnabled(false);                                       // split cocuklari DASH ATMASIN — sadece bolunup kovalasin
+                ec.SetSpeedMultiplier(childSpeedMultiplier);                    // biraz hizli olsunlar
             }
 
             // Yavru da splitter ise: bir sonraki kusak bir kez daha az bolunur (1>2>4>8>16 sonra durur)

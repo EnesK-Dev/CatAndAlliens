@@ -63,7 +63,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 853854adb7f64cbe88b3aa1bd37d4422, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -210,8 +210,8 @@ MonoBehaviour:
   spriteFacesRight: 1
   bodyContactDamage: 2
   contactDamageCooldown: 1
-  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
-  hitFlashDuration: 0.08
+  hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
+  hitFlashDuration: 0.07
   deathFrames: []
   deathFrameRate: 10
   coreDropMin: 20
@@ -234,6 +234,7 @@ MonoBehaviour:
   zigzagChance: 0.5
   arenaCenter: {x: -1.5, y: -0.5}
   arenaHalfSize: {x: 18, y: 16}
+  wallClearance: 0.4
   telegraphColor: {r: 0.29803923, g: 0.8, b: 1, a: 0.78039217}
   telegraphWidth: 0.35
   telegraphArrowSize: 0.4

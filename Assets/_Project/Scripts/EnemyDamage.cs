@@ -27,6 +27,36 @@ public static class EnemyDamage
     }
 
     /// <summary>
+    /// Hasar + KNOCKBACK: dusmani 'knockDir' yonunde iter (silah vurus hissi). Boss itilmez (sadece hasar).
+    /// Dusman disi collider'da false doner. Silah mermileri (yildiz/burst/bumerang) bunu kullanir.
+    /// </summary>
+    public static bool Apply(Collider2D col, float damage, Vector2 knockDir, float knockSpeed, float knockDuration)
+    {
+        if (col == null) return false;
+
+        BossController boss = col.GetComponent<BossController>();
+        if (boss != null) { boss.TakeDamage(damage); return true; } // boss itilmez
+
+        EnemyController enemy = col.GetComponent<EnemyController>();
+        if (enemy != null)
+        {
+            enemy.TakeDamage(damage);
+            // Splitter BOSS (ve soyu) knockback YEMEZ — boss itilmemeli. Normal dusmanlar itilir.
+            SplitterEnemy sp = enemy as SplitterEnemy;
+            if (sp == null || !sp.IsBossLineage) enemy.ApplyKnockback(knockDir, knockSpeed, knockDuration);
+            return true;
+        }
+
+        BurstShooterEnemy burst = col.GetComponent<BurstShooterEnemy>();
+        if (burst != null) { burst.TakeDamage(damage); burst.ApplyKnockback(knockDir, knockSpeed, knockDuration); return true; }
+
+        BoomerangEnemy boom = col.GetComponent<BoomerangEnemy>();
+        if (boom != null) { boom.TakeDamage(damage); boom.ApplyKnockback(knockDir, knockSpeed, knockDuration); return true; }
+
+        return false;
+    }
+
+    /// <summary>
     /// NUKE (boss-oncesi bombardiman) hasari: dusmanlari NukeKill ile oldurur (core birakir, ultFood BIRAKMAZ).
     /// Boss'a DEGMEZ (bombardiman boss'u vurmaz). Dusman disi collider'da false doner.
     /// </summary>
@@ -35,7 +65,14 @@ public static class EnemyDamage
         if (col == null) return false;
 
         EnemyController enemy = col.GetComponent<EnemyController>();
-        if (enemy != null) { enemy.NukeKill(damage); return true; }
+        if (enemy != null)
+        {
+            // Splitter BOSS soyunu bombardiman oldurmesin (spawn ani havada kalan bombaya kurban gitmesin).
+            SplitterEnemy sp = enemy as SplitterEnemy;
+            if (sp != null && sp.IsBossLineage) return true; // "islendi" say ama hasar verme
+            enemy.NukeKill(damage);
+            return true;
+        }
 
         BurstShooterEnemy burst = col.GetComponent<BurstShooterEnemy>();
         if (burst != null) { burst.NukeKill(damage); return true; }

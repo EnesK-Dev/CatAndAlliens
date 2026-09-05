@@ -127,7 +127,37 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     private const float MinChargeDuration = 0.05f; // sarj suresinin inebilecegi guvenli taban
     #endregion
 
+    // Havuz (pool) icin: base degerler SADECE ilk Instantiate'te (Awake) yakalanir; her yeniden kullanimda
+    // (OnEnable) ResetForSpawn bunlardan sifirlar. Boylece can zorlukla ust uste CARPILIP sismez, scale/splitDepth
+    // birikmez, olum durumu (isDying/animator/collider/rb) geri alinir.
+    private float _baseMaxHealth;
+    private Vector3 _baseScale;
+    private float _baseMoveSpeed;
+    private bool _baseEnableDash;
+    private bool _initedOnce;
+
     #region Unity Callbacks
+    /// <summary>Base degerleri prefab'dan yakalar (SADECE ilk Instantiate; SetMaxHealth'ten ONCE calisir).</summary>
+    protected virtual void Awake()
+    {
+        _baseMaxHealth = maxHealth;
+        _baseScale = transform.localScale;
+        _baseMoveSpeed = moveSpeed;
+        _baseEnableDash = enableDash;
+    }
+
+    /// <summary>Havuzdan yeniden kullanimda calisir (ilk spawn'da Start hallettigi icin atlanir).</summary>
+    protected virtual void OnEnable()
+    {
+        if (_initedOnce) ResetForSpawn();
+    }
+
+    /// <summary>Havuza donunce (despawn) lazer gorselini gizle — orphan kalmasin.</summary>
+    protected virtual void OnDisable()
+    {
+        if (laserVisualInstance != null) laserVisualInstance.Hide();
+    }
+
     private void Start()
     {
         InitializeComponents();
@@ -139,6 +169,53 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         SpawnLaserVisual();
 
         _nextDashTime = Time.time + Random.Range(dashIntervalMin, dashIntervalMax); // spawn'da hemen dash atmasin
+        _initedOnce = true; // bundan sonra yeniden kullanimda OnEnable->ResetForSpawn devreye girer
+    }
+
+    /// <summary>
+    /// Havuzdan yeniden kullanimda TUM durumu sifirlar (olum bayraklari, fizik, collider, animator, flash,
+    /// knockback, can[base x zorluk], scale). DetermineEnemyVariation TEKRAR calismaz — her instance kendi
+    /// elite/normal varyasyonunu korur (lazer gorseli o instance'a bagli kalir). Alt sinif ek reset icin override eder.
+    /// </summary>
+    protected virtual void ResetForSpawn()
+    {
+        isDying = false;
+        vacuumed = false;
+        _isDashing = false;
+        _healthOverridden = false;
+        _noFoodDrop = false;
+        _suppressDeathEffects = false;
+
+        transform.localScale = _baseScale;
+
+        // Hiz + dash'i base'e dondur (reuse'da onceki spawn'in child-multiplier'i/dash-kapatmasi kalmasin).
+        // Elite ise hiz eliteMoveSpeed'e doner (DetermineEnemyVariation reuse'da tekrar calismaz).
+        enableDash = _baseEnableDash;
+        moveSpeed = canUseLaser ? eliteMoveSpeed : _baseMoveSpeed;
+        ComputeEffectiveMoveSpeed();
+
+        // Can: base x GUNCEL zorluk (SetMaxHealth cagrilirsa sonra ezer — ornek splitter yavrusu)
+        maxHealth = _baseMaxHealth * Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor);
+        currentHealth = maxHealth;
+
+        if (rb != null) { rb.simulated = true; rb.linearVelocity = Vector2.zero; }
+        if (bodyCollider != null) bodyCollider.enabled = true;
+        if (spriteAnimator != null) spriteAnimator.enabled = true;
+
+        _knockUntil = 0f;
+        _pushStunUntil = 0f;
+        HideDashTelegraph();
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = baseColor;
+            FlashFx.Clear(spriteRenderer);
+            FlashFx.SetTint(spriteRenderer, baseColor);
+        }
+        if (laserVisualInstance != null) laserVisualInstance.Hide();
+
+        CalculateNextAttackTime();
+        _nextDashTime = Time.time + Random.Range(dashIntervalMin, dashIntervalMax);
     }
 
     protected virtual void Update()
@@ -181,6 +258,15 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
             if (rb != null) rb.linearVelocity = Vector2.zero;
             return;
         }
+        if (Time.time < _knockUntil) // silah vurusu ile itiliyor (knockback) — yon + sonme
+        {
+            if (rb != null)
+            {
+                float rem = _knockDur > 0f ? Mathf.Clamp01((_knockUntil - Time.time) / _knockDur) : 0f;
+                rb.linearVelocity = _knockVel * rem; // sona dogru sonumlenir (yumusak sove)
+            }
+            return;
+        }
         if (Time.time < _pushStunUntil) // dash ile itildi — kisa sure yerinde dur (duvar hissi)
         {
             if (rb != null) rb.linearVelocity = Vector2.zero;
@@ -190,12 +276,28 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     }
 
     private float _pushStunUntil;
+    private float _knockUntil;
+    private float _knockDur;
+    private Vector2 _knockVel;
 
     /// <summary>Dash ile itilince kisa sure yerinde dursun (sonra yurumeye devam) — 'duvari ittirme' hissi.</summary>
     public void ApplyPushStun(float duration)
     {
         if (duration > 0f) _pushStunUntil = Mathf.Max(_pushStunUntil, Time.time + duration);
     }
+
+    /// <summary>Silah vurusu geri tepmesi: dusmani 'dir' yonunde 'speed' hiziyla 'duration' sure iter (sonumlenir).</summary>
+    public void ApplyKnockback(Vector2 dir, float speed, float duration)
+    {
+        if (duration <= 0f || speed <= 0f || dir.sqrMagnitude < 0.0001f) return;
+        _knockVel = dir.normalized * speed;
+        _knockDur = duration;
+        _knockUntil = Time.time + duration;
+        _pushStunUntil = Mathf.Max(_pushStunUntil, _knockUntil + HitFreezeAfterKnockback); // geri gidince cok kisa DON (hit-stop hissi)
+    }
+
+    /// <summary>Knockback bitince dusmanin yerinde kalacagi cok kisa donma suresi (hit-stop hissi).</summary>
+    private const float HitFreezeAfterKnockback = 0.06f;
 
     private bool _isDashing;
     private float _nextDashTime;
@@ -338,6 +440,20 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         CalculateNextAttackTime(); // ilk saldiri araligi da yerel zorluga gore (ilk cikinca seyrek)
     }
 
+    /// <summary>Hareket hizini base'in KATI olarak ayarlar (ornek: splitter yavrulari hizlansin). ResetForSpawn base'e dondurur.</summary>
+    public void SetSpeedMultiplier(float multiplier)
+    {
+        moveSpeed = (canUseLaser ? eliteMoveSpeed : _baseMoveSpeed) * Mathf.Max(0f, multiplier);
+        ComputeEffectiveMoveSpeed();
+    }
+
+    /// <summary>Dash'i ac/kapa (ornek: splitter yavrulari dash atmasin). ResetForSpawn base'e dondurur (havuz kirlenmez).</summary>
+    public void SetDashEnabled(bool enabled)
+    {
+        enableDash = enabled;
+        if (!enabled) { _isDashing = false; HideDashTelegraph(); }
+    }
+
     /// <summary>Düşmana hasar verir; can bitince ölüm tetiklenir.</summary>
     public void TakeDamage(float damageAmount)
     {
@@ -402,7 +518,10 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
         // Flash sonrasi bu renge donulecek — elite ise mor, degilse varsayilan
         if (spriteRenderer != null)
+        {
             baseColor = spriteRenderer.color;
+            FlashFx.SetTint(spriteRenderer, baseColor); // gorsel tint _Color'dan gelir (URP 2D)
+        }
     }
 
     private void SpawnLaserVisual()
@@ -458,9 +577,9 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
     private System.Collections.IEnumerator HitFlashRoutine()
     {
-        spriteRenderer.color = hitFlashColor;
+        FlashFx.Set(spriteRenderer, hitFlashColor, 1f);
         yield return new WaitForSeconds(hitFlashDuration);
-        spriteRenderer.color = baseColor;
+        FlashFx.Set(spriteRenderer, hitFlashColor, 0f);
         hitFlashRoutine = null;
     }
 
@@ -567,7 +686,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     public void SetTint(Color c)
     {
         if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null) spriteRenderer.color = c;
+        if (spriteRenderer != null) { spriteRenderer.color = c; FlashFx.SetTint(spriteRenderer, c); }
         baseColor = c;
     }
 
@@ -620,6 +739,8 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
         // Olurken AI, hareket ve carpismalari durdur
         StopAllCoroutines();                    // devam eden lazer/flash coroutine'lerini kes
+        _isDashing = false;
+        HideDashTelegraph();                    // dash sirasinda olduyse telegraph ekranda kalmasin
         if (spriteAnimator != null)
             spriteAnimator.enabled = false;     // Kare oynaticiyi kapat — yoksa death frame'leri her kare ezer
         if (rb != null)
@@ -635,7 +756,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         // Nuke (Vaporize) icin ANINDA yok ol — death frame'leri/dumani oynatma.
         if (!playDeathAnim)
         {
-            Destroy(gameObject);
+            PoolManager.Despawn(gameObject); // Destroy yerine havuza
             return;
         }
 
@@ -648,9 +769,12 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
     private System.Collections.IEnumerator DeathRoutine()
     {
-        // Flash yarim kalmis olabilir — rengi kendi rengine (elite ise mor) sifirla
+        // Flash yarim kalmis olabilir — rengi kendi rengine (elite ise mor) sifirla + flash miktarini kapat
         if (spriteRenderer != null)
+        {
             spriteRenderer.color = baseColor;
+            FlashFx.Clear(spriteRenderer);
+        }
 
         Sprite[] frames = GetDeathFrames(); // alt sinif override edebilir (kamikaze patlama kareleri)
         if (frames != null && frames.Length > 0 && spriteRenderer != null)
@@ -663,7 +787,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
             }
         }
 
-        Destroy(gameObject);
+        PoolManager.Despawn(gameObject); // Destroy yerine havuza
     }
     #endregion
 }

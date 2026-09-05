@@ -27,8 +27,12 @@ public class CoreManager : MonoBehaviour
     [Tooltip("Esik nasil buyusun? Additive: her seferinde sabit ekle. Multiplicative: onceki esigi carpanla buyut.")]
     [SerializeField] private ThresholdGrowthMode thresholdGrowthMode = ThresholdGrowthMode.Additive;
 
-    [Tooltip("Additive modda her esikte eklenen miktar (50 -> 100 -> 150 ...).")]
+    [Tooltip("Additive modda her esikte eklenen TABAN miktar (50 -> 100 -> 150 ...).")]
     [SerializeField] private int thresholdAdditiveStep = 50;
+
+    [Tooltip("Additive modda: her GECILEN milestone, esik adimini bu kadar ARTIRIR. Boylece milestone yukseldikce " +
+             "kart icin gereken core artar (gec oyunda kart spam'i biter). Ornek 40: milestone0 +50, milestone3 +170, milestone5 +250.")]
+    [SerializeField] private int milestoneExtraStep = 40;
 
     [Tooltip("Multiplicative modda esik carpani (50 -> 75 -> 112 ... icin 1.5).")]
     [SerializeField] private float thresholdMultiplier = 1.5f;
@@ -180,7 +184,9 @@ public class CoreManager : MonoBehaviour
         if (thresholdGrowthMode == ThresholdGrowthMode.Multiplicative)
             return Mathf.Max(current + 1, Mathf.RoundToInt(current * thresholdMultiplier));
 
-        return current + Mathf.Max(1, thresholdAdditiveStep);
+        // Additive: taban adim + gecilen milestone x milestoneExtraStep -> milestone yukseldikce kart pahalanir
+        int milestoneBonus = Mathf.Max(0, DifficultyManager.CurrentMilestone) * Mathf.Max(0, milestoneExtraStep);
+        return current + Mathf.Max(1, thresholdAdditiveStep + milestoneBonus);
     }
 
     private void ReturnToPool(CoreItem instance)

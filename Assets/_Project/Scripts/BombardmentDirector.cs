@@ -114,6 +114,10 @@ public class BombardmentDirector : MonoBehaviour
     /// <summary>Bombardiman su an aktif mi. EnemyGenerator spawn'i durdurmak icin okur.</summary>
     public static bool IsActive { get; private set; }
 
+    /// <summary>Bombardimanda bir sonraki +1 rank'e zaman ilerlemesi (0-1). Combo progress dolgusu bunu gosterir.</summary>
+    public static float RankRewardProgress =>
+        _instance != null ? Mathf.Clamp01(_instance._rankTimer / Mathf.Max(0.01f, _instance.rankRewardInterval)) : 0f;
+
     /// <summary>Bombardiman baslayinca firlar.</summary>
     public static event Action OnBombardmentStarted;
 

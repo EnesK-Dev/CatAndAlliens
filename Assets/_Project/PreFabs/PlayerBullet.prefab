@@ -170,6 +170,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b83f78d1409482edd8b5753e7e0fe54b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerProjectile
+  knockbackSpeed: 1
+  knockbackDuration: 0.08
 --- !u!114 &2633154271839393239
 MonoBehaviour:
   m_ObjectHideFlags: 0

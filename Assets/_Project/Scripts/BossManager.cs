@@ -20,6 +20,9 @@ public class BossManager : MonoBehaviour
         [Tooltip("Bu dalganin boss prefab'i (dash/lazer/burst farkli). Bos ise BossManager'daki varsayilan kullanilir.")]
         public BossController bossPrefab;
 
+        [Tooltip("ENEMY-tabanli boss (ornek: SplitterBoss). Doluysa bossPrefab yerine BU spawn edilir (BossController degil).")]
+        public GameObject enemyBossPrefab;
+
         [Tooltip("Bu milestone index'ine ulasilinca boss spawn olur (DifficultyManager.milestoneMinutes sirasi).")]
         public int milestoneIndex = 1;
 
@@ -97,20 +100,46 @@ public class BossManager : MonoBehaviour
     {
         if (_spawned == null || index < 0 || index >= _spawned.Length) return;
         if (_spawned[index]) return; // ayni boss iki kez spawn olmasin
-        if (bossPrefab == null) return;
 
-        _spawned[index] = true;
         BossWave wave = waves[index];
+        if (wave == null) return;
 
-        // Dalganin kendi prefab'i varsa onu, yoksa varsayilani kullan (dash/lazer/burst)
+        // ENEMY-tabanli boss (splitter gibi) — BossController degil, dogrudan prefab spawn edilir
+        if (wave.enemyBossPrefab != null)
+        {
+            _spawned[index] = true;
+            GameObject pf = wave.enemyBossPrefab;
+            Color col = EnemyBossColor(pf, wave.tint);
+            BombardmentDirector.Trigger(col, () => SpawnEnemyBoss(pf));
+            return;
+        }
+
+        // BossController boss — dalganin kendi prefab'i varsa onu, yoksa varsayilani kullan
         BossController prefabToUse = wave.bossPrefab != null ? wave.bossPrefab : bossPrefab;
         if (prefabToUse == null) return;
 
-        // Boss'tan ONCE bombardiman: alani temizler, oyuncuyu zorlar; bitince boss spawn olur.
-        // Director yoksa/zaten calisyorsa Trigger callback'i ANINDA cagirir (boss beklemez).
-        // Boss rengini gecir — "BOSS FIGHT" yazisi bu renkte cikar.
+        _spawned[index] = true;
+
+        // Boss'tan ONCE bombardiman: alani temizler; bitince boss spawn olur. Boss rengi -> "BOSS FIGHT" yazisi.
         Color bossColor = EffectiveBossColor(prefabToUse, wave.tint);
         BombardmentDirector.Trigger(bossColor, () => SpawnBoss(prefabToUse, wave));
+    }
+
+    /// <summary>Enemy-tabanli boss'u (SplitterBoss vb.) oyuncunun yaninda spawn eder. Bombardiman bitince cagrilir.</summary>
+    private void SpawnEnemyBoss(GameObject prefab)
+    {
+        if (prefab == null) return;
+        Vector3 basePos = playerRef != null ? playerRef.transform.position : Vector3.zero;
+        Instantiate(prefab, basePos + (Vector3)spawnOffset, Quaternion.identity);
+    }
+
+    /// <summary>Enemy-tabanli boss'un gorunecek rengi (tint beyazsa prefab'in kendi rengi).</summary>
+    private Color EnemyBossColor(GameObject prefab, Color tint)
+    {
+        bool natural = tint.r > 0.99f && tint.g > 0.99f && tint.b > 0.99f && tint.a > 0.99f;
+        if (!natural) return tint;
+        var sr = prefab.GetComponent<SpriteRenderer>();
+        return sr != null ? sr.color : Color.white;
     }
 
     /// <summary>Boss'un GORUNECEK rengi: tint beyaz (dogal) ise prefab'in kendi rengi, degilse tint. (BossController.Initialize ile ayni mantik.)</summary>

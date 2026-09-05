@@ -72,6 +72,8 @@ public class player : MonoBehaviour
     // Vurus suresince hasar taramasi icin — her karede yeni dizi ayirmamak icin tekrar kullanilir
     private const int MaxHitBufferSize = 32;
     private readonly Collider2D[] _hitBuffer = new Collider2D[MaxHitBufferSize];
+    // En yakin dusmani tararken alloc'suz tampon (OverlapCircleAll her cagride dizi ayiriyordu -> GC)
+    private readonly Collider2D[] _closestBuffer = new Collider2D[MaxHitBufferSize];
     // AoE: bir swing icinde ayni dusmana tekrar vurmayi engeller (her kare taranir). Alloc'suz — Clear ile yeniden kullanilir.
     private readonly HashSet<Collider2D> _swingHitSet = new HashSet<Collider2D>();
 
@@ -177,11 +179,17 @@ public class player : MonoBehaviour
         // Boylece ayni anda ikisi de kullanilsa cakisma olmaz.
         moveInput = keyboardInput.sqrMagnitude > InputDeadZoneSqr ? keyboardInput : joystickInput;
 
-        if (moveInput.sqrMagnitude > 1f)
-            moveInput.Normalize();
-
+        // Sadece YON al, TAM HIZ git — joystick'i az itsen de tam hizda gider (analog buyukluk yok).
+        // Deadzone ustundeyse birim vektore normalize et; altindaysa durur.
         if (moveInput.sqrMagnitude > InputDeadZoneSqr)
-            lastMoveDirection = moveInput.normalized;
+        {
+            moveInput = moveInput.normalized;
+            lastMoveDirection = moveInput;
+        }
+        else
+        {
+            moveInput = Vector2.zero;
+        }
     }
 
     /// <summary>WASD / ok tuslarindan hareket vektoru okur (yeni Input System).</summary>
@@ -256,14 +264,17 @@ public class player : MonoBehaviour
 
     private Transform GetClosestEnemy()
     {
-        // Sahnedeki her seyi aramak yerine sadece menzildeki enemyLayer'lari radarla tarar
-        Collider2D[] enemiesInRange = Physics2D.OverlapCircleAll(transform.position, autoAttackRange, enemyLayers);
-        
+        // Sadece menzildeki enemyLayer'lari radarla tarar — NonAlloc (alloc'suz tampon, GC yok)
+        int count = Physics2D.OverlapCircleNonAlloc(transform.position, autoAttackRange, _closestBuffer, enemyLayers);
+
         Transform closestEnemy = null;
         float closestDistance = Mathf.Infinity;
 
-        foreach (Collider2D enemyCollider in enemiesInRange)
+        for (int i = 0; i < count; i++)
         {
+            Collider2D enemyCollider = _closestBuffer[i];
+            if (enemyCollider == null) continue;
+
             // EnemyController, BurstShooterEnemy, BoomerangEnemy ya da Boss — biri varsa geçerli hedef
             bool isEnemy = enemyCollider.GetComponent<EnemyController>() != null
                         || enemyCollider.GetComponent<BurstShooterEnemy>() != null

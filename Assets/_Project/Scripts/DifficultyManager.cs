@@ -87,7 +87,7 @@ public class DifficultyManager : MonoBehaviour
         // Boss sekansi (bombardiman + boss dovusu) boyunca milestone SAATI DONAR — boss olmeden sonraki
         // milestone/boss gelmesin. Oyuncu bosstan kacip beklese bile clock ilerlemez; boss yavas olse bile
         // ust uste boss binmez. Boss olunce (AnyBossAlive=false) saat kaldigi yerden devam eder.
-        if (BossController.AnyBossAlive || BombardmentDirector.IsActive) return;
+        if (BossController.AnyBossAlive || BombardmentDirector.IsActive || SplitterEnemy.BossLineageAlive) return;
 
         // Olcekli sure kullaniyoruz — Time.timeScale=0 (pause/upgrade paneli) oldugunda zorluk da otomatik durur.
         _elapsedTime += Time.deltaTime;

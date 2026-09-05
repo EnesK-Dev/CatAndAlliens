@@ -170,6 +170,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 423946547a3c222c1b3c5396d2489e17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OrbitalOrb
+  knockbackSpeed: 5
+  knockbackDuration: 0.15
 --- !u!114 &3027064075785255938
 MonoBehaviour:
   m_ObjectHideFlags: 0

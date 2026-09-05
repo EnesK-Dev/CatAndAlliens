@@ -170,6 +170,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4607b85a3366f9e5a90ebfb2ad9a2806, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerBoomerang
+  knockbackSpeed: 4
+  knockbackDuration: 0.15
 --- !u!114 &7215933409703633800
 MonoBehaviour:
   m_ObjectHideFlags: 0

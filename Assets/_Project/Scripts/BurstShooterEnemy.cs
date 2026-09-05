@@ -101,7 +101,10 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
         ComputeEffectiveMoveSpeed();
 
         if (_spriteRenderer != null)
+        {
             _spriteRenderer.color = shooterColor;
+            FlashFx.SetTint(_spriteRenderer, shooterColor); // gorsel tint _Color'dan gelir (URP 2D)
+        }
 
         player target = Object.FindFirstObjectByType<player>();
         if (target != null)
@@ -124,6 +127,12 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
         if (EnemyFreeze.IsFrozen)
         {
             _rb.linearVelocity = Vector2.zero;
+            return;
+        }
+        if (Time.time < _knockUntil) // silah vurusu geri tepmesi
+        {
+            float rem = _knockDur > 0f ? Mathf.Clamp01((_knockUntil - Time.time) / _knockDur) : 0f;
+            _rb.linearVelocity = _knockVel * rem;
             return;
         }
         if (Time.time < _pushStunUntil) // dash ile itildi — kisa sure yerinde dur (duvar hissi)
@@ -150,11 +159,24 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
     }
 
     private float _pushStunUntil;
+    private float _knockUntil;
+    private float _knockDur;
+    private Vector2 _knockVel;
 
     /// <summary>Dash ile itilince kisa sure yerinde dursun (sonra yurumeye devam) — 'duvari ittirme' hissi.</summary>
     public void ApplyPushStun(float duration)
     {
         if (duration > 0f) _pushStunUntil = Mathf.Max(_pushStunUntil, Time.time + duration);
+    }
+
+    /// <summary>Silah vurusu geri tepmesi: dusmani 'dir' yonunde 'speed' hiziyla 'duration' sure iter (sonumlenir).</summary>
+    public void ApplyKnockback(Vector2 dir, float speed, float duration)
+    {
+        if (duration <= 0f || speed <= 0f || dir.sqrMagnitude < 0.0001f) return;
+        _knockVel = dir.normalized * speed;
+        _knockDur = duration;
+        _knockUntil = Time.time + duration;
+        _pushStunUntil = Mathf.Max(_pushStunUntil, _knockUntil + 0.06f); // geri gidince cok kisa DON (hit-stop hissi)
     }
 
     private void OnDisable()
@@ -265,9 +287,9 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
 
     private IEnumerator HitFlashRoutine()
     {
-        _spriteRenderer.color = hitFlashColor;
+        FlashFx.Set(_spriteRenderer, hitFlashColor, 1f);
         yield return new WaitForSeconds(hitFlashDuration);
-        _spriteRenderer.color = shooterColor;
+        FlashFx.Set(_spriteRenderer, hitFlashColor, 0f);
         _hitFlashRoutine = null;
     }
 
@@ -341,9 +363,12 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
 
     private IEnumerator DeathRoutine()
     {
-        // Flash yarim kalmis olabilir — rengi kendi rengine sifirla
+        // Flash yarim kalmis olabilir — rengi kendi rengine sifirla + flash miktarini kapat
         if (_spriteRenderer != null)
+        {
             _spriteRenderer.color = shooterColor;
+            FlashFx.Clear(_spriteRenderer);
+        }
 
         if (deathFrames != null && deathFrames.Length > 0 && _spriteRenderer != null)
         {

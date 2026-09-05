@@ -7,6 +7,14 @@ using UnityEngine;
 /// </summary>
 public class OrbitalOrb : MonoBehaviour
 {
+    #region Serialized Fields
+    [Header("Knockback (vurus hissi)")]
+    [Tooltip("Yildiz degince dusmanin ITILME hizi (orbtan disa dogru = vurdugu yon).")]
+    [SerializeField] private float knockbackSpeed = 5f;
+    [Tooltip("Itmenin suresi (sn) — sonra sonumlenir.")]
+    [SerializeField] private float knockbackDuration = 0.15f;
+    #endregion
+
     #region Private Fields
     private float _damage;
     private float _hitCooldown = 0.4f;
@@ -28,7 +36,9 @@ public class OrbitalOrb : MonoBehaviour
         if (_lastHit.TryGetValue(other, out float last) && Time.time - last < _hitCooldown)
             return;
 
-        if (EnemyDamage.Apply(other, _damage * ComboManager.Multiplier)) // combo carpani vurus aninda
+        // Yildiz degince dusmani orbtan DISA (vurdugu yon) it
+        Vector2 knockDir = (Vector2)other.transform.position - (Vector2)transform.position;
+        if (EnemyDamage.Apply(other, _damage * ComboManager.Multiplier, knockDir, knockbackSpeed, knockbackDuration)) // combo carpani vurus aninda
             _lastHit[other] = Time.time;
     }
     #endregion

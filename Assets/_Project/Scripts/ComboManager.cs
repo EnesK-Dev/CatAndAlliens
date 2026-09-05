@@ -89,6 +89,25 @@ public class ComboManager : MonoBehaviour
 
     /// <summary>Guncel rank'in rengi.</summary>
     public static Color CurrentRankColor => RankColorAt(RankIndex);
+
+    /// <summary>Bir SONRAKI rank'in rengi (progress dolgusu bu renkle). Max rank'te kendi rengi.</summary>
+    public static Color NextRankColor => RankColorAt(Mathf.Min(RankIndex + 1, MaxRankIndex));
+
+    /// <summary>Guncel tier icinde bir sonraki rank'e ilerleme (0-1). Max rank'te 1. UI progress dolgusu icin.</summary>
+    public static float TierProgress
+    {
+        get
+        {
+            if (_instance == null) return 0f;
+            var t = _instance.tiers;
+            int i = _instance._tierIndex;
+            if (t == null || i >= t.Length - 1) return 1f; // en ust rank -> dolu
+            int cur = t[i].requiredHits;
+            int next = t[i + 1].requiredHits;
+            if (next <= cur) return 0f;
+            return Mathf.Clamp01((float)(_instance._count - cur) / (next - cur));
+        }
+    }
     #endregion
 
     #region Static API
