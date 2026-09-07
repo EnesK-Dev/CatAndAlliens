@@ -86,8 +86,11 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     [SerializeField] private float laserWidthMultiplierAtMaxDifficulty = 1.6f;
 
     [Header("Core Drop (FAZ 4)")]
-    [Tooltip("Normal (lazersiz) dusman olunce dusen core sayisi.")]
+    [Tooltip("Normal (lazersiz) dusman olunce dusen core ALT siniri (dahil).")]
     [SerializeField] private int coreDropNormal = 1;
+
+    [Tooltip("Normal dusman core UST siniri (dahil). Min'e esit/kucukse aralik YOK (sabit). Ornek 2-4 icin: normal=2, normalMax=4.")]
+    [SerializeField] private int coreDropNormalMax = 1;
 
     [Tooltip("Elite (lazerli) dusman olunce dusen core alt siniri (dahil).")]
     [SerializeField] private int coreDropEliteMin = 2;
@@ -134,6 +137,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     private Vector3 _baseScale;
     private float _baseMoveSpeed;
     private bool _baseEnableDash;
+    private Color _originalBaseColor = Color.white; // prefab'in ILK rengi (elite ise mor). SetTint baseColor'i kirletebilir; reset buna doner.
     private bool _initedOnce;
 
     #region Unity Callbacks
@@ -144,6 +148,10 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         _baseScale = transform.localScale;
         _baseMoveSpeed = moveSpeed;
         _baseEnableDash = enableDash;
+        // Prefab'in ORIJINAL rengini SetTint'ten ONCE yakala (Awake, Instantiate sirasinda calisir).
+        // Boylece split-child olarak dogup SetTint yese bile, havuz reset'i yesil'e (prefab rengine) doner.
+        var sr0 = GetComponent<SpriteRenderer>();
+        if (sr0 != null) _originalBaseColor = sr0.color;
     }
 
     /// <summary>Havuzdan yeniden kullanimda calisir (ilk spawn'da Start hallettigi icin atlanir).</summary>
@@ -206,6 +214,9 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         _pushStunUntil = 0f;
         HideDashTelegraph();
 
+        // ORIJINAL renge don — SetTint (splitter yavrusu) baseColor'i kirletmis olabilir. Yesil dash dusman
+        // havuzdan tekrar cikinca splitter renginde gelmesin.
+        baseColor = _originalBaseColor;
         if (spriteRenderer != null)
         {
             spriteRenderer.color = baseColor;
@@ -512,11 +523,15 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
             {
                 Color eliteColor;
                 if (ColorUtility.TryParseHtmlString("#D46FE0", out eliteColor))
+                {
                     spriteRenderer.color = eliteColor;
+                    _originalBaseColor = eliteColor; // elite'in ORIJINAL rengi MOR (reset buna doner)
+                }
             }
         }
 
-        // Flash sonrasi bu renge donulecek — elite ise mor, degilse varsayilan
+        // baseColor = bu instance'in SU ANKI rengi (split child ise SetTint ile splitter rengi olabilir).
+        // _originalBaseColor'a DOKUNMA — o prefab/elite rengi (Awake'te yakalandi), reset icin kullanilir.
         if (spriteRenderer != null)
         {
             baseColor = spriteRenderer.color;
@@ -723,11 +738,11 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
         if (dropLoot)
         {
-            // Olum aninda core birak — elite ise araliktan rastgele, normal ise sabit.
-            // Random.Range(int, int) ust sinir HARIC oldugu icin +1.
+            // Olum aninda core birak — hem normal hem elite ARALIKTAN rastgele (ust sinir min'e esitse sabit).
+            // Random.Range(int, int) ust sinir HARIC oldugu icin +1. Mathf.Max: yanlis/eksik ayarda kilit onler.
             int coreAmount = canUseLaser
-                ? Random.Range(coreDropEliteMin, coreDropEliteMax + 1)
-                : coreDropNormal;
+                ? Random.Range(coreDropEliteMin, Mathf.Max(coreDropEliteMin, coreDropEliteMax) + 1)
+                : Random.Range(coreDropNormal, Mathf.Max(coreDropNormal, coreDropNormalMax) + 1);
             CoreManager.SpawnCores(transform.position, coreAmount);
 
             // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)

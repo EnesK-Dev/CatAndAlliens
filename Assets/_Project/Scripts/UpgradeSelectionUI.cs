@@ -229,12 +229,13 @@ public class UpgradeSelectionUI : MonoBehaviour
             string title = opt.isNewWeapon ? w.WeaponName : opt.upgrade.title;
             string desc = opt.isNewWeapon ? "New weapon!" : opt.upgrade.description;
             int level = opt.isNewWeapon ? 1 : opt.upgrade.nextLevel;
-            card.Bind(slotIndex, w.WeaponIcon, weaponIconColor, weaponIconHeight, title, desc, level, weaponCardSprite, cardTint, opt.isNewWeapon, _cardCallback);
+            bool lucky = !opt.isNewWeapon && opt.upgrade.lucky; // sayi/yon/hedef upgrade'i -> LUCKY
+            card.Bind(slotIndex, w.WeaponIcon, weaponIconColor, weaponIconHeight, title, desc, level, weaponCardSprite, cardTint, opt.isNewWeapon, _cardCallback, lucky);
         }
         else
         {
             UpgradeDefinition def = upgrades[opt.statIndex];
-            card.Bind(slotIndex, def.icon, Color.white, statIconHeight, def.title, def.description, def.level + 1, StatCardSprite(def.type), cardTint, false, _cardCallback);
+            card.Bind(slotIndex, def.icon, Color.white, statIconHeight, def.title, def.description, def.level + 1, StatCardSprite(def.type), cardTint, false, _cardCallback, false);
         }
     }
 

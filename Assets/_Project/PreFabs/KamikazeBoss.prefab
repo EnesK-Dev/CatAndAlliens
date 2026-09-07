@@ -198,7 +198,7 @@ MonoBehaviour:
   isFinalBoss: 0
   bossName: KAMIKAZE
   maxHealth: 3000
-  moveSpeed: 3.5
+  moveSpeed: 4.5
   stopDistance: 1.5
   centerMode: 0
   centerPoint: {x: -1.5, y: -0.5}
@@ -214,8 +214,9 @@ MonoBehaviour:
   hitFlashDuration: 0.07
   deathFrames: []
   deathFrameRate: 10
-  coreDropMin: 20
-  coreDropMax: 30
+  coreDropMin: 40
+  coreDropMax: 60
+  coreScatterRadius: 3.5
   healOnDeath: 0
   useDashAttack: 0
   attackInterval: 4
@@ -269,31 +270,31 @@ MonoBehaviour:
   - {fileID: -3766660392476961594, guid: 4106df3a6f538ebe6beec20543ff85e6, type: 3}
   - {fileID: -939560657217726448, guid: 4106df3a6f538ebe6beec20543ff85e6, type: 3}
   explosionFrameRate: 14
-  explosionSize: 1.6
+  explosionSize: 3
   explosionColor: {r: 1, g: 0.28, b: 0.2, a: 1}
   circleColor: {r: 1, g: 0.16651765, b: 0, a: 0.77254903}
   circleSortingOrder: 3
   explosionSortingOrder: 6
-  firstAttackDelay: 2
-  betweenAttacks: 2.5
-  warningTime: 1.1
+  firstAttackDelay: 1.5
+  betweenAttacks: 1.3
+  warningTime: 0.9
   damage: 3
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
   areaHalfExtent: {x: 11, y: 7.5}
-  atk1CircleCount: 4
+  atk1CircleCount: 6
   atk1Radius: 3
-  atk1InnerExplosions: 4
-  atk2Rings: 3
+  atk1InnerExplosions: 5
+  atk2Rings: 4
   atk2FirstRadius: 3
   atk2RingGap: 4
   atk2PerRing: 12
   atk2CircleSpacing: 1.8
-  atk2GapHalfWidth: 32
+  atk2GapHalfWidth: 22
   atk2CircleRadius: 1.1
-  atk2RingDelay: 0.45
-  atk3Count: 12
+  atk2RingDelay: 0.38
+  atk3Count: 16
   atk3Radius: 1.6
-  atk3Interval: 0.18
+  atk3Interval: 0.14
   atk3InnerExplosions: 2

@@ -66,6 +66,7 @@ public class SfxManager : MonoBehaviour
     private bool _ultimateActive;
     private bool _musicWasPlaying;
     private bool _loopWasPlaying;
+    private bool _musicPausedByBombardment; // bombardiman muzigi ayri duraklatir (ulti'den bagimsiz)
     #endregion
 
     #region Unity Callbacks
@@ -98,12 +99,45 @@ public class SfxManager : MonoBehaviour
         // Static event'ler — sahnede yoksa bile guvenli. OnDisable'da mutlaka cikilir (leak olmasin).
         player.OnPlayerDamaged += HandlePlayerDamaged;
         ComboManager.OnRankChanged += HandleRankChanged;
+        VolumeSettings.OnChanged += HandleVolumeChanged; // slider degisince muzik/loop sesini canli guncelle
+        BombardmentDirector.OnBombardmentStarted += HandleBombardmentStarted; // bombardimanda muzik sussun
+        BombardmentDirector.OnBombardmentFinished += HandleBombardmentFinished;
     }
 
     private void OnDisable()
     {
         player.OnPlayerDamaged -= HandlePlayerDamaged;
         ComboManager.OnRankChanged -= HandleRankChanged;
+        VolumeSettings.OnChanged -= HandleVolumeChanged;
+        BombardmentDirector.OnBombardmentStarted -= HandleBombardmentStarted;
+        BombardmentDirector.OnBombardmentFinished -= HandleBombardmentFinished;
+    }
+
+    /// <summary>Bombardiman baslayinca oyun muzigini duraklat (SFX/uyari sesleri devam eder).</summary>
+    private void HandleBombardmentStarted()
+    {
+        if (_musicSource != null && _musicSource.isPlaying)
+        {
+            _musicSource.Pause();
+            _musicPausedByBombardment = true;
+        }
+    }
+
+    /// <summary>Bombardiman bitince (boss gelince) muzigi kaldigi yerden devam ettir.</summary>
+    private void HandleBombardmentFinished(Color bossColor)
+    {
+        if (_musicPausedByBombardment && _musicSource != null)
+        {
+            _musicSource.UnPause();
+            _musicPausedByBombardment = false;
+        }
+    }
+
+    /// <summary>Ses seviyesi degisince surekli calan kaynaklari (muzik + S-loop) canli guncelle.</summary>
+    private void HandleVolumeChanged()
+    {
+        if (_loopSource != null) _loopSource.volume = sRankLoop.volume * VolumeSettings.Sfx;
+        if (_musicSource != null) _musicSource.volume = gameplayMusic.volume * VolumeSettings.Music;
     }
 
     private void OnDestroy()
@@ -205,7 +239,7 @@ public class SfxManager : MonoBehaviour
         _nextVoice = (_nextVoice + 1) % _voices.Length;
 
         src.clip = clip;
-        src.volume = e.volume;
+        src.volume = e.volume * VolumeSettings.Sfx; // ayar barina gore
         src.pitch = Random.Range(e.pitchRange.x, e.pitchRange.y);
         src.Play();
     }
@@ -218,7 +252,7 @@ public class SfxManager : MonoBehaviour
         if (_loopSource.isPlaying && _loopSource.clip == clip) return; // zaten calıyor
 
         _loopSource.clip = clip;
-        _loopSource.volume = sRankLoop.volume;
+        _loopSource.volume = sRankLoop.volume * VolumeSettings.Sfx;
         _loopSource.pitch = sRankLoop.pitchRange.x <= 0f ? 1f : sRankLoop.pitchRange.x;
         _loopSource.Play();
     }
@@ -236,7 +270,7 @@ public class SfxManager : MonoBehaviour
         if (_musicSource.isPlaying && _musicSource.clip == clip) return; // zaten calıyor
 
         _musicSource.clip = clip;
-        _musicSource.volume = gameplayMusic.volume;
+        _musicSource.volume = gameplayMusic.volume * VolumeSettings.Music;
         _musicSource.pitch = gameplayMusic.pitchRange.x <= 0f ? 1f : gameplayMusic.pitchRange.x;
         _musicSource.Play();
     }

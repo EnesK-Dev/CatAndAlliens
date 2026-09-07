@@ -41,5 +41,9 @@ public enum SfxId
     BombardmentWarning, // boss oncesi bombardiman baslamadan once calan uyari sesi (ekran kirmizi yanip sonerken)
 
     KamikazeExplode, // kamikaze dusman patlayinca
-    SplitterSplit    // splitter dusman bolununce
+    SplitterSplit,   // splitter dusman bolununce
+
+    // ---- Silahlar (oyuncu) — klip atanmazsa sessiz ----
+    BlasterFire,     // auto-blaster mermi ateslenince
+    OrbitalHit       // orbital yildiz dusmana degince
 }

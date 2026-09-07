@@ -39,7 +39,10 @@ public class OrbitalOrb : MonoBehaviour
         // Yildiz degince dusmani orbtan DISA (vurdugu yon) it
         Vector2 knockDir = (Vector2)other.transform.position - (Vector2)transform.position;
         if (EnemyDamage.Apply(other, _damage * ComboManager.Multiplier, knockDir, knockbackSpeed, knockbackDuration)) // combo carpani vurus aninda
+        {
             _lastHit[other] = Time.time;
+            SfxManager.Play(SfxId.OrbitalHit); // klip atanmazsa sessiz
+        }
     }
     #endregion
 }

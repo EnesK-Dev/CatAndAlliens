@@ -28,6 +28,9 @@ public class UpgradeCard : MonoBehaviour
 
     [Tooltip("'NEW WEAPON' etiketi — sadece yeni silah kartinda gorunur. Bos ise atlanir.")]
     [SerializeField] private GameObject newWeaponBanner;
+
+    [Tooltip("'LUCKY' etiketi — bariz guclu upgrade'lerde (sayi/yon/hedef) gorunur. Bos ise atlanir.")]
+    [SerializeField] private GameObject luckyBanner;
     #endregion
 
     #region Private Fields
@@ -65,7 +68,7 @@ public class UpgradeCard : MonoBehaviour
     /// <param name="displayLevel">Kart secilince ulasilacak seviye (Lv.N).</param>
     /// <param name="onSelected">Tiklaninca cagrilacak callback; parametre optionIndex.</param>
     public void Bind(int optionIndex, Sprite icon, Color iconColor, float iconHeight, string title, string description, int displayLevel,
-                     Sprite frameSprite, Color frameColor, bool isNewWeapon, Action<int> onSelected)
+                     Sprite frameSprite, Color frameColor, bool isNewWeapon, Action<int> onSelected, bool lucky = false)
     {
         _optionIndex = optionIndex;
         _onSelected = onSelected;
@@ -91,6 +94,7 @@ public class UpgradeCard : MonoBehaviour
             frameImage.color = frameColor;
         }
         if (newWeaponBanner != null) newWeaponBanner.SetActive(isNewWeapon);
+        if (luckyBanner != null) luckyBanner.SetActive(lucky);
     }
     #endregion
 

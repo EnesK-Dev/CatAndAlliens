@@ -77,6 +77,9 @@ public class BossController : MonoBehaviour
     [SerializeField] private int coreDropMin = 20;
     [SerializeField] private int coreDropMax = 30;
 
+    [Tooltip("Boss oldugunde core'lari bu yaricapta ETRAFA sacar (tek yiginda birakmaz). Buyuk = daha genis dagilir.")]
+    [SerializeField] private float coreScatterRadius = 3.5f;
+
     [Tooltip("Olunce oyuncuya doldurulacak can (yarim-kalp birimi: 2 = tam kalp). 0 = kapali.")]
     [SerializeField] private float healOnDeath = 0f;
 
@@ -675,8 +678,8 @@ public class BossController : MonoBehaviour
         if (_rb != null) { _rb.linearVelocity = Vector2.zero; _rb.simulated = false; }
         if (_bodyCollider != null) _bodyCollider.enabled = false;
 
-        // Odul: bol core
-        CoreManager.SpawnCores(transform.position, UnityEngine.Random.Range(coreDropMin, coreDropMax + 1));
+        // Odul: bol core — GENIS sacilma ile etrafa yay (tek yiginda birakma)
+        CoreManager.SpawnCores(transform.position, UnityEngine.Random.Range(coreDropMin, coreDropMax + 1), coreScatterRadius);
         if (healOnDeath > 0f && _playerTransform != null)
         {
             player p = _playerTransform.GetComponent<player>();

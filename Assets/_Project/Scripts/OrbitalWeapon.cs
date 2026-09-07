@@ -27,8 +27,8 @@ public class OrbitalWeapon : WeaponBase
     [SerializeField] private int maxRotationLevel = 5;
 
     [Header("Hasar Track'i")]
-    [SerializeField] private float damagePerLevel = 4f;
-    [SerializeField] private int maxDamageLevel = 5;
+    [SerializeField] private float damagePerLevel = 18f;
+    [SerializeField] private int maxDamageLevel = 8;
 
     [Header("Radius Track'i")]
     [SerializeField] private float radiusPerLevel = 0.35f;
@@ -72,9 +72,9 @@ public class OrbitalWeapon : WeaponBase
 
     public override void CollectUpgrades(List<WeaponUpgradeOption> into)
     {
-        if (_countLevel < maxCountLevel)
-            into.Add(new WeaponUpgradeOption("Orbital +1", "One more orb (max 3)", _countLevel + 1,
-                () => { _countLevel++; EnsureOrbs(); ConfigureOrbs(); }));
+        // LIMITSIZ + LUCKY
+        into.Add(new WeaponUpgradeOption("Orbital +1", "One more orb", _countLevel + 1,
+            () => { _countLevel++; EnsureOrbs(); ConfigureOrbs(); }, true));
         if (_rotationLevel < maxRotationLevel)
             into.Add(new WeaponUpgradeOption("Orbital Speed", "Spins faster", _rotationLevel + 1,
                 () => _rotationLevel++));

@@ -92,7 +92,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BurstShooterEnemy
   moveSpeed: 2
   stopDistance: 5
-  maxHealth: 30
+  maxHealth: 90
   healthMultiplierAtMaxDifficulty: 3
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
   hitFlashDuration: 0.07
@@ -121,6 +121,6 @@ MonoBehaviour:
   delayBetweenShotsAtMaxDifficulty: 0.35
   shootCooldownAtMaxDifficulty: 3.5
   moveSpeedMultiplierAtMaxDifficulty: 1.15
-  coreDropMin: 2
-  coreDropMax: 3
+  coreDropMin: 4
+  coreDropMax: 8
   ultFoodDropChance: 0.35

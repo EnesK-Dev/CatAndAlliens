@@ -25,13 +25,14 @@ public class AutoBlasterWeapon : WeaponBase
     [SerializeField] private int maxFireRateLevel = 5;
 
     [Header("Hasar Track'i")]
-    [SerializeField] private float damagePerLevel = 3f;
-    [SerializeField] private int maxDamageLevel = 5;
+    [SerializeField] private float damagePerLevel = 5f;
+    [SerializeField] private int maxDamageLevel = 8;
     #endregion
 
     #region Private Fields
     private int _fireRateLevel;
     private int _damageLevel;
+    private int _targetLevel;   // 0 = 1 hedef; her seviye +1 farkli dusman (LIMITSIZ)
     private float _nextFireTime;
     private readonly Collider2D[] _hitBuffer = new Collider2D[32];
     #endregion
@@ -41,11 +42,10 @@ public class AutoBlasterWeapon : WeaponBase
     {
         if (bulletPrefab == null || Time.time < _nextFireTime) return;
 
-        Transform target = FindNearestEnemy();
-        if (target == null) return;
-
-        FireAt(target.position);
-        _nextFireTime = Time.time + CurrentFireInterval();
+        // En yakin N FARKLI dusmana ayni anda mermi at (target sayisi upgrade'i). Kimse yoksa bekle.
+        int fired = FireVolley(CurrentTargets());
+        if (fired > 0)
+            _nextFireTime = Time.time + CurrentFireInterval();
     }
     #endregion
 
@@ -59,26 +59,43 @@ public class AutoBlasterWeapon : WeaponBase
         if (_damageLevel < maxDamageLevel)
             into.Add(new WeaponUpgradeOption("Blaster Damage", "+" + damagePerLevel + " damage", _damageLevel + 1,
                 () => _damageLevel++));
+
+        // Hedef sayisi track'i — LIMITSIZ + LUCKY (ayni anda daha cok FARKLI dusmana ates)
+        into.Add(new WeaponUpgradeOption("Blaster Targets", "+1 enemy targeted", _targetLevel + 1,
+            () => _targetLevel++, true));
     }
     #endregion
 
     #region Private Methods
     private float CurrentFireInterval() => baseFireInterval * Mathf.Pow(fireIntervalMultiplier, _fireRateLevel);
     private float CurrentDamage() => baseDamage + damagePerLevel * _damageLevel;
+    private int CurrentTargets() => 1 + _targetLevel;
 
-    private Transform FindNearestEnemy()
+    /// <summary>En yakin 'targets' FARKLI dusmana birer mermi atar. Atilan mermi sayisini dondurur (0 = dusman yok).</summary>
+    private int FireVolley(int targets)
     {
         int count = Physics2D.OverlapCircleNonAlloc(transform.position, range, _hitBuffer, enemyLayers);
-        Transform closest = null;
-        float closestSqr = float.MaxValue;
-        for (int i = 0; i < count; i++)
+        int fired = 0;
+
+        for (int t = 0; t < targets; t++)
         {
-            Collider2D c = _hitBuffer[i];
-            if (c == null) continue;
-            float d = ((Vector2)c.transform.position - (Vector2)transform.position).sqrMagnitude;
-            if (d < closestSqr) { closestSqr = d; closest = c.transform; }
+            // Kalan (secilmemis) dusmanlar arasindan en yakini bul
+            int nearestIdx = -1;
+            float best = float.MaxValue;
+            for (int i = 0; i < count; i++)
+            {
+                Collider2D c = _hitBuffer[i];
+                if (c == null) continue; // secilmis (null'landi) ya da bos
+                float d = ((Vector2)c.transform.position - (Vector2)transform.position).sqrMagnitude;
+                if (d < best) { best = d; nearestIdx = i; }
+            }
+            if (nearestIdx < 0) break; // baska dusman yok
+
+            FireAt(_hitBuffer[nearestIdx].transform.position);
+            _hitBuffer[nearestIdx] = null; // bu dusmani sonraki secimden cikar (ayni dusmana 2 mermi atma)
+            fired++;
         }
-        return closest;
+        return fired;
     }
 
     private void FireAt(Vector3 targetPos)
@@ -88,6 +105,7 @@ public class AutoBlasterWeapon : WeaponBase
         GameObject go = PoolManager.Spawn(bulletPrefab.gameObject, transform.position, Quaternion.identity);
         PlayerProjectile bullet = go.GetComponent<PlayerProjectile>();
         if (bullet != null) bullet.Launch(dir, bulletSpeed, CurrentDamage(), bulletLifetime);
+        SfxManager.Play(SfxId.BlasterFire); // klip atanmazsa sessiz
     }
     #endregion
 }

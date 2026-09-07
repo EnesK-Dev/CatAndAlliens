@@ -20,31 +20,15 @@ public class CoreManager : MonoBehaviour
     [Tooltip("Ayni dusmandan birden fazla core dusunce ust uste binmesin diye bu yaricap icinde rastgele sacilirlar.")]
     [SerializeField] private float scatterRadius = 0.5f;
 
-    [Header("Upgrade Esigi (FAZ 5)")]
-    [Tooltip("Ilk upgrade paneli bu kadar TOPLAM core toplaninca acilir.")]
-    [SerializeField] private int firstThreshold = 50;
+    [Header("Upgrade Esigi (FAZ 5) — TIER modeli")]
+    [Tooltip("Ilk tier'in kart maliyeti (kac core ile kart alinir). Ornek 10.")]
+    [SerializeField] private int firstThreshold = 10;
 
-    [Tooltip("Esik nasil buyusun? Additive: her seferinde sabit ekle. Multiplicative: onceki esigi carpanla buyut.")]
-    [SerializeField] private ThresholdGrowthMode thresholdGrowthMode = ThresholdGrowthMode.Additive;
+    [Tooltip("KAC kartta bir maliyet artsin. Ornek 3 -> 3 kart ayni fiyat, sonra artar. (3 kere 10, 3 kere 20...)")]
+    [SerializeField] private int cardsPerTier = 3;
 
-    [Tooltip("Additive modda her esikte eklenen TABAN miktar (50 -> 100 -> 150 ...).")]
-    [SerializeField] private int thresholdAdditiveStep = 50;
-
-    [Tooltip("Additive modda: her GECILEN milestone, esik adimini bu kadar ARTIRIR. Boylece milestone yukseldikce " +
-             "kart icin gereken core artar (gec oyunda kart spam'i biter). Ornek 40: milestone0 +50, milestone3 +170, milestone5 +250.")]
-    [SerializeField] private int milestoneExtraStep = 40;
-
-    [Tooltip("Multiplicative modda esik carpani (50 -> 75 -> 112 ... icin 1.5).")]
-    [SerializeField] private float thresholdMultiplier = 1.5f;
-    #endregion
-
-    #region Nested Types
-    /// <summary>Upgrade esiginin nasil buyuyecegini belirler.</summary>
-    public enum ThresholdGrowthMode
-    {
-        Additive,
-        Multiplicative
-    }
+    [Tooltip("Her tier'da maliyetin artis miktari. Ornek 10 -> 10, 20, 30, 40 ... Milestone'dan BAGIMSIZ, kendi ic sayaci.")]
+    [SerializeField] private int thresholdAdditiveStep = 10;
     #endregion
 
     #region Private Fields
@@ -57,19 +41,19 @@ public class CoreManager : MonoBehaviour
     #endregion
 
     #region Static API
-    /// <summary>Oyuncunun topladigi guncel toplam core. Sahnede manager yoksa 0 doner.</summary>
+    /// <summary>Harcanabilir GUNCEL core bakiyesi (kart alinca duser). Sahnede manager yoksa 0 doner.</summary>
     public static int TotalCores => _instance != null ? _instance._totalCores : 0;
 
-    /// <summary>Bir core toplaninca firlar. Parametre: guncellenen toplam core sayisi.</summary>
+    /// <summary>Core bakiyesi degisince firlar (toplama VEYA kartta harcama). Parametre: yeni bakiye.</summary>
     public static event Action<int> OnCoreCountChanged;
 
     /// <summary>
-    /// Toplam core bir sonraki esige ulasinca firlar. Parametre: kacinci esik oldugu (1'den baslar).
-    /// FAZ 5 upgrade paneli bunu dinleyip acilir. Esik SAYAC'tir — core harcanmaz, toplam artmaya devam eder.
+    /// Core bakiyesi bir kart almaya yetince firlar (core'lar HARCANIR). Parametre: kacinci kart (1'den baslar).
+    /// FAZ 5 upgrade paneli bunu dinleyip acilir.
     /// </summary>
     public static event Action<int> OnThresholdReached;
 
-    /// <summary>Bir sonraki upgrade esigi (hedef toplam core). Manager yoksa 0.</summary>
+    /// <summary>Bir sonraki kartin MALIYETI (bu kadar core birikince kart alinir ve harcanir). Manager yoksa 0.</summary>
     public static int NextThreshold => _instance != null ? _instance._nextThreshold : 0;
 
     /// <summary>
@@ -79,7 +63,17 @@ public class CoreManager : MonoBehaviour
     public static void SpawnCores(Vector3 position, int amount)
     {
         if (_instance != null)
-            _instance.SpawnCoresInternal(position, amount);
+            _instance.SpawnCoresInternal(position, amount, _instance.scatterRadius);
+    }
+
+    /// <summary>
+    /// GENIS sacilma ile core birakir (ornek: boss oldugunde core'lari etrafa yayar, tek yiginda birakmaz).
+    /// scatterOverride = sacilma yaricapi (dunya birimi).
+    /// </summary>
+    public static void SpawnCores(Vector3 position, int amount, float scatterOverride)
+    {
+        if (_instance != null)
+            _instance.SpawnCoresInternal(position, amount, scatterOverride);
     }
     #endregion
 
@@ -137,7 +131,7 @@ public class CoreManager : MonoBehaviour
         return instance;
     }
 
-    private void SpawnCoresInternal(Vector3 position, int amount)
+    private void SpawnCoresInternal(Vector3 position, int amount, float scatter)
     {
         if (coreItemPrefab == null) return;
 
@@ -146,8 +140,8 @@ public class CoreManager : MonoBehaviour
             // Havuz bosalirsa buyu — yogun olum anlarinda core eksik kalmasin
             CoreItem core = _pool.Count > 0 ? _pool.Dequeue() : CreateInstance();
 
-            // Tek core ise tam noktaya, birden fazlaysa kucuk rastgele sacilma ver
-            Vector2 offset = amount > 1 ? UnityEngine.Random.insideUnitCircle * scatterRadius : Vector2.zero;
+            // Tek core ise tam noktaya, birden fazlaysa rastgele sacilma ver (scatter yaricapinda)
+            Vector2 offset = amount > 1 ? UnityEngine.Random.insideUnitCircle * scatter : Vector2.zero;
             Vector3 spawnPos = position + (Vector3)offset;
 
             core.gameObject.SetActive(true);
@@ -165,28 +159,31 @@ public class CoreManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Toplam core esigi gectiyse OnThresholdReached firlar ve bir sonraki esigi hesaplar.
-    /// Esik SAYAC'tir — core harcanmaz. while: tek karede birden fazla esik gecilirse hepsini firlatir.
+    /// Core bakiyesi karti almaya yetiyorsa: core'lari HARCAR (bakiyeden duser), karti acar ve bir sonraki
+    /// kartin maliyetini buyutur. while: tek karede birden fazla kart alinabilir (nadir, bakiye cok yuksekse).
+    /// Bar 'bakiye / maliyet' gosterir; harcayinca dolgu sifira yakin doner.
     /// </summary>
     private void CheckThreshold()
     {
-        while (_totalCores >= _nextThreshold)
+        while (_totalCores >= _nextThreshold && _nextThreshold > 0)
         {
-            _thresholdLevel++;
-            OnThresholdReached?.Invoke(_thresholdLevel);
-            _nextThreshold = ComputeNextThreshold(_nextThreshold);
+            _totalCores -= _nextThreshold;                       // CORE HARCA (kart alindi)
+            _thresholdLevel++;                                   // alinan kart sayaci (kendi ic sayaci)
+            _nextThreshold = CostForCardsTaken(_thresholdLevel); // her cardsPerTier kartta bir pahalanir
+            OnCoreCountChanged?.Invoke(_totalCores);             // bar: harcanmis bakiye + yeni maliyet
+            OnThresholdReached?.Invoke(_thresholdLevel);         // upgrade paneli acilir
         }
     }
 
-    /// <summary>Bir sonraki esik degerini moda gore hesaplar. Her zaman en az +1 artar (kilitlenmeyi onler).</summary>
-    private int ComputeNextThreshold(int current)
+    /// <summary>
+    /// cardsTaken kadar kart alinmisken SIRADAKI kartin maliyeti. Her cardsPerTier kartta bir tier atlanir ve
+    /// maliyet thresholdAdditiveStep kadar artar. Milestone'dan BAGIMSIZ (kendi ic sayaci).
+    /// Ornek (first=10, perTier=3, step=10): 10,10,10, 20,20,20, 30,30,30, 40...
+    /// </summary>
+    private int CostForCardsTaken(int cardsTaken)
     {
-        if (thresholdGrowthMode == ThresholdGrowthMode.Multiplicative)
-            return Mathf.Max(current + 1, Mathf.RoundToInt(current * thresholdMultiplier));
-
-        // Additive: taban adim + gecilen milestone x milestoneExtraStep -> milestone yukseldikce kart pahalanir
-        int milestoneBonus = Mathf.Max(0, DifficultyManager.CurrentMilestone) * Mathf.Max(0, milestoneExtraStep);
-        return current + Mathf.Max(1, thresholdAdditiveStep + milestoneBonus);
+        int tier = cardsTaken / Mathf.Max(1, cardsPerTier);
+        return Mathf.Max(1, firstThreshold + tier * thresholdAdditiveStep);
     }
 
     private void ReturnToPool(CoreItem instance)

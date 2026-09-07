@@ -119,6 +119,7 @@ public class player : MonoBehaviour
     [SerializeField] private Sprite ultimatePoseSprite;
     private Coroutine _ultRoutine;
     private bool _ultPosing; // true iken hareket/saldiri kilitli, sprite pozda sabit (animator kapali)
+    private bool _ultimateInvulnerable; // true iken ulti sinemasi boyunca TUM hasar kaynaklarina immun (UltimateCinematic yonetir)
 
     public event System.Action<float> OnHealthChanged;
 
@@ -584,6 +585,7 @@ public class player : MonoBehaviour
     public void TakeDamage(float amount)
     {
         if (isDead) return;
+        if (_ultimateInvulnerable) return; // Ulti sinemasi boyunca IMMUN — boss temasi/atagi dahil hicbir kaynaktan hasar alinmaz
         if (isPaused) return; // Upgrade paneli acikken IMMUN — kart secerken hicbir kaynaktan hasar alinmaz
                               // (timeScale=0 fizigi durdurur ama 'yield return null' tabanli hasar donguleri
                               //  render karesinde calismaya devam edebilir; tek cikis noktasindan kesin garanti)
@@ -618,6 +620,13 @@ public class player : MonoBehaviour
 
     /// <summary>Upgrade paneli açılınca true, kapanınca false. Update input'unu kilitler (timeScale=0'a ek garanti).</summary>
     public void SetPaused(bool paused) => isPaused = paused;
+
+    /// <summary>
+    /// Ultimate sinemasi boyunca oyuncuyu hasara karsi dokunulmaz yapar. UltimateCinematic sinema
+    /// basinda true, RestoreState'te (bitis + yarida kesilme dahil) false verir; boylece charge/impact/
+    /// recovery boyunca boss temasi/atagi hicbir hasar vermez.
+    /// </summary>
+    public void SetUltimateInvulnerable(bool value) => _ultimateInvulnerable = value;
 
     /// <summary>Vuruş hasarını kalıcı arttırır (hasar upgrade'i).</summary>
     public void AddDamage(float amount) => playerDamage += amount;

@@ -82,6 +82,12 @@ public class EnemyGenerator : MonoBehaviour
              "(oldurdukce yeni gelir). 'Adim atacak yer kalmamasini' onler — spawn araligi ne olursa olsun " +
              "yogunluk sinirli kalir. 0 = limitsiz (eski davranis).")]
     [SerializeField] private int maxAliveEnemies = 25;
+
+    [Tooltip("SON milestone'da (finalMilestoneIndex ve sonrasi) gecerli AYRI limit — genelde daha DUSUK, cunku son boss'a girerken kalabalik istenmez. 0 = ayrim yok (hep maxAliveEnemies).")]
+    [SerializeField] private int finalMilestoneMaxAlive = 0;
+
+    [Tooltip("Bu milestone ve sonrasinda finalMilestoneMaxAlive gecerli olur (son boss milestone'u).")]
+    [SerializeField] private int finalMilestoneIndex = 5;
     #endregion
 
     #region Private Fields
@@ -157,9 +163,10 @@ public class EnemyGenerator : MonoBehaviour
     /// <summary>Cizgi uzerinde rastgele bir noktaya, weighted random ile secilen tipi spawn eder.</summary>
     private void SpawnEnemyOnLine()
     {
-        // Yogunluk siniri: ekranda zaten maxAliveEnemies kadar dusman varsa bu spawn'i atla.
-        // (Bir sonraki aralikta tekrar denenir; oyuncu oldurdukce yer acilir.)
-        if (maxAliveEnemies > 0 && CountAliveEnemies() >= maxAliveEnemies)
+        // Yogunluk siniri: ekranda zaten (etkin) limit kadar dusman varsa bu spawn'i atla.
+        // Son milestone'da ayri (daha dusuk) limit gecerli olabilir. Oldurdukce yer acilir.
+        int cap = EffectiveMaxAlive();
+        if (cap > 0 && CountAliveEnemies() >= cap)
             return;
 
         EnemySpawnEntry entry = PickWeightedEntry();
@@ -238,6 +245,14 @@ public class EnemyGenerator : MonoBehaviour
                 _aliveEnemies.RemoveAt(i);
         }
         return _aliveEnemies.Count;
+    }
+
+    /// <summary>O anki gecerli eszamanli dusman limiti: son milestone'da (varsa) ayri limit, degilse normal.</summary>
+    private int EffectiveMaxAlive()
+    {
+        if (finalMilestoneMaxAlive > 0 && DifficultyManager.CurrentMilestone >= finalMilestoneIndex)
+            return finalMilestoneMaxAlive;
+        return maxAliveEnemies;
     }
 
     /// <summary>Giris gecerli mi ve milestone'una ulasildi mi? unlockMilestone &lt;= 0 ise bastan aciktir (manager yoksa da).</summary>

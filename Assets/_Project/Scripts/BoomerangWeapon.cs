@@ -34,8 +34,8 @@ public class BoomerangWeapon : WeaponBase
     [SerializeField] private int maxSpeedLevel = 5;
 
     [Header("Hasar Track'i")]
-    [SerializeField] private float damagePerLevel = 6f;
-    [SerializeField] private int maxDamageLevel = 5;
+    [SerializeField] private float damagePerLevel = 12f;
+    [SerializeField] private int maxDamageLevel = 8;
 
     [Header("Dinlenme (Cooldown) Track'i")]
     [Tooltip("Her seviyede dinlenme carpani (0.85 = %15 kisa).")]
@@ -49,6 +49,7 @@ public class BoomerangWeapon : WeaponBase
     private int _inFlight;
     private float _nextThrowTime;
     private readonly Collider2D[] _hitBuffer = new Collider2D[32];
+    private readonly List<Transform> _activeTargets = new List<Transform>(); // su an havadaki bumeranglarin hedefleri (farkli dusman onceligi)
     #endregion
 
     #region Unity Callbacks
@@ -62,7 +63,7 @@ public class BoomerangWeapon : WeaponBase
         if (target == null) return; // dusman gormezse ATMA
 
         Vector2 dir = (Vector2)target.position - (Vector2)transform.position;
-        Throw(dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector2.right);
+        Throw(dir.sqrMagnitude > 0.0001f ? dir.normalized : Vector2.right, target);
         _nextThrowTime = Time.time + throwStagger;
     }
     #endregion
@@ -70,8 +71,8 @@ public class BoomerangWeapon : WeaponBase
     #region Overrides
     public override void CollectUpgrades(List<WeaponUpgradeOption> into)
     {
-        if (_countLevel < maxCountLevel)
-            into.Add(new WeaponUpgradeOption("Boomerang +1", "One more boomerang (max 3)", _countLevel + 1, () => _countLevel++));
+        // LIMITSIZ + LUCKY
+        into.Add(new WeaponUpgradeOption("Boomerang +1", "One more boomerang", _countLevel + 1, () => _countLevel++, true));
         if (_speedLevel < maxSpeedLevel)
             into.Add(new WeaponUpgradeOption("Boomerang Speed", "Flies faster", _speedLevel + 1, () => _speedLevel++));
         if (_damageLevel < maxDamageLevel)
@@ -87,31 +88,45 @@ public class BoomerangWeapon : WeaponBase
     private float CurrentDamage() => baseDamage + damagePerLevel * _damageLevel;
     private float CurrentRestCooldown() => Mathf.Max(minRestCooldown, baseRestCooldown * Mathf.Pow(restCooldownMultiplier, _cooldownLevel));
 
+    /// <summary>
+    /// En yakin dusmani dondurur ama FARKLI dusman oncelikli: su an havadaki bumeranglarin gittigi
+    /// hedefleri (_activeTargets) ELER — yani ikinci bumerangi baska (bir sonraki en yakin) dusmana atar.
+    /// Baska dusman kalmadiysa (hepsi hedeflenmis) genel en yakina duser (atisi bosa harcamaz).
+    /// </summary>
     private Transform FindNearestEnemy()
     {
+        _activeTargets.RemoveAll(t => t == null); // olmus hedefleri temizle
+
         int count = Physics2D.OverlapCircleNonAlloc(transform.position, detectRange, _hitBuffer, enemyLayers);
-        Transform closest = null;
-        float closestSqr = float.MaxValue;
+        Transform closest = null, closestFree = null;
+        float bestSqr = float.MaxValue, bestFreeSqr = float.MaxValue;
+
         for (int i = 0; i < count; i++)
         {
             Collider2D c = _hitBuffer[i];
             if (c == null) continue;
-            float d = ((Vector2)c.transform.position - (Vector2)transform.position).sqrMagnitude;
-            if (d < closestSqr) { closestSqr = d; closest = c.transform; }
+            Transform t = c.transform;
+            float d = ((Vector2)t.position - (Vector2)transform.position).sqrMagnitude;
+
+            if (d < bestSqr) { bestSqr = d; closest = t; }                          // genel en yakin
+            if (!_activeTargets.Contains(t) && d < bestFreeSqr) { bestFreeSqr = d; closestFree = t; } // hedeflenmemis en yakin
         }
-        return closest;
+        return closestFree != null ? closestFree : closest; // once FARKLI dusman, yoksa en yakin
     }
 
-    private void Throw(Vector2 dir)
+    private void Throw(Vector2 dir, Transform target)
     {
         PlayerBoomerang b = Instantiate(boomerangPrefab, transform.position, Quaternion.identity);
         _inFlight++;
-        b.Launch(transform, dir, outDistance, CurrentSpeed(), CurrentDamage(), spin, catchDistance, OnBoomerangReturned);
+        if (target != null) _activeTargets.Add(target); // bu hedef artik "hedeflenmis" (sonraki bumerang baskasina)
+        b.Launch(transform, dir, outDistance, CurrentSpeed(), CurrentDamage(), spin, catchDistance, () => OnBoomerangReturned(target));
+        SfxManager.Play(SfxId.BoomerangThrow); // klip atanmazsa sessiz
     }
 
-    private void OnBoomerangReturned()
+    private void OnBoomerangReturned(Transform target)
     {
         _inFlight = Mathf.Max(0, _inFlight - 1);
+        _activeTargets.Remove(target); // hedef serbest — tekrar hedeflenebilir
         _nextThrowTime = Mathf.Max(_nextThrowTime, Time.time + CurrentRestCooldown()); // donunce kisa dinlen
     }
     #endregion

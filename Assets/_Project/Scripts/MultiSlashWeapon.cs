@@ -36,14 +36,14 @@ public class MultiSlashWeapon : WeaponBase
 
     public override void CollectUpgrades(List<WeaponUpgradeOption> into)
     {
-        if (CurrentDirections() < maxDirections)
-            into.Add(new WeaponUpgradeOption("Multi-Slash +1", "One more slash direction", _dirLevel + 1,
-                () => { _dirLevel++; ApplyDirections(); }));
+        // LIMITSIZ (sonsuz alinabilir) + LUCKY rozeti (bariz guclu)
+        into.Add(new WeaponUpgradeOption("Multi-Slash +1", "One more slash direction", _dirLevel + 1,
+            () => { _dirLevel++; ApplyDirections(); }, true));
     }
     #endregion
 
     #region Private Methods
-    private int CurrentDirections() => Mathf.Min(maxDirections, startDirections + _dirLevel);
+    private int CurrentDirections() => startDirections + _dirLevel; // clamp YOK — sonsuz
     private void ApplyDirections() { if (playerRef != null) playerRef.SetAttackDirections(CurrentDirections()); }
     #endregion
 }

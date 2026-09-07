@@ -52,6 +52,9 @@ public class UltimateCinematic : MonoBehaviour
     [Tooltip("RECOVERY: beyaz fade + kamera geri acilma suresi.")]
     [SerializeField] private float recoveryDuration = 0.5f;
 
+    [Tooltip("Ulti IMPACT aninda BOSSLARA verilen SABIT hasar. Bosslar emilmez/vaporize olmaz — sadece bu kadar hasar alir.")]
+    [SerializeField] private float bossUltimateDamage = 500f;
+
     [Header("Dusman Vacuum (charge boyunca oyuncuya cekme)")]
     [Tooltip("CHARGE basindaki cekme hizi (yavas baslar).")]
     [SerializeField] private float pullSpeedStart = 1.5f;
@@ -122,7 +125,7 @@ public class UltimateCinematic : MonoBehaviour
     private IEnumerator PlaySequence()
     {
         // --- Hazirlik ---
-        if (playerRef != null) playerRef.EnterUltimatePose();
+        if (playerRef != null) { playerRef.SetUltimateInvulnerable(true); playerRef.EnterUltimatePose(); } // sinema boyunca hasara immun
         Time.timeScale = Mathf.Clamp01(slowMoTimeScale);
         if (screenFX != null) screenFX.ResetFX();
         if (aura != null) aura.SetIntensity(0f); // baseline (senin ayarin) — buradan yukari rampa
@@ -208,7 +211,12 @@ public class UltimateCinematic : MonoBehaviour
 
         var chasers = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
         for (int i = 0; i < chasers.Length; i++)
-            if (chasers[i] != null) { chasers[i].BeginUltimateVacuum(); _pulled.Add(chasers[i].transform); }
+        {
+            if (chasers[i] == null) continue;
+            if (chasers[i] is SplitterEnemy sp && sp.IsBossLineage) continue; // splitter BOSS emilmez
+            chasers[i].BeginUltimateVacuum();
+            _pulled.Add(chasers[i].transform);
+        }
 
         var shooters = FindObjectsByType<BurstShooterEnemy>(FindObjectsSortMode.None);
         for (int i = 0; i < shooters.Length; i++)
@@ -237,7 +245,12 @@ public class UltimateCinematic : MonoBehaviour
     {
         var chasers = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
         for (int i = 0; i < chasers.Length; i++)
-            if (chasers[i] != null) chasers[i].Vaporize();
+        {
+            if (chasers[i] == null) continue;
+            // Splitter BOSS vaporize OLMAZ (instakill degil) — sadece sabit hasar alir.
+            if (chasers[i] is SplitterEnemy sp && sp.IsBossLineage) { chasers[i].TakeDamage(bossUltimateDamage); continue; }
+            chasers[i].Vaporize();
+        }
 
         var shooters = FindObjectsByType<BurstShooterEnemy>(FindObjectsSortMode.None);
         for (int i = 0; i < shooters.Length; i++)
@@ -246,6 +259,11 @@ public class UltimateCinematic : MonoBehaviour
         var boomerangs = FindObjectsByType<BoomerangEnemy>(FindObjectsSortMode.None);
         for (int i = 0; i < boomerangs.Length; i++)
             if (boomerangs[i] != null) boomerangs[i].Vaporize();
+
+        // BOSSLAR (BossController: dash/laser/kamikaze/burst) — emilmez/vaporize olmaz, SABIT hasar alir.
+        var bosses = FindObjectsByType<BossController>(FindObjectsSortMode.None);
+        for (int i = 0; i < bosses.Length; i++)
+            if (bosses[i] != null && !bosses[i].IsDying) bosses[i].TakeDamage(bossUltimateDamage);
     }
 
     private IEnumerator WaitUnscaled(float seconds)
@@ -260,7 +278,7 @@ public class UltimateCinematic : MonoBehaviour
         Time.timeScale = 1f;
         if (cam != null && cam.orthographic) cam.orthographicSize = _baseOrthoSize;
         if (cameraShake != null) cameraShake.EndSustainedShake(); // sarsinti yarida kalmis olabilir — temizle
-        if (playerRef != null) playerRef.ExitUltimatePose();
+        if (playerRef != null) { playerRef.ExitUltimatePose(); playerRef.SetUltimateInvulnerable(false); } // immunity biter (yarida kesilse bile buradan temizlenir)
         if (screenFX != null) screenFX.ResetFX();
     }
     #endregion

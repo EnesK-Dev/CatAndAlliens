@@ -23,6 +23,10 @@ public class DifficultyManager : MonoBehaviour
     [SerializeField] private float[] milestoneMinutes = { 0f, 2f, 5f, 8f };
 
     [Header("Debug")]
+    [Tooltip("TEST: Oyunu bu MILESTONE'dan baslat. 0 = normal bas. 1 = dash boss'tan, 2 = splitter boss'tan... " +
+             "Sadece hedef milestone tetiklenir (oncekiler atlanir). RELEASE'de 0 birak!")]
+    [SerializeField] private int debugStartMilestone = 0;
+
     [Tooltip("Ekranin sol ustunde gecen sure / faktor / milestone gosterir. Test icin; sonra kapat.")]
     [SerializeField] private bool showDebugOverlay = true;
 
@@ -80,6 +84,14 @@ public class DifficultyManager : MonoBehaviour
         _elapsedTime = 0f;
         _currentFactor = 0f;
         _reachedMilestoneIndex = -1;
+
+        // TEST: belirli bir milestone'dan basla — sureyi o milestone'un dakikasina al ve oncekileri "gecilmis" say
+        // ki sadece HEDEF milestone tetiklensin (ust uste boss binmesin). RELEASE'de debugStartMilestone=0.
+        if (debugStartMilestone > 0 && milestoneMinutes != null && debugStartMilestone < milestoneMinutes.Length)
+        {
+            _elapsedTime = milestoneMinutes[debugStartMilestone] * 60f;
+            _reachedMilestoneIndex = debugStartMilestone - 1;
+        }
     }
 
     private void Update()

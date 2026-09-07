@@ -57,6 +57,7 @@
     <Compile Include="Assets/_Project/Scripts/UpgradeCard.cs" />
     <Compile Include="Assets/_Project/Scripts/DifficultyManager.cs" />
     <Compile Include="Assets/_Project/Scripts/AutoBlasterWeapon.cs" />
+    <Compile Include="Assets/_Project/Scripts/VolumeSlider.cs" />
     <Compile Include="Assets/_Project/Scripts/PoolManager.cs" />
     <Compile Include="Assets/_Project/Scripts/BossOffscreenIndicator.cs" />
     <Compile Include="Assets/_Project/Scripts/BossController.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="Assets/_Project/Scripts/MultiSlashWeapon.cs" />
     <Compile Include="Assets/_Project/Scripts/BossLaser.cs" />
     <Compile Include="Assets/_Project/Scripts/MainMenuController.cs" />
+    <Compile Include="Assets/_Project/Scripts/Starfield.cs" />
     <Compile Include="Assets/_Project/Scripts/CameraShake.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateBarUI.cs" />
     <Compile Include="Assets/_Project/Scripts/WinUI.cs" />
@@ -109,6 +111,7 @@
     <Compile Include="Assets/_Project/Scripts/UpgradeSelectionUI.cs" />
     <Compile Include="Assets/_Project/Scripts/BossTestSpawner.cs" />
     <Compile Include="Assets/_Project/Scripts/BoomerangWeapon.cs" />
+    <Compile Include="Assets/_Project/Scripts/VolumeSettings.cs" />
     <Compile Include="Assets/_Project/Scripts/BoomerangEnemy.cs" />
     <Compile Include="Assets/_Project/Scripts/BossHealthBarUI.cs" />
     <Compile Include="Assets/_Project/Scripts/SfxId.cs" />

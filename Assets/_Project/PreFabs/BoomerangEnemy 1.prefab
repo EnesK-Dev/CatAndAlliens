@@ -201,8 +201,8 @@ MonoBehaviour:
   throwCooldownAtMaxDifficulty: 1.2
   throwTelegraphDurationAtMaxDifficulty: 0.15
   moveSpeedMultiplierAtMaxDifficulty: 1.15
-  coreDropMin: 2
-  coreDropMax: 3
+  coreDropMin: 4
+  coreDropMax: 6
   ultFoodDropChance: 0.4
 --- !u!114 &3628730348530122341
 MonoBehaviour:
