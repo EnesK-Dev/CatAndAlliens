@@ -67,6 +67,7 @@
     <Compile Include="Assets/_Project/Scripts/EnemyController.cs" />
     <Compile Include="Assets/_Project/Scripts/DamagePopupManager.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyBullet.cs" />
+    <Compile Include="Assets/_Project/Scripts/CameraFollow.cs" />
     <Compile Include="Assets/_Project/Scripts/AudioManager.cs" />
     <Compile Include="Assets/_Project/Scripts/player.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FixedJoystick.cs" />
@@ -112,6 +113,7 @@
     <Compile Include="Assets/_Project/Scripts/BossTestSpawner.cs" />
     <Compile Include="Assets/_Project/Scripts/BoomerangWeapon.cs" />
     <Compile Include="Assets/_Project/Scripts/VolumeSettings.cs" />
+    <Compile Include="Assets/_Project/Scripts/AppConfig.cs" />
     <Compile Include="Assets/_Project/Scripts/BoomerangEnemy.cs" />
     <Compile Include="Assets/_Project/Scripts/BossHealthBarUI.cs" />
     <Compile Include="Assets/_Project/Scripts/SfxId.cs" />

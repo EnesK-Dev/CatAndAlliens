@@ -9,7 +9,20 @@ public class player : MonoBehaviour
     [SerializeField] private float moveSpeed; 
 
     [Header("Giris Bileseni")]
-    [SerializeField] private FixedJoystick joystick; 
+    // Base 'Joystick' tipi: Fixed/Floating/Dynamic/Variable hepsi atanabilir (Horizontal/Vertical base'te).
+    [SerializeField] private Joystick joystick;
+
+    [Header("Hareket Hissiyati (mobil)")]
+    [Tooltip("0'dan tam hiza ulasma suresi (sn). Kucuk = daha ani. 0 = anlik (eski davranis).")]
+    [SerializeField] private float moveAccelTime = 0.08f;
+
+    [Tooltip("Tam hizdan durusa gecme suresi (sn). Genelde accel'den kisa (daha net durus).")]
+    [SerializeField] private float moveDecelTime = 0.05f;
+
+    [Tooltip("Analog bant: joystick'i hafif itince minimum hiz orani (0.6 = %60). Tam itince %100. " +
+             "1 verirsen analog kapali (hep tam hiz). Klavye her zaman tam hiz.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float analogMinFactor = 0.6f;
 
     [Header("Vampire Hunter Saldiri Ayarlari")]
     [SerializeField] private GameObject attackPointObject; 
@@ -92,6 +105,7 @@ public class player : MonoBehaviour
 
     private Rigidbody2D rb;
     private Vector2 moveInput;
+    private float _moveSpeedFactor; // 0..1 analog hiz orani (joystick buyuklugunden; klavyede 1)
     private Animator animator;
 
     private bool isCooldown = false;
@@ -176,20 +190,34 @@ public class player : MonoBehaviour
         // WASD klavye girisi (masaustu). Yeni Input System uzerinden okunur.
         Vector2 keyboardInput = ReadKeyboardInput();
 
-        // Iki kaynak birlestirilir; klavye varsa onceligi klavyeye ver, yoksa joystick.
-        // Boylece ayni anda ikisi de kullanilsa cakisma olmaz.
-        moveInput = keyboardInput.sqrMagnitude > InputDeadZoneSqr ? keyboardInput : joystickInput;
+        // Klavye varsa onceligi klavyeye ver, yoksa joystick. Boylece ikisi cakismaz.
+        bool useKeyboard = keyboardInput.sqrMagnitude > InputDeadZoneSqr;
+        Vector2 raw = useKeyboard ? keyboardInput : joystickInput;
 
-        // Sadece YON al, TAM HIZ git — joystick'i az itsen de tam hizda gider (analog buyukluk yok).
-        // Deadzone ustundeyse birim vektore normalize et; altindaysa durur.
-        if (moveInput.sqrMagnitude > InputDeadZoneSqr)
+        // YON birim vektor; HIZ ise analog faktor (joystick buyuklugunden). Klavye dijital -> tam hiz.
+        // Analog bant: ic deadzone = dur, disa dogru minFactor -> 1 rampa. Boylece hafif itince ince
+        // kontrol (yavas), tam itince tam hiz. analogMinFactor=1 ise etkisiz (hep tam hiz).
+        if (raw.sqrMagnitude > InputDeadZoneSqr)
         {
-            moveInput = moveInput.normalized;
+            moveInput = raw.normalized;
             lastMoveDirection = moveInput;
+
+            if (useKeyboard)
+            {
+                _moveSpeedFactor = 1f;
+            }
+            else
+            {
+                float mag = Mathf.Clamp01(raw.magnitude);           // joystick 0..1
+                float deadzone = Mathf.Sqrt(InputDeadZoneSqr);       // ~0.05
+                float t = Mathf.InverseLerp(deadzone, 1f, mag);      // deadzone..1 -> 0..1
+                _moveSpeedFactor = Mathf.Lerp(analogMinFactor, 1f, t);
+            }
         }
         else
         {
             moveInput = Vector2.zero;
+            _moveSpeedFactor = 0f;
         }
     }
 
@@ -242,11 +270,18 @@ public class player : MonoBehaviour
             return;
         }
 
-        // Deadzone altindaysa tam dur — animasyonla ayni esik, tutarli davranis.
-        // Hareket hizi combo carpaniyla ARTAR (kullanici istegi: sadece hareket + hasar comboyla artar).
-        rb.linearVelocity = moveInput.sqrMagnitude > InputDeadZoneSqr
-            ? moveInput * (moveSpeed * ComboManager.Multiplier)
+        // Hedef hiz: yon * taban hiz * combo * analog faktor. Deadzone altinda hedef = 0 (dur).
+        float maxSpeedNow = moveSpeed * ComboManager.Multiplier;
+        Vector2 targetVel = moveInput.sqrMagnitude > InputDeadZoneSqr
+            ? moveInput * (maxSpeedNow * _moveSpeedFactor)
             : Vector2.zero;
+
+        // IVMELENME: velocity'yi anlik set etmek yerine hedefe RAMPALA (baslangic/durus doganallasir).
+        // Hizlanirken accelTime, yavaslarken decelTime kullanilir; rate = tam hiz / sure -> tutarli his.
+        bool accelerating = targetVel.sqrMagnitude > 0.0001f;
+        float smoothTime = accelerating ? moveAccelTime : moveDecelTime;
+        float rate = smoothTime > 0f ? maxSpeedNow / smoothTime : float.MaxValue; // 0 sure = anlik (eski davranis)
+        rb.linearVelocity = Vector2.MoveTowards(rb.linearVelocity, targetVel, rate * Time.fixedDeltaTime);
     }
 
     private void HandleVampireHunterAttack()

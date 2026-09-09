@@ -213,14 +213,14 @@ MonoBehaviour:
   hitFlashDuration: 0.07
   deathFrames: []
   deathFrameRate: 10
-  coreDropMin: 40
-  coreDropMax: 60
+  coreDropMin: 100
+  coreDropMax: 100
   coreScatterRadius: 3.5
   healOnDeath: 0
   useDashAttack: 1
-  attackInterval: 2
-  telegraphDuration: 0.6
-  dashSpeed: 20
+  attackInterval: 1
+  telegraphDuration: 0.5
+  dashSpeed: 25
   dashDistance: 9
   zigzagAmplitude: 2.5
   dashDistanceMin: 6
@@ -230,16 +230,16 @@ MonoBehaviour:
   zigzagSegmentsMin: 4
   zigzagSegmentsMax: 7
   headbuttOvershoot: 3.5
-  retreatChance: 0.22
+  retreatChance: 0.168
   zigzagChance: 0.5
   arenaCenter: {x: -1.5, y: -0.5}
   arenaHalfSize: {x: 18, y: 16}
-  wallClearance: 0.4
+  wallClearance: 0.2
   telegraphColor: {r: 0, g: 0.93333334, b: 0.21568628, a: 0.69411767}
   telegraphWidth: 0.35
   telegraphArrowSize: 0.4
   leaveAfterImages: 1
-  afterImageInterval: 0.045
+  afterImageInterval: 0.035
   afterImageFadeTime: 0.35
   afterImageAlpha: 0.55
   afterImageColor: {r: 0, g: 0.93333334, b: 0.21568628, a: 1}

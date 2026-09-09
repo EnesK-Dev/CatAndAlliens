@@ -196,7 +196,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SplitterEnemy
   moveSpeed: 2.2
-  maxHealth: 2300
+  maxHealth: 3100
   healthMultiplierAtMaxDifficulty: 3
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
   hitFlashDuration: 0.07
@@ -249,16 +249,16 @@ MonoBehaviour:
   maxAttackCooldownAtMaxDifficulty: 4.5
   moveSpeedMultiplierAtMaxDifficulty: 1.15
   laserWidthMultiplierAtMaxDifficulty: 1.6
-  coreDropNormal: 2
-  coreDropNormalMax: 4
-  coreDropEliteMin: 4
-  coreDropEliteMax: 6
+  coreDropNormal: 150
+  coreDropNormalMax: 150
+  coreDropEliteMin: 150
+  coreDropEliteMax: 150
   ultFoodDropChance: 0.25
   splitChildPrefab: {fileID: 3971847470037377216}
   splitCount: 2
   splitDepth: 4
   childHealthFactor: 0.4
   childScale: 0.72
-  spawnSpread: 1.2
-  childSpeedMultiplier: 1.3
+  spawnSpread: 1.1
+  childSpeedMultiplier: 1.2
   isBossLineage: 1

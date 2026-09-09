@@ -214,8 +214,8 @@ MonoBehaviour:
   hitFlashDuration: 0.07
   deathFrames: []
   deathFrameRate: 10
-  coreDropMin: 40
-  coreDropMax: 60
+  coreDropMin: 250
+  coreDropMax: 250
   coreScatterRadius: 3.5
   healOnDeath: 0
   useDashAttack: 0

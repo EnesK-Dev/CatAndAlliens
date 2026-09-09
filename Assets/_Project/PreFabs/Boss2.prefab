@@ -214,8 +214,8 @@ MonoBehaviour:
   hitFlashDuration: 0.07
   deathFrames: []
   deathFrameRate: 10
-  coreDropMin: 40
-  coreDropMax: 60
+  coreDropMin: 200
+  coreDropMax: 200
   coreScatterRadius: 3.5
   healOnDeath: 0
   useDashAttack: 0
@@ -259,15 +259,15 @@ MonoBehaviour:
   laserVisualPrefab: {fileID: 8123456789012345678, guid: 1992a096572d90d17b44989b0b1280c9, type: 3}
   laserWidth: 2.3
   colliderWidthScale: 0.462
-  laserLength: 40
+  laserLength: 35
   laserDamage: 2
-  laserHitCooldown: 1
+  laserHitCooldown: 2
   firstAttackDelay: 2
   betweenAttacks: 2.5
-  telegraphDuration: 0.6
+  telegraphDuration: 0.7
   atk1GrowTime: 0.6
   atk1FollowTime: 4.5
-  atk1TurnSpeed: 20
+  atk1TurnSpeed: 22
   atk2Duration: 6
   atk2RotSpeed: 45
   atk3Spread: 28
