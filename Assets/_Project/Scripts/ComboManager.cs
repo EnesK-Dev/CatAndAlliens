@@ -150,6 +150,27 @@ public class ComboManager : MonoBehaviour
         if (_instance != null)
             _instance.GainRankInternal(steps);
     }
+
+    /// <summary>
+    /// Combo'yu "canli tutar": zaman decay penceresini (son vurustan beri gecen sure) SIFIRLAR ama
+    /// sayaci/rank'i degistirmez. Ulti gibi ekrani temizleyen (ama RegisterHit tetiklemeyen) aksiyonlar
+    /// cagirir — boylece dusman kalmadigi bosluk suresinde combo dusmez ("saldiri gibi sayilir").
+    /// </summary>
+    public static void KeepAlive()
+    {
+        if (_instance != null)
+            _instance._timeSinceLastHit = 0f;
+    }
+
+    /// <summary>
+    /// Comboyu tek seferde N vurus arttirir (toplu). Ulti ekrani temizlerken her oldurulen dusman
+    /// +1 vurus sayilsin diye cagrilir — combo firlar. Decay penceresini de sifirlar. UI bir kez guncellenir.
+    /// </summary>
+    public static void AddHits(int n)
+    {
+        if (_instance != null && n > 0)
+            _instance.AddHitsInternal(n);
+    }
     #endregion
 
     #region Unity Callbacks
@@ -206,6 +227,15 @@ public class ComboManager : MonoBehaviour
     {
         _count++;
         _timeSinceLastHit = 0f; // Vurdu — decay penceresi sifirlanir
+        RecomputeRank();
+        OnComboChanged?.Invoke(_count, _tierIndex);
+    }
+
+    /// <summary>N vurusu tek seferde ekler; rank'i yeniden hesaplar, UI'yi bir kez gunceller.</summary>
+    private void AddHitsInternal(int n)
+    {
+        _count += n;
+        _timeSinceLastHit = 0f;
         RecomputeRank();
         OnComboChanged?.Invoke(_count, _tierIndex);
     }

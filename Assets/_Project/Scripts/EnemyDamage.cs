@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Bir collider'a (dusman/boss) hasar uygulayan tek noktali yardimci. Dort dusman tipini ve boss'u
+/// Bir collider'a (dusman/boss) hasar uygulayan tek noktali yardimci. Dusman tiplerini ve boss'u
 /// tanir; kimseye denk gelmezse false doner. Player saldirisi ve silah mermileri buradan gecer (DRY).
 /// </summary>
 public static class EnemyDamage
@@ -19,9 +19,6 @@ public static class EnemyDamage
 
         BurstShooterEnemy burst = col.GetComponent<BurstShooterEnemy>();
         if (burst != null) { burst.TakeDamage(damage); return true; }
-
-        BoomerangEnemy boom = col.GetComponent<BoomerangEnemy>();
-        if (boom != null) { boom.TakeDamage(damage); return true; }
 
         return false;
     }
@@ -50,9 +47,6 @@ public static class EnemyDamage
         BurstShooterEnemy burst = col.GetComponent<BurstShooterEnemy>();
         if (burst != null) { burst.TakeDamage(damage); burst.ApplyKnockback(knockDir, knockSpeed, knockDuration); return true; }
 
-        BoomerangEnemy boom = col.GetComponent<BoomerangEnemy>();
-        if (boom != null) { boom.TakeDamage(damage); boom.ApplyKnockback(knockDir, knockSpeed, knockDuration); return true; }
-
         return false;
     }
 
@@ -76,9 +70,6 @@ public static class EnemyDamage
 
         BurstShooterEnemy burst = col.GetComponent<BurstShooterEnemy>();
         if (burst != null) { burst.NukeKill(damage); return true; }
-
-        BoomerangEnemy boom = col.GetComponent<BoomerangEnemy>();
-        if (boom != null) { boom.NukeKill(damage); return true; }
 
         return false; // boss vb. — nuke hasar vermez
     }

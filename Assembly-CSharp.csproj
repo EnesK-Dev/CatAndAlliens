@@ -73,7 +73,6 @@
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FixedJoystick.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyDamage.cs" />
     <Compile Include="Assets/_Project/Scripts/KamikazeEnemy.cs" />
-    <Compile Include="Assets/_Project/Scripts/BoomerangProjectile.cs" />
     <Compile Include="Assets/_Project/Scripts/SceneLoader.cs" />
     <Compile Include="Assets/_Project/Scripts/ClawSlashVisual.cs" />
     <Compile Include="Assets/_Project/Scripts/GameLog.cs" />
@@ -114,7 +113,6 @@
     <Compile Include="Assets/_Project/Scripts/BoomerangWeapon.cs" />
     <Compile Include="Assets/_Project/Scripts/VolumeSettings.cs" />
     <Compile Include="Assets/_Project/Scripts/AppConfig.cs" />
-    <Compile Include="Assets/_Project/Scripts/BoomerangEnemy.cs" />
     <Compile Include="Assets/_Project/Scripts/BossHealthBarUI.cs" />
     <Compile Include="Assets/_Project/Scripts/SfxId.cs" />
     <Compile Include="Assets/_Project/Scripts/PooledObject.cs" />

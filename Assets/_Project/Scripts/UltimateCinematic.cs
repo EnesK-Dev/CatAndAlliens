@@ -126,6 +126,7 @@ public class UltimateCinematic : MonoBehaviour
     {
         // --- Hazirlik ---
         if (playerRef != null) { playerRef.SetUltimateInvulnerable(true); playerRef.EnterUltimatePose(); } // sinema boyunca hasara immun
+        ComboManager.KeepAlive(); // ulti "saldiri gibi" sayilir — charge boyunca combo decay penceresi sifirlanir
         Time.timeScale = Mathf.Clamp01(slowMoTimeScale);
         if (screenFX != null) screenFX.ResetFX();
         if (aura != null) aura.SetIntensity(0f); // baseline (senin ayarin) — buradan yukari rampa
@@ -175,7 +176,7 @@ public class UltimateCinematic : MonoBehaviour
         if (cameraShake != null) cameraShake.EndSustainedShake(); // sarsintiyi durdur, kamerayi yerine al
         if (screenFX != null) screenFX.SetWhite(1f); // tam ekran beyaz (her seyin ustunde)
         SfxManager.Play(SfxId.UltimateImpact); // beyaz flash / patlama sesi (aktivasyondan ayri)
-        VaporizeAllEnemies();                        // dropsuz + aninda sil (emilenler + stragglerlar)
+        VaporizeAllEnemies();                        // dropsuz + aninda sil (+ combo'ya vurus ekler; icinde)
         _pulled.Clear();
         _pullTargets.Clear();
         yield return WaitUnscaled(whiteHold);
@@ -222,10 +223,6 @@ public class UltimateCinematic : MonoBehaviour
         for (int i = 0; i < shooters.Length; i++)
             if (shooters[i] != null) { shooters[i].BeginUltimateVacuum(); _pulled.Add(shooters[i].transform); }
 
-        var boomerangs = FindObjectsByType<BoomerangEnemy>(FindObjectsSortMode.None);
-        for (int i = 0; i < boomerangs.Length; i++)
-            if (boomerangs[i] != null) { boomerangs[i].BeginUltimateVacuum(); _pulled.Add(boomerangs[i].transform); }
-
         // Her dusman icin diskteki hedef: yaricap = minRadius + spacing*sqrt(index), aci = index*altinAci.
         // sqrt + altin aci = esit yogunluklu, ust uste binmeyen dagilim (ayciyegi cekirdek dizilimi).
         for (int i = 0; i < _pulled.Count; i++)
@@ -243,27 +240,31 @@ public class UltimateCinematic : MonoBehaviour
     /// </summary>
     private void VaporizeAllEnemies()
     {
+        int killed = 0; // vaporize edilen dusman sayisi -> combo'ya "vurus" olarak eklenir
+
         var chasers = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
         for (int i = 0; i < chasers.Length; i++)
         {
             if (chasers[i] == null) continue;
-            // Splitter BOSS vaporize OLMAZ (instakill degil) — sadece sabit hasar alir.
+            // Splitter BOSS vaporize OLMAZ (instakill degil) — sadece sabit hasar alir, combo saymaz.
             if (chasers[i] is SplitterEnemy sp && sp.IsBossLineage) { chasers[i].TakeDamage(bossUltimateDamage); continue; }
             chasers[i].Vaporize();
+            killed++;
         }
 
         var shooters = FindObjectsByType<BurstShooterEnemy>(FindObjectsSortMode.None);
         for (int i = 0; i < shooters.Length; i++)
-            if (shooters[i] != null) shooters[i].Vaporize();
+            if (shooters[i] != null) { shooters[i].Vaporize(); killed++; }
 
-        var boomerangs = FindObjectsByType<BoomerangEnemy>(FindObjectsSortMode.None);
-        for (int i = 0; i < boomerangs.Length; i++)
-            if (boomerangs[i] != null) boomerangs[i].Vaporize();
-
-        // BOSSLAR (BossController: dash/laser/kamikaze/burst) — emilmez/vaporize olmaz, SABIT hasar alir.
+        // BOSSLAR (BossController: dash/laser/kamikaze/burst) — emilmez/vaporize olmaz, SABIT hasar alir (combo saymaz).
         var bosses = FindObjectsByType<BossController>(FindObjectsSortMode.None);
         for (int i = 0; i < bosses.Length; i++)
             if (bosses[i] != null && !bosses[i].IsDying) bosses[i].TakeDamage(bossUltimateDamage);
+
+        // Ulti "saldiri" sayilir: her oldurulen dusman +1 combo vurusu (combo firlar). Dusman yoksa en azindan
+        // decay penceresini taze tut (KeepAlive) — ekran bosalinca combo dusmesin.
+        if (killed > 0) ComboManager.AddHits(killed);
+        else ComboManager.KeepAlive();
     }
 
     private IEnumerator WaitUnscaled(float seconds)

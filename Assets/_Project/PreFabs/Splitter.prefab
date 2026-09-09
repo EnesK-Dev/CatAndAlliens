@@ -253,7 +253,7 @@ MonoBehaviour:
   coreDropNormalMax: 4
   coreDropEliteMin: 4
   coreDropEliteMax: 6
-  ultFoodDropChance: 0.25
+  ultFoodDropChance: 0.098
   splitChildPrefab: {fileID: 3971847470037377216, guid: 4b622fb260dca95a480e6d08863f11c0, type: 3}
   splitCount: 2
   splitDepth: 1

@@ -165,7 +165,8 @@ public class UltimateManager : MonoBehaviour
     private void SpawnFoodInternal(Vector3 position, Color tint, int amount)
     {
         if (ultFoodPrefab == null) return;
-        if (_isReady) return; // ult zaten dolu — kullanilana kadar yeni food bosa gitmesin
+        // NOT: ulti dolu olsa bile food DUSER — cunku food ayni zamanda CAN verir (HandleFoodCollected -> Heal).
+        // Dolu iken toplaninca charge eklenmez (AddChargeInternal guard) ama iyilestirme yine calisir.
 
         for (int i = 0; i < amount; i++)
         {

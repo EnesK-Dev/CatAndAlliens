@@ -13,8 +13,8 @@ public class player : MonoBehaviour
     [SerializeField] private Joystick joystick;
 
     [Header("Hareket Hissiyati (mobil)")]
-    [Tooltip("0'dan tam hiza ulasma suresi (sn). Kucuk = daha ani. 0 = anlik (eski davranis).")]
-    [SerializeField] private float moveAccelTime = 0.08f;
+    [Tooltip("0'dan tam hiza ulasma / ani yon degistirme suresi (sn). Buyuk = donusler daha yumusak/gec. 0 = anlik.")]
+    [SerializeField] private float moveAccelTime = 0.15f;
 
     [Tooltip("Tam hizdan durusa gecme suresi (sn). Genelde accel'den kisa (daha net durus).")]
     [SerializeField] private float moveDecelTime = 0.05f;
@@ -152,6 +152,19 @@ public class player : MonoBehaviour
     void Awake()
     {
         InitializeComponents();
+    }
+
+    void Start()
+    {
+        // Oyun basinda kedi EKRANA (asagi) baksin — idle_tree SimpleDirectional2D blend'i MoveX/MoveY okur;
+        // varsayilan (0,0) sirti donuk (yukari) idle'a dusuyordu. MoveY=-1 -> asagi bakan idle. Oyuncu
+        // hareket edene kadar bu deger korunur (UpdateAnimationState idle'da MoveX/MoveY'e dokunmaz).
+        lastMoveDirection = Vector2.down;
+        if (animator != null)
+        {
+            animator.SetFloat("MoveX", 0f);
+            animator.SetFloat("MoveY", -1f);
+        }
     }
 
     void Update()
@@ -311,10 +324,9 @@ public class player : MonoBehaviour
             Collider2D enemyCollider = _closestBuffer[i];
             if (enemyCollider == null) continue;
 
-            // EnemyController, BurstShooterEnemy, BoomerangEnemy ya da Boss — biri varsa geçerli hedef
+            // EnemyController, BurstShooterEnemy ya da Boss — biri varsa geçerli hedef
             bool isEnemy = enemyCollider.GetComponent<EnemyController>() != null
                         || enemyCollider.GetComponent<BurstShooterEnemy>() != null
-                        || enemyCollider.GetComponent<BoomerangEnemy>() != null
                         || enemyCollider.GetComponent<BossController>() != null;
             if (!isEnemy) continue;
 
@@ -478,11 +490,6 @@ public class player : MonoBehaviour
             burst.TakeDamage(damage);
             return;
         }
-
-        // Ikisi de degilse boomerang dusmani olabilir — ayri sinif, kendi TakeDamage'i var
-        BoomerangEnemy boomerang = enemyCollider.GetComponent<BoomerangEnemy>();
-        if (boomerang != null)
-            boomerang.TakeDamage(damage);
     }
 
     /// <summary>Multi-slash silahi (Silah 4) cagirir: saldirinin kac YONDE vuracagini ayarlar (1 = normal, max 6).</summary>
@@ -598,7 +605,6 @@ public class player : MonoBehaviour
             // Itilen dusman KISA sure yerinde dursun (sonra yurur) — 'duvari ittirme' hissi. Boss stun'lanmaz.
             if (col.TryGetComponent(out EnemyController ec)) ec.ApplyPushStun(dashPushStunDuration);
             else if (col.TryGetComponent(out BurstShooterEnemy bs)) bs.ApplyPushStun(dashPushStunDuration);
-            else if (col.TryGetComponent(out BoomerangEnemy be)) be.ApplyPushStun(dashPushStunDuration);
         }
     }
 

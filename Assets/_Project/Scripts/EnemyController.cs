@@ -6,6 +6,12 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     [Header("Yapay Zeka Ayarlari")]
     [SerializeField] private float moveSpeed = 3f;
 
+    [Tooltip("Duvara dik gelince pinlenmek yerine duvar boyunca kaysin (wall slide). Kapatilirsa eski davranis.")]
+    [SerializeField] private bool wallSlide = true;
+
+    [Tooltip("Onde bu mesafede duvar varsa kayma devreye girer (dunya birimi).")]
+    [SerializeField] private float wallProbeDistance = 0.4f;
+
     [Header("Can Ayarlari")]
     [SerializeField] private float maxHealth;
     [Tooltip("Zorluk 1 iken (zamanla) can carpani. Spawn aninda GLOBAL DifficultyFactor ile Lerp'lenir — " +
@@ -111,6 +117,10 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     private LaserVisual laserVisualInstance;
     private Transform playerTransform;
     private Rigidbody2D rb;
+    // Duvar kaymasi (wall slide) — Obstacle layer'ina rb.Cast ile bakip pinlenmeyi onler.
+    private ContactFilter2D _wallFilter;
+    private bool _wallFilterReady;
+    private static readonly RaycastHit2D[] _wallHits = new RaycastHit2D[4];
     private Vector2 moveDirection;
     private float currentHealth;
     private SpriteRenderer spriteRenderer;
@@ -487,6 +497,14 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         spriteRenderer = GetComponent<SpriteRenderer>();
         bodyCollider = GetComponent<Collider2D>();
         spriteAnimator = GetComponent<SpriteAnimator>();
+
+        // Duvar kaymasi icin Obstacle layer'ina bakan cast filtresi (trigger'lari yok say).
+        int obstacleLayer = LayerMask.NameToLayer("Obstacle");
+        if (obstacleLayer >= 0)
+        {
+            _wallFilter = new ContactFilter2D { useLayerMask = true, layerMask = 1 << obstacleLayer, useTriggers = false };
+            _wallFilterReady = true;
+        }
     }
 
     private void InitializeHealthSystem()
@@ -575,7 +593,33 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
             return;
         }
 
-        rb.linearVelocity = moveDirection * effectiveMoveSpeed;
+        Vector2 dir = moveDirection;
+
+        // DUVAR KAYMASI: onde duvar (Obstacle) varsa hizin duvara giren bileseni atilir -> duvar boyunca kayar
+        // (pinlenmez). rb.Cast gercek collider sekliyle bakar. Tam dik gelirse oyuncunun oldugu tarafa tegetlenir.
+        if (wallSlide && _wallFilterReady)
+        {
+            int hitCount = rb.Cast(dir, _wallFilter, _wallHits, wallProbeDistance);
+            if (hitCount > 0)
+            {
+                Vector2 n = _wallHits[0].normal;
+                Vector2 slide = dir - Vector2.Dot(dir, n) * n; // duvara paralel bilesen
+                if (slide.sqrMagnitude > 0.02f)
+                {
+                    dir = slide.normalized;
+                }
+                else
+                {
+                    // Tam dik: duvar tegetini oyuncuya yakin yone cevir (duvari dolan)
+                    Vector2 tangent = new Vector2(-n.y, n.x);
+                    Vector2 toPlayer = (Vector2)playerTransform.position - rb.position;
+                    if (Vector2.Dot(tangent, toPlayer) < 0f) tangent = -tangent;
+                    dir = tangent;
+                }
+            }
+        }
+
+        rb.linearVelocity = dir * effectiveMoveSpeed;
     }
 
     /// <summary>Vurulunca kisa sure kirmizi flash yakar, sonra kendi rengine doner.</summary>
