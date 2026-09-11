@@ -172,6 +172,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   moveSpeed: 3
+  wallSlide: 1
+  wallProbeDistance: 0.4
   maxHealth: 100
   healthMultiplierAtMaxDifficulty: 3
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
@@ -205,7 +207,7 @@ MonoBehaviour:
   dashAfterImageFadeTime: 0.25
   dashAfterImageColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   laserDamage: 1
-  bodyContactDamage: 1
+  bodyContactDamage: 4
   contactDamageCooldown: 1
   chargeDuration: 1.5
   laserDuration: 0.5

@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/MeowvivorsSplash.unity
+    guid: d91075d4ee870fc178c9c4f3253d2156
+  - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: 07357dcf8a8a51618b5ecbb8f73892c3
   - enabled: 1

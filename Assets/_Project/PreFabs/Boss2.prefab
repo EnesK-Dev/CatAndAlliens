@@ -269,10 +269,10 @@ MonoBehaviour:
   atk1FollowTime: 4.5
   atk1TurnSpeed: 22
   atk2Duration: 6
-  atk2RotSpeed: 45
+  atk2RotSpeed: 38
   atk3Spread: 28
   atk3CloseSpread: 4
   atk3CloseSpeed: 14
-  atk3CenterTrackSpeed: 35
+  atk3CenterTrackSpeed: 0
   atk3CloseTime: 2.5
   atk3HoldTime: 0.7

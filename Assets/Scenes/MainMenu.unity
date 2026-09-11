@@ -3176,6 +3176,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuController
   sceneLoader: {fileID: 1045664606}
   gameSceneName: SampleScene
+  splashSceneName: MeowvivorsSplash
   settingsPanel: {fileID: 286670135}
   creditsPanel: {fileID: 433757905}
   audioManager: {fileID: 930055512}

@@ -167,7 +167,14 @@ public class KamikazeBossAttack : MonoBehaviour
         SpriteRenderer circle = GetCircle();
         circle.transform.position = center;
         float spriteW = redCircleSprite != null ? redCircleSprite.bounds.size.x : 1f;
-        circle.transform.localScale = Vector3.one * (spriteW > 0.001f ? (radius * 2f) / spriteW : 1f);
+        // red_circle YUMUSAK gradyan (kenarlari seffafa doner) -> gorunur "belirgin kirmizi" kabaca bounds
+        // yaricapinin ~%50'si. Bu yuzden: patlamalari merkeze topla (spread), HASAR'i gorunur cekirdege (coverR)
+        // esitle ve sprite'i 2x buyut. Sonuc: patlamalar kirmizinin icinde, gorunur kirmizinin DISINDA hasar YOK.
+        float spread = radius * 0.5f;                     // patlama sacilimi (daha siki)
+        float coverR = spread + explosionSize * 0.5f;     // patlama gorsellerinin ulastigi yaricap = hasar
+        const float RedCoreFraction = 0.5f;               // gorunur kirmizinin sprite bounds'una orani
+        float boundsR = coverR / RedCoreFraction;         // glow bounds yaricapi (buyur ki cekirdek coverR olsun)
+        circle.transform.localScale = Vector3.one * (spriteW > 0.001f ? (boundsR * 2f) / spriteW : 1f);
         circle.gameObject.SetActive(true);
 
         float t = 0f;
@@ -183,13 +190,13 @@ public class KamikazeBossAttack : MonoBehaviour
         circle.gameObject.SetActive(false); // telegraph bitti
 
         // Alan hasari (bir kez)
-        DamagePlayer(center, radius);
+        DamagePlayer(center, coverR); // hasar = gorunur kirmizi cekirdek (patlamalari kapsar, glow'un ICINDE)
         SfxManager.Play(SfxId.KamikazeExplode);
 
         // Icinde birden fazla 03 patlamasi
         for (int i = 0; i < innerExplosions; i++)
         {
-            Vector2 p = center + Random.insideUnitCircle * (radius * 0.75f);
+            Vector2 p = center + Random.insideUnitCircle * spread;
             StartCoroutine(ExplosionRoutine(p));
         }
     }

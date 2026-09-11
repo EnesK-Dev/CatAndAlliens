@@ -207,8 +207,8 @@ MonoBehaviour:
   kiteMoveSpeed: 3.5
   facePlayer: 1
   spriteFacesRight: 1
-  bodyContactDamage: 2
-  contactDamageCooldown: 1
+  bodyContactDamage: 4
+  contactDamageCooldown: 2
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
   hitFlashDuration: 0.07
   deathFrames: []

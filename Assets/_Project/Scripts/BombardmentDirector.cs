@@ -359,7 +359,18 @@ public class BombardmentDirector : MonoBehaviour
     /// <summary>Bombanin pool'a donus delegesi (bir kez uretilir, closure alloc havuz kurulumunda kalir).</summary>
     private Action MakeReturn(BombWarning b) => () => _bombAvailable.Enqueue(b);
 
-    private BombWarning GetBomb() => _bombAvailable.Count > 0 ? _bombAvailable.Dequeue() : null;
+    private BombWarning GetBomb()
+    {
+        if (_bombAvailable.Count > 0) return _bombAvailable.Dequeue();
+        // Havuz bosaldi -> BUYU (yoksa ucak golgesi bomba birakamiyor = bosuna gerilim). Her golge bomba biraksin.
+        if (bombWarningPrefab == null) return null;
+        BombWarning b = Instantiate(bombWarningPrefab, transform);
+        b.Initialize(bombWarningDuration, bombExplosionDuration, explosionRadius, playerBombDamage, playerLayer, MakeReturn(b));
+        b.ConfigureEnemyDamage(enemyLayers, enemyBombDamage);
+        b.gameObject.SetActive(false);
+        _bombPool.Add(b);
+        return b;
+    }
 
     private BombPlane GetPlane()
     {

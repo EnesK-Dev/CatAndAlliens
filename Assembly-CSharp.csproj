@@ -57,6 +57,7 @@
     <Compile Include="Assets/_Project/Scripts/UpgradeCard.cs" />
     <Compile Include="Assets/_Project/Scripts/DifficultyManager.cs" />
     <Compile Include="Assets/_Project/Scripts/AutoBlasterWeapon.cs" />
+    <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FloatingHomeJoystick.cs" />
     <Compile Include="Assets/_Project/Scripts/VolumeSlider.cs" />
     <Compile Include="Assets/_Project/Scripts/PoolManager.cs" />
     <Compile Include="Assets/_Project/Scripts/BossOffscreenIndicator.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="Assets/_Project/Scripts/EnemyController.cs" />
     <Compile Include="Assets/_Project/Scripts/DamagePopupManager.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyBullet.cs" />
+    <Compile Include="Assets/_Project/Scripts/SplashIntro.cs" />
     <Compile Include="Assets/_Project/Scripts/CameraFollow.cs" />
     <Compile Include="Assets/_Project/Scripts/AudioManager.cs" />
     <Compile Include="Assets/_Project/Scripts/player.cs" />

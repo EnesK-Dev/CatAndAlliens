@@ -26,6 +26,7 @@ public class BombWarning : MonoBehaviour
     // Bombardiman modu: patlama dusmanlara da hasar verir (alan temizleme). 0/bos ise sadece player.
     private LayerMask enemyLayers;
     private float enemyExplosionDamage;
+    private bool _playerHitThisBomb; // patlama basina oyuncuya SADECE 1 kez hasar
 
     // Alloc'suz overlap tamponu (mobil: patlama sik olabilir).
     private static readonly Collider2D[] _overlapBuffer = new Collider2D[24];
@@ -89,8 +90,7 @@ public class BombWarning : MonoBehaviour
         GameLog.Log($"[BombWarning] Patlama başladı. Frame sayısı: {explosionFrames?.Length ?? 0}, FPS: {explosionFrameRate}", this);
         SetVisuals(warning: false, explosion: true);
         SfxManager.Play(SfxId.BombExplosion); // bomba patlama sesi
-        ApplyExplosionDamage();
-        yield return PlayExplosionVisual();
+        yield return PlayExplosionWithDamage(); // patlama animasyonu BOYUNCA hasar penceresi acik (girene de vurur)
 
         SetVisuals(warning: false, explosion: false);
         // bombCoroutine'i önce null'la: SetActive(false) → OnDisable → StopCoroutine zincirini kırar
@@ -99,20 +99,29 @@ public class BombWarning : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    private IEnumerator PlayExplosionVisual()
+    /// <summary>Patlama karelerini oynatirken HER KARE hasar kontrolu yapar — animasyon suresince alana
+    /// giren oyuncu da hasar alir (oyuncuya bomba basina 1 kez), dusmanlar surekli temizlenir.</summary>
+    private IEnumerator PlayExplosionWithDamage()
     {
-        if (explosionFrames != null && explosionFrames.Length > 0 && explosionSpriteRenderer != null)
+        _playerHitThisBomb = false;
+        int frameCount = (explosionFrames != null) ? explosionFrames.Length : 0;
+        float frameTime = explosionFrameRate > 0f ? 1f / explosionFrameRate : 0.05f;
+        float totalDur = frameCount > 0 ? frameCount * frameTime : Mathf.Max(0.05f, explosionDuration);
+        if (frameCount > 0 && explosionSpriteRenderer != null) explosionSpriteRenderer.sprite = explosionFrames[0];
+
+        float elapsed = 0f, frameTimer = 0f;
+        int idx = 0;
+        while (elapsed < totalDur)
         {
-            WaitForSeconds wait = new WaitForSeconds(1f / explosionFrameRate);
-            for (int i = 0; i < explosionFrames.Length; i++)
+            DamageTick();
+            float dt = Time.deltaTime;
+            elapsed += dt;
+            if (frameCount > 0 && explosionSpriteRenderer != null)
             {
-                explosionSpriteRenderer.sprite = explosionFrames[i];
-                yield return wait;
+                frameTimer += dt;
+                while (frameTimer >= frameTime && idx < frameCount - 1) { frameTimer -= frameTime; idx++; explosionSpriteRenderer.sprite = explosionFrames[idx]; }
             }
-        }
-        else
-        {
-            yield return new WaitForSeconds(explosionDuration);
+            yield return null;
         }
     }
 
@@ -129,21 +138,24 @@ public class BombWarning : MonoBehaviour
             GameLog.Warning("[BombWarning] Explosion Sprite Renderer atanmamış!", this);
     }
 
-    private void ApplyExplosionDamage()
+    /// <summary>Patlama alaninda hasar kontrolu (her kare cagrilir). Oyuncu bomba basina 1 kez, dusman surekli.</summary>
+    private void DamageTick()
     {
         // Oyun duraklatildiysa (upgrade kart paneli / olum, timeScale=0) HIC hasar verme.
         if (Time.timeScale == 0f) return;
 
-        // Player'a hasar (alloc'suz)
-        int pc = Physics2D.OverlapCircleNonAlloc(transform.position, explosionRadius, _overlapBuffer, playerLayer);
-        for (int i = 0; i < pc; i++)
+        // Oyuncu: patlama BOYUNCA alana girerse hasar alir — ama bomba basina SADECE 1 kez.
+        if (!_playerHitThisBomb)
         {
-            player playerComponent = _overlapBuffer[i].GetComponent<player>();
-            if (playerComponent != null)
-                playerComponent.TakeDamage(explosionDamage);
+            int pc = Physics2D.OverlapCircleNonAlloc(transform.position, explosionRadius, _overlapBuffer, playerLayer);
+            for (int i = 0; i < pc; i++)
+            {
+                player playerComponent = _overlapBuffer[i].GetComponent<player>();
+                if (playerComponent != null) { playerComponent.TakeDamage(explosionDamage); _playerHitThisBomb = true; break; }
+            }
         }
 
-        // Bombardiman modu: dusmanlara da hasar (alani temizler). BOSS bombadan hasar ALMAZ.
+        // Bombardiman modu: dusmanlara da hasar (alani temizler, alana gireni de). BOSS bombadan hasar ALMAZ.
         if (enemyExplosionDamage > 0f && enemyLayers.value != 0)
         {
             int ec = Physics2D.OverlapCircleNonAlloc(transform.position, explosionRadius, _overlapBuffer, enemyLayers);

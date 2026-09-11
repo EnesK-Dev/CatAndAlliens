@@ -276,9 +276,9 @@ MonoBehaviour:
   circleSortingOrder: 3
   explosionSortingOrder: 6
   firstAttackDelay: 1.5
-  betweenAttacks: 1.3
-  warningTime: 0.9
-  damage: 3
+  betweenAttacks: 1.6
+  warningTime: 1.2
+  damage: 2
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
