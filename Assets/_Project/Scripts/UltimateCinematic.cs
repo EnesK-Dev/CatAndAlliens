@@ -135,6 +135,7 @@ public class UltimateCinematic : MonoBehaviour
         float zoomedSize = _baseOrthoSize * zoomInFactor;
 
         BeginVacuumGather(playerPos); // dusmanlari emilebilir yap + kedinin etrafinda hedef nokta ata
+        GatherCoresAround(playerPos); // map'teki core'lari da AYNI ANDA kedinin etrafindaki halkaya cek (dusman vacuum'u ile birlikte)
         if (cameraShake != null) cameraShake.BeginSustainedShake(); // charge boyunca ekran sarsintisi
 
         // --- 1) CHARGE ---
@@ -177,6 +178,7 @@ public class UltimateCinematic : MonoBehaviour
         if (screenFX != null) screenFX.SetWhite(1f); // tam ekran beyaz (her seyin ustunde)
         SfxManager.Play(SfxId.UltimateImpact); // beyaz flash / patlama sesi (aktivasyondan ayri)
         VaporizeAllEnemies();                        // dropsuz + aninda sil (+ combo'ya vurus ekler; icinde)
+        ComboManager.SetMaxRank();                   // ulti odulu: rank S
         _pulled.Clear();
         _pullTargets.Clear();
         yield return WaitUnscaled(whiteHold);
@@ -265,6 +267,17 @@ public class UltimateCinematic : MonoBehaviour
         // decay penceresini taze tut (KeepAlive) — ekran bosalinca combo dusmesin.
         if (killed > 0) ComboManager.AddHits(killed);
         else ComboManager.KeepAlive();
+    }
+
+    /// <summary>
+    /// Map'teki (aktif) tum core'lari oyuncunun etrafindaki halkaya toplar — magnet menzili disinda dururlar,
+    /// otomatik toplanmazlar; oyuncu sonra isteyerek uzerlerine gidip toplar. Ulti nadir oldugu icin FindObjects OK.
+    /// </summary>
+    private void GatherCoresAround(Vector3 center)
+    {
+        var cores = FindObjectsByType<CoreItem>(FindObjectsSortMode.None); // sadece aktif core'lar (havuzdaki pasifler haric)
+        for (int i = 0; i < cores.Length; i++)
+            if (cores[i] != null) cores[i].GatherAround(center);
     }
 
     private IEnumerator WaitUnscaled(float seconds)

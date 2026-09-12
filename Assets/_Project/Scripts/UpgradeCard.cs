@@ -37,6 +37,10 @@ public class UpgradeCard : MonoBehaviour
     private int _optionIndex;
     private Action<int> _onSelected;
     private LayoutElement _iconLayout; // ikonun boyut kontrolu (Icon objesindeki LayoutElement)
+
+    // Kartlar acilir acilmaz, oyun sirasindaki son (kaza) dokunusun yanlis kart secmesini onleyen kisa giris kilidi.
+    private const float SelectLockoutSeconds = 0.4f;
+    private float _selectableAtTime; // Time.unscaledTime bunu gecince kart secilebilir (timeScale=0'da da ilerler)
     #endregion
 
     #region Unity Callbacks
@@ -73,6 +77,9 @@ public class UpgradeCard : MonoBehaviour
         _optionIndex = optionIndex;
         _onSelected = onSelected;
 
+        // Kart bu an gosterildi -> kisa sure secilemez (kaza tiklamasi korumasi).
+        _selectableAtTime = Time.unscaledTime + SelectLockoutSeconds;
+
         if (iconImage != null)
         {
             iconImage.sprite = icon;
@@ -101,6 +108,8 @@ public class UpgradeCard : MonoBehaviour
     #region Private Methods
     private void HandleClick()
     {
+        // Acilistan hemen sonraki (kaza) dokunuslari yok say — kisa giris kilidi.
+        if (Time.unscaledTime < _selectableAtTime) return;
         _onSelected?.Invoke(_optionIndex);
     }
     #endregion

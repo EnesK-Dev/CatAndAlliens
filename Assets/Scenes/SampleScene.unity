@@ -270,8 +270,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.0089627225, y: -0.11087339}
-  m_Size: {x: 0.3606574, y: 0.8385777}
+  m_Offset: {x: -0.006864157, y: -0.08194705}
+  m_Size: {x: 0.20536883, y: 0.62942034}
   m_Direction: 0
 --- !u!114 &19887873
 MonoBehaviour:
@@ -292,7 +292,7 @@ MonoBehaviour:
   analogMinFactor: 0.6
   attackPointObject: {fileID: 329940562}
   attackOffset: 0.7
-  attackDuration: 0.25
+  attackDuration: 0.19
   attackCooldown: 0.6
   minAttackCooldown: 0.1
   autoAttackRange: 3.5
@@ -1459,8 +1459,8 @@ MonoBehaviour:
     unlockMilestone: 4
     baseWeight: 0.3
     maxWeight: 0.5
-  maxSpawnInterval: 7
-  minSpawnInterval: 3.5
+  maxSpawnInterval: 14
+  minSpawnInterval: 5
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
   startingBurstCount: 2
@@ -1525,7 +1525,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 14.699951, y: 2.5999756}
+  m_AnchoredPosition: {x: 14.700195, y: -29.659912}
   m_SizeDelta: {x: 350, y: 350}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &190413096
@@ -1739,7 +1739,7 @@ MonoBehaviour:
     color: {r: 1, g: 0.94509804, b: 0, a: 1}
   decayInterval: 7
   tiersLostOnDecay: 1
-  tiersLostOnDamage: 3
+  tiersLostOnDamage: 2
   showDebugOverlay: 0
 --- !u!4 &254816336
 Transform:
@@ -3115,8 +3115,8 @@ MonoBehaviour:
     unlockMilestone: 4
     baseWeight: 0.3
     maxWeight: 0.5
-  maxSpawnInterval: 15
-  minSpawnInterval: 7
+  maxSpawnInterval: 14
+  minSpawnInterval: 5
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
   startingBurstCount: 2
@@ -5387,9 +5387,9 @@ MonoBehaviour:
   bombWarningPrefab: {fileID: 7236689478525657843, guid: 338ff1528ae6fa83f8432726eba43a3c, type: 3}
   followTarget: {fileID: 19887875}
   planeShadowSprite: {fileID: 21300000, guid: 1b67e5f40e5421244bf39ddebccae2e9, type: 3}
-  duration: 15
+  duration: 10
   endLingerTime: 2.2
-  waveInterval: 1.8
+  waveInterval: 2.5
   rankRewardInterval: 3
   warningLeadTime: 2.5
   warningPulses: 4
@@ -5400,20 +5400,20 @@ MonoBehaviour:
   mapHalf: {x: 20, y: 18}
   areaHalfExtent: {x: 12, y: 8}
   lineMargin: 4
-  planeSpeed: 12
-  bombInterval: 0.18
+  planeSpeed: 10
+  bombInterval: 0.2
   vSpacing: 2.5
   planeShadowSize: {x: 10, y: 5}
   planeShadowColor: {r: 0, g: 0, b: 0, a: 0.7294118}
   planeSortingOrder: 6
-  bombSideGap: 0.9
+  bombSideGap: 0.6
   swoopRadiusMin: 5
   swoopRadiusMax: 9
   explosionRadius: 1.1
   bombWarningDuration: 1
   bombExplosionDuration: 0.3
   playerBombDamage: 2
-  enemyBombDamage: 9999
+  enemyBombDamage: 999
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -5651,8 +5651,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 10, y: 513.2}
-  m_SizeDelta: {x: 190, y: 190}
+  m_AnchoredPosition: {x: 10, y: 490.46}
+  m_SizeDelta: {x: 225, y: 225}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &702737493
 MonoBehaviour:
@@ -6546,8 +6546,8 @@ MonoBehaviour:
     unlockMilestone: 4
     baseWeight: 0.3
     maxWeight: 0.5
-  maxSpawnInterval: 15
-  minSpawnInterval: 7
+  maxSpawnInterval: 14
+  minSpawnInterval: 5
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
   startingBurstCount: 2
@@ -6795,7 +6795,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -20, y: -123.33}
+  m_AnchoredPosition: {x: 38.6, y: -123.33002}
   m_SizeDelta: {x: 700, y: 190}
   m_Pivot: {x: 0, y: 1}
 --- !u!21 &1009176626
@@ -7156,7 +7156,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc85647153537ecaa8d2119400844724, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DifficultyManager
-  timeToMaxDifficulty: 360
+  timeToMaxDifficulty: 240
   difficultyCurve:
     serializedVersion: 2
     m_Curve:
@@ -7183,11 +7183,11 @@ MonoBehaviour:
     m_RotationOrder: 4
   milestoneMinutes:
   - 0
+  - 1
   - 2
   - 4
   - 6
   - 8
-  - 10
   debugStartMilestone: 0
   showDebugOverlay: 0
   debugFontScale: 0.03
@@ -14191,21 +14191,21 @@ MonoBehaviour:
     milestoneIndex: 3
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 0
-    maxHealth: 5500
+    maxHealth: 6500
   - label: Kamikaze Boss
     bossPrefab: {fileID: 733014060969819527, guid: 41156fdc126fc33ab9e617abbbb08607, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 4
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 0
-    maxHealth: 6500
+    maxHealth: 7500
   - label: Burst Boss FINAL
     bossPrefab: {fileID: 733014060969819527, guid: 8e1b786b0f6d9b7b4bae2db97a9cedd4, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 5
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 1
-    maxHealth: 7500
+    maxHealth: 8500
   spawnOffset: {x: 0, y: 6}
 --- !u!4 &1532023695
 Transform:
@@ -16238,8 +16238,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 32.619385, y: -0.00030517578}
-  m_SizeDelta: {x: 65.2388, y: 83.031}
+  m_AnchoredPosition: {x: 36.619392, y: -0.00030517578}
+  m_SizeDelta: {x: 57.238785, y: 83.031}
   m_Pivot: {x: 0.5, y: 0.50000006}
 --- !u!114 &1839205021
 MonoBehaviour:
@@ -16635,7 +16635,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: " BOMB RA\u0130N !"
+  m_text: ' BOMB RAIN'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f904114a20f0c4e6ea38dd503bdd2ce7, type: 2}
   m_sharedMaterial: {fileID: 5375318936855482559, guid: f904114a20f0c4e6ea38dd503bdd2ce7, type: 2}
@@ -16645,7 +16645,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 0, b: 0, a: 1}
+  m_fontColor: {r: 0.8207547, g: 0.019357419, b: 0.019357419, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -16662,8 +16662,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 160
-  m_fontSizeBase: 160
+  m_fontSize: 175
+  m_fontSizeBase: 175
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 40
@@ -17077,8 +17077,8 @@ MonoBehaviour:
     unlockMilestone: 4
     baseWeight: 0.3
     maxWeight: 0.5
-  maxSpawnInterval: 15
-  minSpawnInterval: 7
+  maxSpawnInterval: 14
+  minSpawnInterval: 5
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
   startingBurstCount: 2

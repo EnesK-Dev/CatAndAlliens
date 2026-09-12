@@ -58,3 +58,7 @@ crashlytics-build.properties
 
 # Unity crash-recovery scene yedekleri
 /[Aa]ssets/_Recovery/
+
+# Signing keys — ASLA commit etme, kaybedersen uygulama guncellenemez
+*.keystore
+*.jks

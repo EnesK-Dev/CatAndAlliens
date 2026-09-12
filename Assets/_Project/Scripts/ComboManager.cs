@@ -171,6 +171,13 @@ public class ComboManager : MonoBehaviour
         if (_instance != null && n > 0)
             _instance.AddHitsInternal(n);
     }
+
+    /// <summary>Rank'i dogrudan en uste (S) tasir — ulti odulu. Zaten S ise bir sey yapmaz.</summary>
+    public static void SetMaxRank()
+    {
+        if (_instance != null)
+            _instance.GainRankInternal(_instance.tiers.Length); // steps >= max -> clamp ile S'e ciker
+    }
     #endregion
 
     #region Unity Callbacks

@@ -60,6 +60,13 @@ public class CoreItem : MonoBehaviour
     private Vector2 _burstDirection;
     private float _burstSpeed;
     private float _burstTimer;
+
+    // Ulti ile halkaya toplanma: core magnet menzilinin DISINDA bir halkaya ucar, orada otomatik toplanmaz.
+    private const float GatherRadiusMin = 2.8f; // magnetRadius'un ustunde olacak sekilde Max ile guvenceye alinir
+    private const float GatherRadiusMax = 3.5f;
+    private const float GatherFlySpeed = 16f;   // halkaya ucus hizi
+    private bool _gathering;
+    private Vector3 _gatherTarget;
     #endregion
 
     #region Public Methods
@@ -76,6 +83,7 @@ public class CoreItem : MonoBehaviour
         _onCollected = onCollected;
         _currentMagnetSpeed = magnetSpeed;
         _isCollected = false;
+        _gathering = false;
 
         // Kare animasyonunu bastan baslat
         _frameTimer = 0f;
@@ -88,6 +96,20 @@ public class CoreItem : MonoBehaviour
         _burstDirection = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
         _burstSpeed = UnityEngine.Random.Range(burstSpeedMin, burstSpeedMax);
         _burstTimer = 0f;
+    }
+
+    /// <summary>
+    /// Ulti: core'u oyuncunun ETRAFINDAKI bir halkaya ucurur. Halka magnet menzilinin DISINDA oldugu icin
+    /// orada otomatik toplanmaz — ucus bitince normal magnet'e doner; oyuncu uzerine gidince toplar. Burst iptal.
+    /// </summary>
+    public void GatherAround(Vector3 center)
+    {
+        if (_isCollected) return;
+        float ringBase = Mathf.Max(GatherRadiusMin, magnetRadius + 0.4f); // her zaman magnet menzilinin disi
+        float ring = ringBase + UnityEngine.Random.Range(0f, GatherRadiusMax - GatherRadiusMin);
+        float angle = UnityEngine.Random.value * Mathf.PI * 2f;
+        _gatherTarget = center + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * ring;
+        _gathering = true;
     }
     #endregion
 
@@ -106,6 +128,9 @@ public class CoreItem : MonoBehaviour
 
         AnimateFrames();
 
+        // Ulti ile halkaya toplaniyorsa: sadece hedefe uc, magnet/toplama devre disi
+        if (_gathering) { HandleGather(); return; }
+
         // Once patlama fazi (disari sacilma), bitince magnet (oyuncuya cekilme)
         if (_burstTimer < burstDuration)
             HandleBurst();
@@ -115,7 +140,7 @@ public class CoreItem : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (_isCollected) return;
+        if (_isCollected || _gathering) return; // halkaya ucarken oyuncuya degse bile toplanmaz
         if (other.GetComponent<player>() == null) return;
 
         Collect();
@@ -180,6 +205,14 @@ public class CoreItem : MonoBehaviour
         _currentMagnetSpeed += magnetAcceleration * Time.deltaTime;
         transform.position = Vector3.MoveTowards(
             transform.position, _playerTransform.position, _currentMagnetSpeed * Time.deltaTime);
+    }
+
+    /// <summary>Ulti halka toplamasi: core'u hedefe (oyuncunun etrafindaki halka) ucurur; varinca normal magnet'e doner.</summary>
+    private void HandleGather()
+    {
+        transform.position = Vector3.MoveTowards(transform.position, _gatherTarget, GatherFlySpeed * Time.deltaTime);
+        if ((transform.position - _gatherTarget).sqrMagnitude <= 0.01f)
+            _gathering = false; // halkaya vardi -> normal magnet (menzil disinda oldugu icin beklemede kalir)
     }
 
     /// <summary>Bir kez toplanir; tekrar tetiklenmesini engeller ve CoreManager'a haber verir.</summary>

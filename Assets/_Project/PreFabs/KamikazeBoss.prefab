@@ -284,17 +284,17 @@ MonoBehaviour:
     m_Bits: 64
   areaHalfExtent: {x: 11, y: 7.5}
   atk1CircleCount: 6
-  atk1Radius: 3
+  atk1Radius: 4
   atk1InnerExplosions: 5
   atk2Rings: 4
   atk2FirstRadius: 3
-  atk2RingGap: 4
+  atk2RingGap: 5.5
   atk2PerRing: 12
   atk2CircleSpacing: 1.8
-  atk2GapHalfWidth: 22
+  atk2GapHalfWidth: 0
   atk2CircleRadius: 1.1
   atk2RingDelay: 0.38
-  atk3Count: 16
-  atk3Radius: 1.6
+  atk3Count: 20
+  atk3Radius: 1
   atk3Interval: 0.14
   atk3InnerExplosions: 2

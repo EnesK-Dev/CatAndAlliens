@@ -272,7 +272,7 @@ PlayerSettings:
   AndroidAllowedArchitectures: -13
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
-  AndroidKeystoreName: '{dedicated}: Meowvivors.keystore'
+  AndroidKeystoreName: '{inproject}: ../Meowvivors.keystore'
   AndroidKeyaliasName: meowvivors_key
   AndroidEnableArmv9SecurityFeatures: 0
   AndroidEnableArm64MTE: 0
