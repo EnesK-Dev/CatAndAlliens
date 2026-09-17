@@ -52,6 +52,11 @@ public class DifficultyManager : MonoBehaviour
     /// <summary>Ulasilmis en yuksek milestone index'i (-1 = henuz hicbiri). Manager yoksa -1.</summary>
     public static int CurrentMilestone => _instance != null ? _instance._reachedMilestoneIndex : -1;
 
+    /// <summary>En yuksek milestone index'i (milestoneMinutes son eleman). Manager yoksa 0. Cooldown/olcekleme icin.</summary>
+    public static int MaxMilestoneIndex =>
+        (_instance != null && _instance.milestoneMinutes != null && _instance.milestoneMinutes.Length > 0)
+            ? _instance.milestoneMinutes.Length - 1 : 0;
+
     /// <summary>
     /// Verilen milestone'a ulasilmasindan bu yana gecen SANIYE (henuz ulasilmadiysa/manager yoksa 0).
     /// Milestone'lar milestoneMinutes[i]*60'ta tetiklendigi icin = elapsed - o zaman. Dusman tipinin

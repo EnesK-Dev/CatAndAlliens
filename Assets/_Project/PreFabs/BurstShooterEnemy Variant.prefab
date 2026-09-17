@@ -121,6 +121,6 @@ MonoBehaviour:
   delayBetweenShotsAtMaxDifficulty: 0.35
   shootCooldownAtMaxDifficulty: 3.5
   moveSpeedMultiplierAtMaxDifficulty: 1.15
-  coreDropMin: 4
-  coreDropMax: 8
+  coreDropMin: 6
+  coreDropMax: 12
   ultFoodDropChance: 0.152

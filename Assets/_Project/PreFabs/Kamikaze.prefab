@@ -196,6 +196,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KamikazeEnemy
   moveSpeed: 5
+  wallSlide: 1
+  wallProbeDistance: 0.4
   maxHealth: 80
   healthMultiplierAtMaxDifficulty: 3
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
@@ -249,8 +251,8 @@ MonoBehaviour:
   maxAttackCooldownAtMaxDifficulty: 4.5
   moveSpeedMultiplierAtMaxDifficulty: 1.15
   laserWidthMultiplierAtMaxDifficulty: 1.6
-  coreDropNormal: 3
-  coreDropNormalMax: 6
+  coreDropNormal: 5
+  coreDropNormalMax: 10
   coreDropEliteMin: 4
   coreDropEliteMax: 6
   ultFoodDropChance: 0.136

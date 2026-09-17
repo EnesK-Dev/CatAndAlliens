@@ -267,7 +267,7 @@ MonoBehaviour:
   telegraphDuration: 0.7
   atk1GrowTime: 0.6
   atk1FollowTime: 4.5
-  atk1TurnSpeed: 22
+  atk1TurnSpeed: 30
   atk2Duration: 6
   atk2RotSpeed: 38
   atk3Spread: 28

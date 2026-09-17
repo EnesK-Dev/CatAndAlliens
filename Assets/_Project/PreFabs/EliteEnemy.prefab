@@ -229,8 +229,8 @@ MonoBehaviour:
   laserWidthMultiplierAtMaxDifficulty: 1.6
   coreDropNormal: 2
   coreDropNormalMax: 4
-  coreDropEliteMin: 4
-  coreDropEliteMax: 6
+  coreDropEliteMin: 6
+  coreDropEliteMax: 9
   ultFoodDropChance: 0.125
 --- !u!114 &3743581823330301967
 MonoBehaviour:

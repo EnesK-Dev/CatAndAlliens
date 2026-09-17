@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Upgrade paneli. CoreManager.OnThresholdReached'i dinler; esige ulasinca oyunu duraklatir
@@ -98,6 +100,16 @@ public class UpgradeSelectionUI : MonoBehaviour
     private readonly List<CardOption> _available = new List<CardOption>(); // her acilista yeniden doldurulur
     private readonly List<WeaponUpgradeOption> _weaponUpgradeBuffer = new List<WeaponUpgradeOption>();
     private CardOption[] _shown;                                           // o an gosterilen kartlar (slot sirasi)
+
+    // --- Secim animasyonu (deneysel): secilmeyenler yukari kayip solar; secilen kucule kucule kedinin ARKASINA gider ---
+    private const float SelectAnimDuration = 0.38f;      // animasyon suresi (unscaled)
+    private const float UnselectedRiseDistance = 2400f;  // secilmeyen kartlar ekranin USTUNDEN tamamen cikacak kadar
+    private bool _animating;                              // animasyon sirasinda ikinci secim engellenir
+    private Canvas _flyCanvas;                            // secilen kart icin kamera-uzayi canvas (kedinin arkasi)
+    private RectTransform _flyCanvasRT;
+    private RectTransform _cardRow;                       // kartlarin normal ebeveyni (layout grubu)
+    private HorizontalLayoutGroup _cardRowLayout;
+    private Vector2[] _origAnchorMin, _origAnchorMax, _origPivot; // reset icin kart anchor/pivot yedegi
     #endregion
 
     #region Static API
@@ -121,6 +133,7 @@ public class UpgradeSelectionUI : MonoBehaviour
         if (weaponManager == null && playerRef != null) weaponManager = playerRef.GetComponent<WeaponManager>();
 
         _shown = new CardOption[cardSlots != null ? cardSlots.Length : 0];
+        CaptureCardOriginals();
 
         if (panelRoot != null) panelRoot.SetActive(false);
 
@@ -160,6 +173,7 @@ public class UpgradeSelectionUI : MonoBehaviour
     /// <summary>Dinamik havuzu (stat + silah) kurar, karistirir, slotlara basar.</summary>
     private void PopulateCards()
     {
+        ResetCardVisuals(); // onceki secim animasyonunun (pozisyon/olcek/alpha/parent) izlerini temizle
         BuildAvailableOptions();
         ShuffleAvailable();
 
@@ -252,23 +266,25 @@ public class UpgradeSelectionUI : MonoBehaviour
         }
     }
 
-    /// <summary>Bir kart secilince cagrilir (parametre = slot indeksi). Secenegi uygular, kapat/devam et.</summary>
+    /// <summary>Bir kart secilince cagrilir (parametre = slot indeksi). Secenegi HEMEN uygular (oyun duraklali),
+    /// sonra secim animasyonunu oynatip kapatir/devam eder.</summary>
     private void HandleCardSelected(int slotIndex)
     {
+        if (_animating) return; // animasyon sirasinda ikinci secim yok
         if (_shown == null || slotIndex < 0 || slotIndex >= _shown.Length) return;
 
-        CardOption opt = _shown[slotIndex];
+        ApplyChoice(_shown[slotIndex]); // timeScale=0 — hemen uygula, animasyon araya girsin
+        _animating = true;
+        StartCoroutine(AnimateAndContinue(slotIndex));
+    }
 
+    /// <summary>Secilen secenegi (stat/silah) uygular. Panel akisindan ayrildi ki animasyon araya girebilsin.</summary>
+    private void ApplyChoice(CardOption opt)
+    {
         if (opt.isWeapon)
         {
-            if (opt.isNewWeapon)
-            {
-                if (opt.weapon != null) opt.weapon.Acquire();
-            }
-            else
-            {
-                opt.upgrade.apply?.Invoke(); // secilen track'i (hasar/hiz/sayi vb.) arttir
-            }
+            if (opt.isNewWeapon) { if (opt.weapon != null) opt.weapon.Acquire(); }
+            else { opt.upgrade.apply?.Invoke(); }
         }
         else if (upgrades != null && opt.statIndex >= 0 && opt.statIndex < upgrades.Length)
         {
@@ -277,16 +293,166 @@ public class UpgradeSelectionUI : MonoBehaviour
             def.level++;
             OnUpgradeSelected?.Invoke(def.type);
         }
+    }
 
-        if (_pendingSelections > 0)
+    /// <summary>Secim animasyonunu oynatir; bitince bekleyen secim varsa yeni kartlari acar, yoksa paneli kapatir.</summary>
+    private IEnumerator AnimateAndContinue(int chosenSlot)
+    {
+        yield return AnimateSelection(chosenSlot);
+        _animating = false;
+        if (_pendingSelections > 0) { _pendingSelections--; PopulateCards(); }
+        else ClosePanel();
+    }
+
+    /// <summary>
+    /// Secim animasyonu: secilmeyen kartlar yukari kayip solar; secilen kart kedinin ARKASINDAKI kamera-uzayi
+    /// canvas'a tasinip kucule kucule + solarak kedinin ekran konumuna akar (layer olarak kedinin arkasinda kaybolur).
+    /// UNSCALED zaman (panel timeScale=0).
+    /// </summary>
+    private IEnumerator AnimateSelection(int chosenSlot)
+    {
+        if (_cardRowLayout != null) _cardRowLayout.enabled = false; // layout pozisyonlari ezmesin
+
+        int n = cardSlots != null ? cardSlots.Length : 0;
+        var startPos = new Vector2[n];
+        var active = new bool[n];
+        Vector2 selStartLocal = Vector2.zero, selCatLocal = Vector2.zero;
+        RectTransform selRT = null;
+
+        for (int i = 0; i < n; i++)
         {
-            _pendingSelections--;
-            PopulateCards();
+            var card = cardSlots[i];
+            active[i] = card != null && card.gameObject.activeSelf;
+            if (!active[i]) continue;
+            var cg = EnsureGroup(i);
+            cg.blocksRaycasts = false; cg.interactable = false; // animasyonda tiklanamaz
+            startPos[i] = card.GetComponent<RectTransform>().anchoredPosition;
         }
-        else
+
+        // Secilen karti kedinin arkasindaki kamera canvas'ina tasi + baslangic/kedi ekran noktalarini hesapla
+        if (chosenSlot >= 0 && chosenSlot < n && active[chosenSlot])
         {
-            ClosePanel();
+            selRT = cardSlots[chosenSlot].GetComponent<RectTransform>();
+            Camera cam = Camera.main;
+            EnsureFlyCanvas();
+            if (_flyCanvas != null && cam != null)
+            {
+                Vector2 screenStart = RectTransformUtility.WorldToScreenPoint(null, selRT.position); // overlay -> ekran px
+                Vector3 catWorld = playerRef != null ? playerRef.transform.position : Vector3.zero;
+                Vector2 catScreen = cam.WorldToScreenPoint(catWorld);
+
+                selRT.SetParent(_flyCanvasRT, false);                 // kedinin ARKASI (sortingOrder < player)
+                selRT.anchorMin = selRT.anchorMax = new Vector2(0.5f, 0.5f);
+                selRT.pivot = new Vector2(0.5f, 0.5f);                 // kendi merkezine dogru kuculsun
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(_flyCanvasRT, screenStart, cam, out selStartLocal);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(_flyCanvasRT, catScreen, cam, out selCatLocal);
+                selRT.anchoredPosition = selStartLocal;
+            }
+            else selRT = null; // fly canvas yoksa secilen de sadece solar
         }
+
+        float t = 0f;
+        while (t < SelectAnimDuration)
+        {
+            t += Time.unscaledDeltaTime;
+            float e = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / SelectAnimDuration));
+            for (int i = 0; i < n; i++)
+            {
+                if (!active[i]) continue;
+                var rt = cardSlots[i].GetComponent<RectTransform>();
+                if (i == chosenSlot && selRT != null)
+                {
+                    rt.anchoredPosition = Vector2.Lerp(selStartLocal, selCatLocal, e);
+                    rt.localScale = Vector3.Lerp(Vector3.one, Vector3.one * 0.001f, e); // opak kalir, kedinin icine kuculerek kaybolur
+                }
+                else
+                {
+                    rt.anchoredPosition = startPos[i] + Vector2.up * (UnselectedRiseDistance * e); // opak kalir, yukari kayarak ekrandan cikar
+                }
+            }
+            yield return null;
+        }
+
+        if (selRT != null) selRT.SetParent(_cardRow, false); // eve don (panel kapaninca/populate'te normale doner)
+    }
+
+    /// <summary>Secilen kartin arkasina cizilecegi kamera-uzayi canvas'i (lazily) olusturur. sortingOrder < player.</summary>
+    private void EnsureFlyCanvas()
+    {
+        if (_flyCanvas != null) return;
+        var go = new GameObject("UpgradeCardFlyCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
+        var cv = go.GetComponent<Canvas>();
+        cv.renderMode = RenderMode.ScreenSpaceCamera;
+        cv.worldCamera = Camera.main;
+        cv.planeDistance = 5f;
+        int order = 9;
+        if (playerRef != null)
+        {
+            var sr = playerRef.GetComponentInChildren<SpriteRenderer>();
+            if (sr != null) order = sr.sortingOrder - 1; // kedinin bir ALTI = arkasi
+        }
+        cv.sortingOrder = order;
+
+        var sc = go.GetComponent<CanvasScaler>();
+        var mainScaler = panelRoot != null ? panelRoot.GetComponentInParent<CanvasScaler>() : null;
+        if (mainScaler != null) // ayni olcek faktoru -> reparent'ta boyut sicramasi olmaz
+        {
+            sc.uiScaleMode = mainScaler.uiScaleMode;
+            sc.referenceResolution = mainScaler.referenceResolution;
+            sc.screenMatchMode = mainScaler.screenMatchMode;
+            sc.matchWidthOrHeight = mainScaler.matchWidthOrHeight;
+        }
+        _flyCanvas = cv;
+        _flyCanvasRT = go.GetComponent<RectTransform>();
+    }
+
+    /// <summary>Kartlarin animasyon oncesi orijinal anchor/pivot'unu yedekler (reset icin).</summary>
+    private void CaptureCardOriginals()
+    {
+        if (cardSlots == null) return;
+        int m = cardSlots.Length;
+        _origAnchorMin = new Vector2[m]; _origAnchorMax = new Vector2[m]; _origPivot = new Vector2[m];
+        for (int i = 0; i < m; i++)
+        {
+            if (cardSlots[i] == null) continue;
+            var rt = cardSlots[i].GetComponent<RectTransform>();
+            _origAnchorMin[i] = rt.anchorMin; _origAnchorMax[i] = rt.anchorMax; _origPivot[i] = rt.pivot;
+        }
+        if (m > 0 && cardSlots[0] != null)
+        {
+            _cardRow = cardSlots[0].transform.parent as RectTransform;
+            if (_cardRow != null) _cardRowLayout = _cardRow.GetComponent<HorizontalLayoutGroup>();
+        }
+    }
+
+    /// <summary>Kartlari animasyon sonrasi pristine hale getirir: eve tasi, olcek/alpha/anchor sifirla, layout'u geri ac.</summary>
+    private void ResetCardVisuals()
+    {
+        if (_cardRowLayout != null) _cardRowLayout.enabled = true;
+        if (cardSlots == null) return;
+        for (int i = 0; i < cardSlots.Length; i++)
+        {
+            var card = cardSlots[i];
+            if (card == null) continue;
+            var rt = card.GetComponent<RectTransform>();
+            if (_cardRow != null && rt.parent != _cardRow) { rt.SetParent(_cardRow, false); rt.SetSiblingIndex(i); }
+            if (_origAnchorMin != null && i < _origAnchorMin.Length)
+            {
+                rt.anchorMin = _origAnchorMin[i]; rt.anchorMax = _origAnchorMax[i]; rt.pivot = _origPivot[i];
+            }
+            rt.localScale = Vector3.one;
+            var cg = EnsureGroup(i);
+            cg.alpha = 1f; cg.interactable = true; cg.blocksRaycasts = true;
+        }
+        if (_cardRow != null) LayoutRebuilder.ForceRebuildLayoutImmediate(_cardRow);
+    }
+
+    /// <summary>Kartin CanvasGroup'unu dondurur (yoksa runtime ekler) — fade icin.</summary>
+    private CanvasGroup EnsureGroup(int i)
+    {
+        var cg = cardSlots[i].GetComponent<CanvasGroup>();
+        if (cg == null) cg = cardSlots[i].gameObject.AddComponent<CanvasGroup>();
+        return cg;
     }
 
     /// <summary>Secilen STAT upgrade turune gore player'in ilgili metodunu cagirir.</summary>

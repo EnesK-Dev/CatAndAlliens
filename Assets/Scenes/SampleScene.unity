@@ -312,6 +312,13 @@ MonoBehaviour:
   dashSpeed: 25
   dashDuration: 0.4
   dashCooldown: 1.5
+  dashCooldownByMilestone:
+  - 1.5
+  - 1.3
+  - 1.1
+  - 0.95
+  - 0.8
+  - 0.75
   dashPushRadius: 0.7
   dashPushStep: 0.6
   dashPushStunDuration: 0.18
@@ -498,7 +505,7 @@ MonoBehaviour:
   bulletSpeed: 12
   bulletLifetime: 2
   baseFireInterval: 0.5
-  baseDamage: 10
+  baseDamage: 15
   fireIntervalMultiplier: 0.88
   maxFireRateLevel: 5
   damagePerLevel: 5
@@ -1467,11 +1474,11 @@ MonoBehaviour:
   spawnLineLength: 42.9
   isVerticalLine: 0
   finalWaveMilestoneIndex: 4
-  finalWaveSpawnInterval: 2
+  finalWaveSpawnInterval: 2.6
   pauseSpawnDuringBoss: 1
   maxAliveEnemies: 14
   finalMilestoneMaxAlive: 10
-  finalMilestoneIndex: 5
+  finalMilestoneIndex: 4
 --- !u!4 &187720255
 Transform:
   m_ObjectHideFlags: 0
@@ -1731,11 +1738,11 @@ MonoBehaviour:
     color: {r: 0.5696884, g: 0.22241013, b: 0.9622642, a: 1}
   - label: A
     requiredHits: 30
-    multiplier: 1.7
+    multiplier: 1.5
     color: {r: 0.8962264, g: 0.4481132, b: 0, a: 1}
   - label: S
     requiredHits: 45
-    multiplier: 2
+    multiplier: 1.75
     color: {r: 1, g: 0.94509804, b: 0, a: 1}
   decayInterval: 7
   tiersLostOnDecay: 1
@@ -3123,11 +3130,11 @@ MonoBehaviour:
   spawnLineLength: 37.6
   isVerticalLine: 1
   finalWaveMilestoneIndex: 4
-  finalWaveSpawnInterval: 2
+  finalWaveSpawnInterval: 2.6
   pauseSpawnDuringBoss: 1
   maxAliveEnemies: 14
   finalMilestoneMaxAlive: 10
-  finalMilestoneIndex: 5
+  finalMilestoneIndex: 4
 --- !u!4 &370601849
 Transform:
   m_ObjectHideFlags: 0
@@ -5389,7 +5396,7 @@ MonoBehaviour:
   planeShadowSprite: {fileID: 21300000, guid: 1b67e5f40e5421244bf39ddebccae2e9, type: 3}
   duration: 10
   endLingerTime: 2.2
-  waveInterval: 2.5
+  waveInterval: 2
   rankRewardInterval: 3
   warningLeadTime: 2.5
   warningPulses: 4
@@ -6554,11 +6561,11 @@ MonoBehaviour:
   spawnLineLength: 36.5
   isVerticalLine: 1
   finalWaveMilestoneIndex: 4
-  finalWaveSpawnInterval: 2
+  finalWaveSpawnInterval: 2.6
   pauseSpawnDuringBoss: 1
   maxAliveEnemies: 14
   finalMilestoneMaxAlive: 10
-  finalMilestoneIndex: 5
+  finalMilestoneIndex: 4
 --- !u!4 &891927827
 Transform:
   m_ObjectHideFlags: 0
@@ -7183,11 +7190,11 @@ MonoBehaviour:
     m_RotationOrder: 4
   milestoneMinutes:
   - 0
-  - 1
-  - 2
-  - 4
-  - 6
-  - 8
+  - 1.5
+  - 3
+  - 5
+  - 7
+  - 9
   debugStartMilestone: 0
   showDebugOverlay: 0
   debugFontScale: 0.03
@@ -14184,28 +14191,28 @@ MonoBehaviour:
     milestoneIndex: 1
     tint: {r: 0.1, g: 0.85, b: 0.25, a: 1}
     isFinalBoss: 0
-    maxHealth: 4500
+    maxHealth: 6000
   - label: Laser Boss
     bossPrefab: {fileID: 733014060969819527, guid: dc337d24e43cb5d29a68ece93f69bc71, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 3
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 0
-    maxHealth: 6500
+    maxHealth: 8000
   - label: Kamikaze Boss
     bossPrefab: {fileID: 733014060969819527, guid: 41156fdc126fc33ab9e617abbbb08607, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 4
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 0
-    maxHealth: 7500
+    maxHealth: 10000
   - label: Burst Boss FINAL
     bossPrefab: {fileID: 733014060969819527, guid: 8e1b786b0f6d9b7b4bae2db97a9cedd4, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 5
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 1
-    maxHealth: 8500
+    maxHealth: 10500
   spawnOffset: {x: 0, y: 6}
 --- !u!4 &1532023695
 Transform:
@@ -14493,7 +14500,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 11e74484df668c1a1bdc1981212a3280, type: 3}
+  m_Sprite: {fileID: -8565169649177842169, guid: 480a81d588a0b0267a5bec49a49c615e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -17085,11 +17092,11 @@ MonoBehaviour:
   spawnLineLength: 40
   isVerticalLine: 0
   finalWaveMilestoneIndex: 4
-  finalWaveSpawnInterval: 2
+  finalWaveSpawnInterval: 2.6
   pauseSpawnDuringBoss: 1
   maxAliveEnemies: 14
   finalMilestoneMaxAlive: 10
-  finalMilestoneIndex: 5
+  finalMilestoneIndex: 4
 --- !u!4 &2056335174
 Transform:
   m_ObjectHideFlags: 0

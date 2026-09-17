@@ -52,6 +52,9 @@ public class player : MonoBehaviour
     [SerializeField] private float dashSpeed = 15f;
     [SerializeField] private float dashDuration = 0.15f;
     [SerializeField] private float dashCooldown = 1.5f;
+    [Tooltip("Milestone'a gore dash cooldown (index = milestone; [0]=oyun basi, son=final). Milestone sayisi kadar deger gir. " +
+             "Bos ise dashCooldown kullanilir.")]
+    [SerializeField] private float[] dashCooldownByMilestone = { 1.5f, 1.3f, 1.1f, 0.95f, 0.8f, 0.75f };
     [Tooltip("Dash sirasinda dusmanlari itme yaricapi (kucuk tut — sadece degenler).")]
     [SerializeField] private float dashPushRadius = 0.55f;
     [Tooltip("Dash sirasinda her kare uygulanan KUCUK itme mesafesi. Amac: kalabalıktan cikis, uzaga firlatma DEGIL.")]
@@ -112,6 +115,7 @@ public class player : MonoBehaviour
     private bool isDashing = false;
     private bool isDashOnCooldown = false;
     private float dashStartTime; // dash basladigi an — cooldown gostergesi (0->1) + hiz egrisi ilerlemesi icin
+    private float _activeDashCooldown; // bu dash icin dash basinda kilitlenen efektif cooldown (milestone'a gore)
     private Vector2 _dashDirection; // dash yonu (basta kilitlenir; egri boyunca bu yonde sonumlenir)
     private readonly Collider2D[] dashHitBuffer = new Collider2D[16]; // dash itme icin alloc'suz overlap tamponu
     private bool isPaused = false; // Upgrade paneli acikken true — Update input'u isler islemez keser
@@ -547,6 +551,7 @@ public class player : MonoBehaviour
     {
         if (isDashing || isDashOnCooldown) return;
         dashStartTime = Time.time; // cooldown gostergesi bu andan itibaren 0->1 dolar
+        _activeDashCooldown = ComputeDashCooldown(); // milestone'a gore dusen efektif cooldown (bu dash icin sabit)
         StartCoroutine(DashRoutine());
         SfxManager.Play(SfxId.Dash); // dash whoosh
     }
@@ -585,7 +590,7 @@ public class player : MonoBehaviour
         }
         isDashing = false;
 
-        yield return new WaitForSeconds(dashCooldown);
+        yield return new WaitForSeconds(_activeDashCooldown);
         isDashOnCooldown = false;
     }
 
@@ -614,13 +619,23 @@ public class player : MonoBehaviour
         get
         {
             if (!isDashOnCooldown) return 1f;
-            float total = dashDuration + dashCooldown;
+            float total = dashDuration + _activeDashCooldown;
             return total <= 0f ? 1f : Mathf.Clamp01((Time.time - dashStartTime) / total);
         }
     }
 
     /// <summary>Dash su an kullanilabilir mi (cooldown'da degil).</summary>
     public bool IsDashReady => !isDashOnCooldown;
+
+    /// <summary>Guncel milestone'a karsilik gelen dash cooldown'u dizisinden okur (index = milestone, siniri clamp'lenir).</summary>
+    private float ComputeDashCooldown()
+    {
+        int m = DifficultyManager.CurrentMilestone;
+        if (m < 0 || dashCooldownByMilestone == null || dashCooldownByMilestone.Length == 0)
+            return dashCooldown; // manager yok / dizi bos -> taban cooldown
+        int idx = Mathf.Clamp(m, 0, dashCooldownByMilestone.Length - 1);
+        return dashCooldownByMilestone[idx];
+    }
 
     /// <summary>Player'a hasar verir; can sıfırlanınca ölüm tetiklenir.</summary>
     public void TakeDamage(float amount)

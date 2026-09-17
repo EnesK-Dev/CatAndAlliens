@@ -227,8 +227,8 @@ MonoBehaviour:
   maxAttackCooldownAtMaxDifficulty: 4.5
   moveSpeedMultiplierAtMaxDifficulty: 1.15
   laserWidthMultiplierAtMaxDifficulty: 1.6
-  coreDropNormal: 2
-  coreDropNormalMax: 4
+  coreDropNormal: 3
+  coreDropNormalMax: 5
   coreDropEliteMin: 4
   coreDropEliteMax: 6
   ultFoodDropChance: 0.109
