@@ -93,12 +93,17 @@ public class CoreManager : MonoBehaviour
         _thresholdLevel = 0;
         CachePlayer();
         PrewarmPool();
+
+        player.OnPlayerDied += HandlePlayerDied; // olunce run core'lari bankaya
     }
 
     private void OnDestroy()
     {
         if (_instance == this)
+        {
+            player.OnPlayerDied -= HandlePlayerDied;
             _instance = null;
+        }
     }
     #endregion
 
@@ -131,6 +136,14 @@ public class CoreManager : MonoBehaviour
         return instance;
     }
 
+    /// <summary>Oyuncu olunce bu run'da toplanan core'lari KALICI bankaya (MetaSave) yazar. Sonra run sayaci sifirlanir.</summary>
+    private void HandlePlayerDied()
+    {
+        if (_totalCores > 0) MetaSave.AddCores(_totalCores);
+        _totalCores = 0;
+        OnCoreCountChanged?.Invoke(_totalCores);
+    }
+
     private void SpawnCoresInternal(Vector3 position, int amount, float scatter)
     {
         if (coreItemPrefab == null) return;
@@ -154,7 +167,7 @@ public class CoreManager : MonoBehaviour
     {
         _totalCores++;
         OnCoreCountChanged?.Invoke(_totalCores);
-        CheckThreshold();
+        // Roguelite: core run icinde HARCANMAZ, sadece birikir; olunce bankaya yazilir (HandlePlayerDied).
         ReturnToPool(instance);
     }
 

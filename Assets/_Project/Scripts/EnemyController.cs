@@ -790,7 +790,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
             CoreManager.SpawnCores(transform.position, coreAmount);
 
             // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
-            if (!_noFoodDrop && Random.value < ultFoodDropChance)
+            if (!_noFoodDrop && Random.value < ultFoodDropChance + RunStats.FoodDropChanceBonus)
                 UltimateManager.SpawnFood(transform.position, baseColor, 1);
         }
 

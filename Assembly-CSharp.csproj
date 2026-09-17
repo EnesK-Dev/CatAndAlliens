@@ -63,6 +63,7 @@
     <Compile Include="Assets/_Project/Scripts/BossOffscreenIndicator.cs" />
     <Compile Include="Assets/_Project/Scripts/BossController.cs" />
     <Compile Include="Assets/_Project/Scripts/BurstShooterEnemy.cs" />
+    <Compile Include="Assets/_Project/Scripts/CardCatalog.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyFreeze.cs" />
     <Compile Include="Assets/_Project/Scripts/LaserVisual.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyController.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="Assets/_Project/Scripts/SplashIntro.cs" />
     <Compile Include="Assets/_Project/Scripts/CameraFollow.cs" />
     <Compile Include="Assets/_Project/Scripts/AudioManager.cs" />
+    <Compile Include="Assets/_Project/Scripts/MetaSave.cs" />
     <Compile Include="Assets/_Project/Scripts/player.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FixedJoystick.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyDamage.cs" />
@@ -92,6 +94,7 @@
     <Compile Include="Assets/_Project/Scripts/DamageScreenFlash.cs" />
     <Compile Include="Assets/_Project/Scripts/GameOverUI.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyGenerator.cs" />
+    <Compile Include="Assets/_Project/Scripts/RunStats.cs" />
     <Compile Include="Assets/_Project/Scripts/SpaceBackground.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateParticleAura.cs" />
     <Compile Include="Assets/_Project/Scripts/MultiSlashWeapon.cs" />
@@ -102,7 +105,10 @@
     <Compile Include="Assets/_Project/Scripts/UltimateBarUI.cs" />
     <Compile Include="Assets/_Project/Scripts/WinUI.cs" />
     <Compile Include="Assets/_Project/Scripts/BombardmentBannerUI.cs" />
+    <Compile Include="Assets/_Project/Scripts/ShopUI.cs" />
+    <Compile Include="Assets/_Project/Scripts/ShopItemUI.cs" />
     <Compile Include="Assets/_Project/Scripts/PlayerBoomerang.cs" />
+    <Compile Include="Assets/_Project/Scripts/CardDefinition.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateManager.cs" />
     <Compile Include="Assets/_Project/Scripts/OrbitalWeapon.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FloatingJoystick.cs" />
@@ -121,6 +127,7 @@
     <Compile Include="Assets/_Project/Scripts/OrbitalOrb.cs" />
     <Compile Include="Assets/_Project/Scripts/UltFoodItem.cs" />
     <Compile Include="Assets/_Project/Scripts/IDifficultyScaled.cs" />
+    <Compile Include="Assets/_Project/Scripts/DeckApplier.cs" />
     <Compile Include="Assets/_Project/Scripts/BombardmentDirector.cs" />
     <Compile Include="Assets/_Project/Scripts/ComboUI.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/DynamicJoystick.cs" />
@@ -137,6 +144,7 @@
     <Compile Include="Assets/_Project/Scripts/UltimateAura.cs" />
     <Compile Include="Assets/_Project/Scripts/WeaponBase.cs" />
     <Compile Include="Assets/_Project/Scripts/UltimateScreenFX.cs" />
+    <Compile Include="Assets/_Project/Scripts/CardDatabase.cs" />
     <Compile Include="Assets/_Project/Scripts/FlashFx.cs" />
     <Compile Include="Assets/_Project/Scripts/CoreManager.cs" />
     <Compile Include="Assets/_Project/Scripts/CoreCounterUI.cs" />

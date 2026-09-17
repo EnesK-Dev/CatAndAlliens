@@ -293,10 +293,10 @@ MonoBehaviour:
   attackPointObject: {fileID: 329940562}
   attackOffset: 0.7
   attackDuration: 0.19
-  attackCooldown: 0.6
+  attackCooldown: 0.85
   minAttackCooldown: 0.1
-  autoAttackRange: 3.5
-  playerDamage: 60
+  autoAttackRange: 1.4
+  playerDamage: 10
   attackRadius: 0.3
   attackKnockback: 0.3
   attackVisualAngleOffset: 10
@@ -311,7 +311,7 @@ MonoBehaviour:
   hurtShakeMagnitude: 0.55
   dashSpeed: 25
   dashDuration: 0.4
-  dashCooldown: 1.5
+  dashCooldown: 2
   dashCooldownByMilestone:
   - 1.5
   - 1.3
@@ -350,7 +350,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  maxHealth: 18
+  maxHealth: 8
   hurtColor: {r: 0, g: 0, b: 0, a: 1}
   hurtFlashDuration: 0.35
   deathAnimDuration: 1
@@ -1688,6 +1688,52 @@ Transform:
   m_Children:
   - {fileID: 607561929}
   - {fileID: 1757349740}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &228111240
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 228111242}
+  - component: {fileID: 228111241}
+  m_Layer: 0
+  m_Name: DeckApplier
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &228111241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 228111240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f62edf0246589eff892c443b4fbc692a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DeckApplier
+  playerRef: {fileID: 0}
+  logApplied: 1
+--- !u!4 &228111242
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 228111240}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &254816334
@@ -6802,7 +6848,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 38.6, y: -123.33002}
+  m_AnchoredPosition: {x: 38.600098, y: -123.33008}
   m_SizeDelta: {x: 700, y: 190}
   m_Pivot: {x: 0, y: 1}
 --- !u!21 &1009176626
@@ -17850,3 +17896,4 @@ SceneRoots:
   - {fileID: 1063139016}
   - {fileID: 1405597113}
   - {fileID: 664393393}
+  - {fileID: 228111242}

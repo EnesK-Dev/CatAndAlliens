@@ -115,7 +115,9 @@ public class player : MonoBehaviour
     private bool isDashing = false;
     private bool isDashOnCooldown = false;
     private float dashStartTime; // dash basladigi an — cooldown gostergesi (0->1) + hiz egrisi ilerlemesi icin
-    private float _activeDashCooldown; // bu dash icin dash basinda kilitlenen efektif cooldown (milestone'a gore)
+    private float _activeDashCooldown; // bu dash icin dash basinda kilitlenen efektif cooldown
+    private float _dashCooldownMod;     // kartlardan gelen dash cooldown degisimi (negatif = azaltir)
+    private const float MinDashCooldown = 0.3f; // dash cooldown bunun altina inemez
     private Vector2 _dashDirection; // dash yonu (basta kilitlenir; egri boyunca bu yonde sonumlenir)
     private readonly Collider2D[] dashHitBuffer = new Collider2D[16]; // dash itme icin alloc'suz overlap tamponu
     private bool isPaused = false; // Upgrade paneli acikken true — Update input'u isler islemez keser
@@ -627,14 +629,11 @@ public class player : MonoBehaviour
     /// <summary>Dash su an kullanilabilir mi (cooldown'da degil).</summary>
     public bool IsDashReady => !isDashOnCooldown;
 
-    /// <summary>Guncel milestone'a karsilik gelen dash cooldown'u dizisinden okur (index = milestone, siniri clamp'lenir).</summary>
+    /// <summary>Efektif dash cooldown = taban + kart modu (deck'ten). Taban MinDashCooldown ile sinirli.
+    /// (Roguelite: dash run icinde degil, meta kartlarla guclenir; eski milestone-scaling kaldirildi.)</summary>
     private float ComputeDashCooldown()
     {
-        int m = DifficultyManager.CurrentMilestone;
-        if (m < 0 || dashCooldownByMilestone == null || dashCooldownByMilestone.Length == 0)
-            return dashCooldown; // manager yok / dizi bos -> taban cooldown
-        int idx = Mathf.Clamp(m, 0, dashCooldownByMilestone.Length - 1);
-        return dashCooldownByMilestone[idx];
+        return Mathf.Max(MinDashCooldown, dashCooldown + _dashCooldownMod);
     }
 
     /// <summary>Player'a hasar verir; can sıfırlanınca ölüm tetiklenir.</summary>
@@ -703,6 +702,18 @@ public class player : MonoBehaviour
         currentHealth = Mathf.Clamp(currentHealth + amount, 0f, maxHealth);
         OnHealthChanged?.Invoke(currentHealth);
     }
+
+    /// <summary>Maksimum cani KALICI arttirir (deck can karti). Run baslangicinda cagrilir; cani da doldurur.</summary>
+    public void AddMaxHealth(float amount)
+    {
+        if (amount == 0f) return;
+        maxHealth = Mathf.Max(1f, maxHealth + amount);
+        currentHealth = maxHealth; // run basi: yeni max ile dolu basla
+        OnHealthChanged?.Invoke(currentHealth);
+    }
+
+    /// <summary>Dash cooldown'u degistirir (deck dash karti). Negatif deger = cooldown azaltir. Taban MinDashCooldown.</summary>
+    public void AddDashCooldown(float delta) => _dashCooldownMod += delta;
 
     /// <summary>
     /// Ultimate'i aktive eder (SAF NUKE): stat buff'i YOK. Sadece 'ultimateActiveDuration' boyunca

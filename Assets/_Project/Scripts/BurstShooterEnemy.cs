@@ -334,7 +334,7 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
             CoreManager.SpawnCores(transform.position, UnityEngine.Random.Range(coreDropMin, coreDropMax + 1));
 
             // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
-            if (!_noFoodDrop && UnityEngine.Random.value < ultFoodDropChance)
+            if (!_noFoodDrop && UnityEngine.Random.value < ultFoodDropChance + RunStats.FoodDropChanceBonus)
                 UltimateManager.SpawnFood(transform.position, shooterColor, 1);
         }
 

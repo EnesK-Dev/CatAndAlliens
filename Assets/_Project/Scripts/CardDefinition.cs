@@ -1,0 +1,66 @@
+using System;
+using UnityEngine;
+
+/// <summary>Kartin ait oldugu kategori — uygulanma ve shop davranisini belirler.</summary>
+public enum CardCategory
+{
+    Stat,          // player stat'i (hasar/hiz/menzil/can/dash/food)
+    Weapon,        // bir silahi ALIR (run'da o silah aktif olur)
+    WeaponUpgrade  // belirli bir silahin bir track'ini yukseltir
+}
+
+/// <summary>Stat kartlarinin etkiledigi stat turu. amount'in ANLAMI buna gore degisir (bkz. CardDefinition.amount).</summary>
+public enum CardStatType
+{
+    Damage,          // + hasar (additive)
+    AttackSpeed,     // cooldown CARPANI (0.92 = %8 hizli; stack multiplicative)
+    AttackRange,     // + menzil (additive)
+    MaxHealth,       // + maksimum can (additive)
+    DashCooldown,    // - dash cooldown saniye (additive, negatif etki = azaltir)
+    FoodDropChance   // + food drop sansi (additive, 0-1)
+}
+
+/// <summary>
+/// TEK bir kartin tanimi (deck birimi). Blueprint modeli: bir kez alinir, slotlara dizilir; slotta stack'lenir.
+/// Katalog (CardDatabase) tarafindan tutulur; MetaSave sadece id'leri saklar. Efekt FAZ 4'te uygulanir.
+/// </summary>
+[Serializable]
+public class CardDefinition
+{
+    [Tooltip("Benzersiz kimlik — MetaSave bunu saklar. Degistirme (kayit kirilir).")]
+    public string id = "";
+
+    [Tooltip("Kart uzerinde gorunecek ad (Ingilizce).")]
+    public string displayName = "Card";
+
+    [TextArea]
+    [Tooltip("Kisa aciklama.")]
+    public string description = "";
+
+    [Tooltip("Kart ikonu (bos olabilir; UI'da atanir).")]
+    public Sprite icon;
+
+    [Tooltip("Kartin kategorisi.")]
+    public CardCategory category = CardCategory.Stat;
+
+    [Tooltip("Shop'ta bu karti almanin core maliyeti (blueprint: tek seferlik).")]
+    public int cost = 20;
+
+    [Tooltip("Bir SLOTA en fazla kac kez konabilir. 0 = slot limiti (20). Silah karti icin 1 onerilir.")]
+    public int maxPerSlot = 0;
+
+    [Header("Stat karti (category = Stat)")]
+    [Tooltip("Hangi stat'i etkiler.")]
+    public CardStatType statType = CardStatType.Damage;
+
+    [Tooltip("Etki miktari. Damage/Range/MaxHealth/FoodDrop: additive. AttackSpeed: cooldown carpani (0.92). " +
+             "DashCooldown: saniye (negatif verilirse azaltir).")]
+    public float amount = 1f;
+
+    [Header("Silah karti (category = Weapon / WeaponUpgrade)")]
+    [Tooltip("Hedef silahin id'si (WeaponManager FAZ 5'te eslestirir).")]
+    public string weaponId = "";
+
+    [Tooltip("WeaponUpgrade icin: silahin hangi track'i (FAZ 5). Weapon-acquire'da bos.")]
+    public string upgradeKey = "";
+}
