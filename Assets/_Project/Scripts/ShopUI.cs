@@ -80,8 +80,7 @@ public class ShopUI : MonoBehaviour
         for (int i = 0; i < _items.Count && i < all.Count; i++)
         {
             var card = all[i];
-            bool owned = MetaSave.OwnsCard(card.id);
-            _items[i].Bind(card, owned, bank >= card.cost, HandleBuy);
+            _items[i].Bind(card, MetaSave.OwnedCount(card.id), bank >= card.cost, HandleBuy);
         }
         RefreshCores();
     }
@@ -94,9 +93,9 @@ public class ShopUI : MonoBehaviour
     private void HandleBuy(string cardId)
     {
         var card = CardCatalog.Get(cardId);
-        if (card == null || MetaSave.OwnsCard(cardId)) return;
+        if (card == null) return;
         if (MetaSave.SpendCores(card.cost))
-            MetaSave.AddOwnedCard(cardId);
+            MetaSave.AddOwned(cardId); // ayni kart defalarca alinabilir (stack)
         RefreshAll(); // satirlar (owned/afford) + core yenilenir
     }
 

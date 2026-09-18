@@ -94,14 +94,16 @@ public class CoreManager : MonoBehaviour
         CachePlayer();
         PrewarmPool();
 
-        player.OnPlayerDied += HandlePlayerDied; // olunce run core'lari bankaya
+        player.OnPlayerDied += HandleRunEnd;           // olunce run core'lari bankaya
+        WinConditionManager.OnGameWon += HandleRunEnd;  // kazaninca da bankala
     }
 
     private void OnDestroy()
     {
         if (_instance == this)
         {
-            player.OnPlayerDied -= HandlePlayerDied;
+            player.OnPlayerDied -= HandleRunEnd;
+            WinConditionManager.OnGameWon -= HandleRunEnd;
             _instance = null;
         }
     }
@@ -136,8 +138,9 @@ public class CoreManager : MonoBehaviour
         return instance;
     }
 
-    /// <summary>Oyuncu olunce bu run'da toplanan core'lari KALICI bankaya (MetaSave) yazar. Sonra run sayaci sifirlanir.</summary>
-    private void HandlePlayerDied()
+    /// <summary>Run bitince (olum VEYA kazanma) bu run'da toplanan core'lari KALICI bankaya (MetaSave) yazar.
+    /// Sonra sayac sifirlanir (ayni run'da iki kez bankalanmasin).</summary>
+    private void HandleRunEnd()
     {
         if (_totalCores > 0) MetaSave.AddCores(_totalCores);
         _totalCores = 0;

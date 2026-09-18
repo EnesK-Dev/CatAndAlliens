@@ -69,6 +69,18 @@ public class BoomerangWeapon : WeaponBase
     #endregion
 
     #region Overrides
+    public override void ApplyTrack(string key, int times)
+    {
+        if (times <= 0) return;
+        switch (key)
+        {
+            case "count":    _countLevel    += times; break;
+            case "speed":    _speedLevel    = Mathf.Min(maxSpeedLevel,    _speedLevel + times);    break;
+            case "damage":   _damageLevel   = Mathf.Min(maxDamageLevel,   _damageLevel + times);   break;
+            case "cooldown": _cooldownLevel = Mathf.Min(maxCooldownLevel, _cooldownLevel + times); break;
+        }
+    }
+
     public override void CollectUpgrades(List<WeaponUpgradeOption> into)
     {
         // LIMITSIZ + LUCKY

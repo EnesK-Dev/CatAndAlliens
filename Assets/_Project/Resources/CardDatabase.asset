@@ -16,7 +16,8 @@ MonoBehaviour:
   - id: stat_damage
     displayName: Sharp Claws
     description: +8 damage
-    icon: {fileID: 0}
+    icon: {fileID: -8285997511256225826, guid: 3bc435cab7be966b485f8901a71b6d86, type: 3}
+    frameSprite: {fileID: -6476649989000015363, guid: 4fdd351667472291ebfdb939a4de2e28, type: 3}
     category: 0
     cost: 20
     maxPerSlot: 0
@@ -27,7 +28,8 @@ MonoBehaviour:
   - id: stat_atkspeed
     displayName: Quick Paws
     description: Attack 8% faster
-    icon: {fileID: 0}
+    icon: {fileID: 7614817794888221515, guid: 7cf698bf1bf6e892bbe1a8374787e1bf, type: 3}
+    frameSprite: {fileID: 1806066430021436774, guid: 250e30a787ca159fea491a2b25978a5f, type: 3}
     category: 0
     cost: 25
     maxPerSlot: 0
@@ -38,7 +40,8 @@ MonoBehaviour:
   - id: stat_range
     displayName: Long Whiskers
     description: +0.5 attack range
-    icon: {fileID: 0}
+    icon: {fileID: -8970998617824141593, guid: d5a969d4e3c14e27bae7d1fb47871dd9, type: 3}
+    frameSprite: {fileID: 983849462666196623, guid: 5c61cc098ca5a84e392a43a5e6220ece, type: 3}
     category: 0
     cost: 20
     maxPerSlot: 0
@@ -49,7 +52,8 @@ MonoBehaviour:
   - id: stat_health
     displayName: Thick Fur
     description: +4 max health
-    icon: {fileID: 0}
+    icon: {fileID: -854701565890967653, guid: f27c00166eec9b8cd9c1cb533daf83e4, type: 3}
+    frameSprite: {fileID: -2261672979846821725, guid: a0c0cb7f52ee56c5f8e7b10fe2aaf344, type: 3}
     category: 0
     cost: 20
     maxPerSlot: 0
@@ -61,6 +65,7 @@ MonoBehaviour:
     displayName: Nimble Feet
     description: -0.1s dash cooldown
     icon: {fileID: 0}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
     category: 0
     cost: 25
     maxPerSlot: 10
@@ -72,6 +77,7 @@ MonoBehaviour:
     displayName: Forager
     description: +3% food drop chance
     icon: {fileID: 0}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
     category: 0
     cost: 25
     maxPerSlot: 10
@@ -82,7 +88,8 @@ MonoBehaviour:
   - id: wpn_blaster
     displayName: Blaster
     description: Auto-firing blaster
-    icon: {fileID: 0}
+    icon: {fileID: -6137623135985537652, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
     category: 1
     cost: 60
     maxPerSlot: 1
@@ -93,7 +100,8 @@ MonoBehaviour:
   - id: wpn_boomerang
     displayName: Boomerang
     description: Returning boomerang
-    icon: {fileID: 0}
+    icon: {fileID: 6216987119186573744, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
     category: 1
     cost: 60
     maxPerSlot: 1
@@ -104,7 +112,8 @@ MonoBehaviour:
   - id: wpn_orbital
     displayName: Orbital
     description: Orbiting blades
-    icon: {fileID: 0}
+    icon: {fileID: 8181939858501728441, guid: 307d0e1c7f023bee5955e8dcda6f77e4, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
     category: 1
     cost: 70
     maxPerSlot: 1
@@ -115,7 +124,8 @@ MonoBehaviour:
   - id: wpn_multislash
     displayName: Multi-Slash
     description: Extra slash directions
-    icon: {fileID: 0}
+    icon: {fileID: 2835976423604859573, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
     category: 1
     cost: 70
     maxPerSlot: 1
@@ -123,3 +133,147 @@ MonoBehaviour:
     amount: 1
     weaponId: multislash
     upgradeKey: 
+  - id: wpn_blaster_dmg
+    displayName: Blaster Damage
+    description: +damage
+    icon: {fileID: -6137623135985537652, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    category: 2
+    cost: 40
+    maxPerSlot: 10
+    statType: 0
+    amount: 1
+    weaponId: blaster
+    upgradeKey: damage
+  - id: wpn_blaster_firerate
+    displayName: Blaster Fire Rate
+    description: +attack speed
+    icon: {fileID: -6137623135985537652, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    category: 2
+    cost: 40
+    maxPerSlot: 8
+    statType: 0
+    amount: 1
+    weaponId: blaster
+    upgradeKey: firerate
+  - id: wpn_blaster_targets
+    displayName: Blaster Targets
+    description: +1 enemy targeted
+    icon: {fileID: -6137623135985537652, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    category: 2
+    cost: 55
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    weaponId: blaster
+    upgradeKey: targets
+  - id: wpn_boomerang_dmg
+    displayName: Boomerang Damage
+    description: +damage
+    icon: {fileID: 6216987119186573744, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    category: 2
+    cost: 40
+    maxPerSlot: 10
+    statType: 0
+    amount: 1
+    weaponId: boomerang
+    upgradeKey: damage
+  - id: wpn_boomerang_count
+    displayName: Boomerang +1
+    description: one more boomerang
+    icon: {fileID: 6216987119186573744, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    category: 2
+    cost: 55
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    weaponId: boomerang
+    upgradeKey: count
+  - id: wpn_boomerang_speed
+    displayName: Boomerang Speed
+    description: flies faster
+    icon: {fileID: 6216987119186573744, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    category: 2
+    cost: 35
+    maxPerSlot: 8
+    statType: 0
+    amount: 1
+    weaponId: boomerang
+    upgradeKey: speed
+  - id: wpn_boomerang_cd
+    displayName: Boomerang Cooldown
+    description: throws sooner
+    icon: {fileID: 6216987119186573744, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    category: 2
+    cost: 35
+    maxPerSlot: 8
+    statType: 0
+    amount: 1
+    weaponId: boomerang
+    upgradeKey: cooldown
+  - id: wpn_orbital_dmg
+    displayName: Orbital Damage
+    description: +damage
+    icon: {fileID: 8181939858501728441, guid: 307d0e1c7f023bee5955e8dcda6f77e4, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    category: 2
+    cost: 40
+    maxPerSlot: 10
+    statType: 0
+    amount: 1
+    weaponId: orbital
+    upgradeKey: damage
+  - id: wpn_orbital_count
+    displayName: Orbital +1
+    description: one more orb
+    icon: {fileID: 8181939858501728441, guid: 307d0e1c7f023bee5955e8dcda6f77e4, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    category: 2
+    cost: 55
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    weaponId: orbital
+    upgradeKey: count
+  - id: wpn_orbital_speed
+    displayName: Orbital Speed
+    description: spins faster
+    icon: {fileID: 8181939858501728441, guid: 307d0e1c7f023bee5955e8dcda6f77e4, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    category: 2
+    cost: 35
+    maxPerSlot: 8
+    statType: 0
+    amount: 1
+    weaponId: orbital
+    upgradeKey: speed
+  - id: wpn_orbital_radius
+    displayName: Orbital Radius
+    description: wider orbit
+    icon: {fileID: 8181939858501728441, guid: 307d0e1c7f023bee5955e8dcda6f77e4, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    category: 2
+    cost: 35
+    maxPerSlot: 8
+    statType: 0
+    amount: 1
+    weaponId: orbital
+    upgradeKey: radius
+  - id: wpn_multislash_dir
+    displayName: Multi-Slash +1
+    description: one more slash direction
+    icon: {fileID: 2835976423604859573, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    category: 2
+    cost: 55
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    weaponId: multislash
+    upgradeKey: dir

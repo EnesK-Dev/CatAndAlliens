@@ -37,8 +37,11 @@ public class CardDefinition
     [Tooltip("Kisa aciklama.")]
     public string description = "";
 
-    [Tooltip("Kart ikonu (bos olabilir; UI'da atanir).")]
+    [Tooltip("Kart ikonu (stat/silah gorseli).")]
     public Sprite icon;
+
+    [Tooltip("Kart cerceve sprite'i (kategori rengi). Kart gorseli bunu arka plan yapar.")]
+    public Sprite frameSprite;
 
     [Tooltip("Kartin kategorisi.")]
     public CardCategory category = CardCategory.Stat;

@@ -16,6 +16,11 @@ public class DeckApplier : MonoBehaviour
     [SerializeField] private bool logApplied = true;
     #endregion
 
+    #region Private Fields
+    private WeaponManager _weapons;
+    private readonly System.Collections.Generic.Dictionary<string,int> _upgradeAccum = new System.Collections.Generic.Dictionary<string,int>();
+    #endregion
+
     #region Unity Callbacks
     private void Start()
     {
@@ -29,29 +34,38 @@ public class DeckApplier : MonoBehaviour
     public void ApplyActiveDeck()
     {
         RunStats.Reset();
+        if (_weapons == null && playerRef != null) _weapons = playerRef.GetComponent<WeaponManager>();
+        _upgradeAccum.Clear();
         var deck = MetaSave.GetActiveDeck();
         int applied = 0;
         for (int i = 0; i < deck.Count; i++)
         {
             var card = CardCatalog.Get(deck[i]);
             if (card == null) continue;
-            ApplyCard(card);
+            switch (card.category)
+            {
+                case CardCategory.Stat: ApplyStat(card); break;
+                case CardCategory.Weapon: AcquireWeapon(card.weaponId); break;
+                case CardCategory.WeaponUpgrade:
+                    string k = card.weaponId + "|" + card.upgradeKey;
+                    _upgradeAccum.TryGetValue(k, out int had); _upgradeAccum[k] = had + 1;
+                    break;
+            }
             applied++;
+        }
+        // Silahlar alindiktan SONRA upgrade track'lerini toplu (stack) uygula
+        foreach (var kv in _upgradeAccum)
+        {
+            int sep = kv.Key.IndexOf('|');
+            if (sep < 0) continue;
+            var w = FindWeapon(kv.Key.Substring(0, sep));
+            if (w != null) w.ApplyTrack(kv.Key.Substring(sep + 1), kv.Value);
         }
         if (logApplied) GameLog.Log("[DeckApplier] Aktif slot " + MetaSave.ActiveSlot + " - uygulanan kart: " + applied + "/" + deck.Count, this);
     }
     #endregion
 
     #region Private Methods
-    private void ApplyCard(CardDefinition card)
-    {
-        switch (card.category)
-        {
-            case CardCategory.Stat: ApplyStat(card); break;
-            case CardCategory.Weapon: /* FAZ 5: silah alma */ break;
-            case CardCategory.WeaponUpgrade: /* FAZ 5: silah upgrade */ break;
-        }
-    }
 
     private void ApplyStat(CardDefinition card)
     {
@@ -64,6 +78,24 @@ public class DeckApplier : MonoBehaviour
             case CardStatType.DashCooldown:   if (playerRef != null) playerRef.AddDashCooldown(card.amount); break;
             case CardStatType.FoodDropChance: RunStats.FoodDropChanceBonus += card.amount; break;
         }
+    }
+
+    /// <summary>weaponId'ye karsilik gelen silahi (tip adiyla eslesir) alir/aktif eder. Ornek: "blaster" -> AutoBlasterWeapon.</summary>
+    private void AcquireWeapon(string weaponId)
+    {
+        var w = FindWeapon(weaponId);
+        if (w != null) w.Acquire();
+    }
+
+    /// <summary>weaponId'ye karsilik gelen silahi tip adiyla bulur (blaster -> AutoBlasterWeapon).</summary>
+    private WeaponBase FindWeapon(string weaponId)
+    {
+        if (_weapons == null || _weapons.Weapons == null || string.IsNullOrEmpty(weaponId)) return null;
+        string key = weaponId.ToLowerInvariant();
+        var list = _weapons.Weapons;
+        for (int i = 0; i < list.Length; i++)
+            if (list[i] != null && list[i].GetType().Name.ToLowerInvariant().Contains(key)) return list[i];
+        return null;
     }
     #endregion
 

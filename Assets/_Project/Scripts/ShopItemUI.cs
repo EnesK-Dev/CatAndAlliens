@@ -17,6 +17,8 @@ public class ShopItemUI : MonoBehaviour
     [SerializeField] private Button buyButton;
     [SerializeField] private GameObject ownedBadge;
     [SerializeField] private UIImage iconImage;
+    [SerializeField] private UIImage frameImage;   // kart cerceve (kategori rengi)
+    [SerializeField] private TMP_Text ownedText;   // "x3" sahip olunan adet
     #endregion
 
     #region Private Fields
@@ -37,7 +39,7 @@ public class ShopItemUI : MonoBehaviour
 
     #region Public Methods
     /// <summary>Karti satira baglar. owned=sahipse Buy kapali + OWNED; degilse maliyet + (canAfford ise) aktif.</summary>
-    public void Bind(CardDefinition card, bool owned, bool canAfford, Action<string> onBuy)
+    public void Bind(CardDefinition card, int ownedCount, bool canAfford, Action<string> onBuy)
     {
         _cardId = card != null ? card.id : "";
         _onBuy = onBuy;
@@ -49,10 +51,11 @@ public class ShopItemUI : MonoBehaviour
             iconImage.sprite = card != null ? card.icon : null;
             iconImage.enabled = card != null && card.icon != null;
         }
-
-        if (ownedBadge != null) ownedBadge.SetActive(owned);
-        if (costText != null) costText.text = owned ? "OWNED" : (card != null ? card.cost.ToString() : "0");
-        if (buyButton != null) buyButton.interactable = !owned && canAfford;
+        if (frameImage != null && card != null && card.frameSprite != null) frameImage.sprite = card.frameSprite;
+        if (ownedText != null) ownedText.text = "x" + ownedCount;
+        if (ownedBadge != null) ownedBadge.SetActive(false);
+        if (costText != null) costText.text = card != null ? card.cost.ToString() : "0";
+        if (buyButton != null) buyButton.interactable = canAfford; // tekrarlanabilir alim
     }
     #endregion
 

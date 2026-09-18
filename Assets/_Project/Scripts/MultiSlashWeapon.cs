@@ -34,6 +34,12 @@ public class MultiSlashWeapon : WeaponBase
     #region Overrides
     protected override void OnAcquired() => ApplyDirections();
 
+    public override void ApplyTrack(string key, int times)
+    {
+        if (times <= 0) return;
+        if (key == "dir") { _dirLevel += times; ApplyDirections(); }
+    }
+
     public override void CollectUpgrades(List<WeaponUpgradeOption> into)
     {
         // LIMITSIZ (sonsuz alinabilir) + LUCKY rozeti (bariz guclu)

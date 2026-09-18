@@ -39,6 +39,9 @@ public abstract class WeaponBase : MonoBehaviour
 
     #region Public Methods
     /// <summary>Silahi ilk kez alir: aktif eder ve baslangic (Lv.1) durumunu uygular.</summary>
+    /// <summary>Deck: bir upgrade track'ini 'times' kez arttirir (stack). Alt siniflar override eder.</summary>
+    public virtual void ApplyTrack(string key, int times) { }
+
     public void Acquire()
     {
         if (IsAcquired) return;

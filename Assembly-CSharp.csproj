@@ -59,6 +59,7 @@
     <Compile Include="Assets/_Project/Scripts/AutoBlasterWeapon.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FloatingHomeJoystick.cs" />
     <Compile Include="Assets/_Project/Scripts/VolumeSlider.cs" />
+    <Compile Include="Assets/_Project/Scripts/BuildUI.cs" />
     <Compile Include="Assets/_Project/Scripts/PoolManager.cs" />
     <Compile Include="Assets/_Project/Scripts/BossOffscreenIndicator.cs" />
     <Compile Include="Assets/_Project/Scripts/BossController.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="Assets/_Project/Scripts/PlayerProjectile.cs" />
     <Compile Include="Assets/_Project/Scripts/UpgradeSelectionUI.cs" />
     <Compile Include="Assets/_Project/Scripts/BossTestSpawner.cs" />
+    <Compile Include="Assets/_Project/Scripts/BuildItemUI.cs" />
     <Compile Include="Assets/_Project/Scripts/BoomerangWeapon.cs" />
     <Compile Include="Assets/_Project/Scripts/VolumeSettings.cs" />
     <Compile Include="Assets/_Project/Scripts/AppConfig.cs" />

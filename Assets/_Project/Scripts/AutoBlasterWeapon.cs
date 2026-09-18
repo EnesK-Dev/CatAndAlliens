@@ -50,6 +50,17 @@ public class AutoBlasterWeapon : WeaponBase
     #endregion
 
     #region Overrides
+    public override void ApplyTrack(string key, int times)
+    {
+        if (times <= 0) return;
+        switch (key)
+        {
+            case "firerate": _fireRateLevel = Mathf.Min(maxFireRateLevel, _fireRateLevel + times); break;
+            case "damage":   _damageLevel   = Mathf.Min(maxDamageLevel,   _damageLevel + times);   break;
+            case "targets":  _targetLevel  += times; break;
+        }
+    }
+
     public override void CollectUpgrades(List<WeaponUpgradeOption> into)
     {
         if (_fireRateLevel < maxFireRateLevel)
