@@ -22,11 +22,13 @@ public class AutoBlasterWeapon : WeaponBase
     [Header("Ates Hizi Track'i")]
     [Tooltip("Her ates-hizi yukseltmesinde araligin carpani (0.88 = %12 hizli).")]
     [SerializeField] private float fireIntervalMultiplier = 0.88f;
-    [SerializeField] private int maxFireRateLevel = 5;
+    [SerializeField] private int maxFireRateLevel = 20;
 
     [Header("Hasar Track'i")]
-    [SerializeField] private float damagePerLevel = 5f;
-    [SerializeField] private int maxDamageLevel = 8;
+    [SerializeField] private float damagePerLevel = 16f;
+    [Tooltip("Hasar bilesik carpani (her level x bu). 1 = duz additive.")]
+    [SerializeField] private float damageMult = 1.14f;
+    [SerializeField] private int maxDamageLevel = 20;
     #endregion
 
     #region Private Fields
@@ -79,7 +81,14 @@ public class AutoBlasterWeapon : WeaponBase
 
     #region Private Methods
     private float CurrentFireInterval() => baseFireInterval * Mathf.Pow(fireIntervalMultiplier, _fireRateLevel);
-    private float CurrentDamage() => baseDamage + damagePerLevel * _damageLevel;
+    // Bileşik hasar: her level (hasar + damagePerLevel) * damageMult -> sabit + carpan (Sharp Claws hissi).
+    private float CurrentDamage()
+    {
+        if (_damageLevel <= 0) return baseDamage;
+        if (damageMult <= 1.0001f) return baseDamage + damagePerLevel * _damageLevel; // carpan yoksa additive
+        float mp = Mathf.Pow(damageMult, _damageLevel);
+        return baseDamage * mp + damagePerLevel * damageMult * (mp - 1f) / (damageMult - 1f);
+    }
     private int CurrentTargets() => 1 + _targetLevel;
 
     /// <summary>En yakin 'targets' FARKLI dusmana birer mermi atar. Atilan mermi sayisini dondurur (0 = dusman yok).</summary>

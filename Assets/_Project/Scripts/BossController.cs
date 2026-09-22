@@ -131,7 +131,7 @@ public class BossController : MonoBehaviour
     [SerializeField] private Vector2 arenaHalfSize = new Vector2(20f, 18f);
 
     [Tooltip("Boss duvara ne kadar yaklasabilsin (dunya birimi). KUCUK = duvara daha cok yaklasir (oyuncu duvar kenarinda kolayca kacamaz/kampleyemez). Eskiden boss yaricapi kullaniliyordu, cok geride duruyordu.")]
-    [SerializeField] private float wallClearance = 0.4f;
+    [SerializeField] private float wallClearance = 0.2f;
 
     [Tooltip("Kirmizi telegraph izinin rengi.")]
     [SerializeField] private Color telegraphColor = new Color(1f, 0.12f, 0.12f, 0.85f);
@@ -258,6 +258,14 @@ public class BossController : MonoBehaviour
         OnBossHealthChanged?.Invoke(_currentHealth, maxHealth);
 
         _nextAttackTime = Time.time + attackInterval; // ilk saldiri bir sure sonra
+
+        // Spawn oyuncunun yaninda olur; oyuncu duvara yakinsa boss duvarin icine dogabilir -> arena dikdortgenine clamp'le.
+        Vector2 sp = _rb != null ? _rb.position : (Vector2)transform.position;
+        Vector2 clamped = ClampToArena(sp);
+        if ((clamped - sp).sqrMagnitude > 0.0000001f)
+        {
+            if (_rb != null) _rb.position = clamped; else transform.position = clamped;
+        }
     }
 
     private void Update()

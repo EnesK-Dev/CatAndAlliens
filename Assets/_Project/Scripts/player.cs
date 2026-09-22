@@ -117,7 +117,7 @@ public class player : MonoBehaviour
     private float dashStartTime; // dash basladigi an — cooldown gostergesi (0->1) + hiz egrisi ilerlemesi icin
     private float _activeDashCooldown; // bu dash icin dash basinda kilitlenen efektif cooldown
     private float _dashCooldownMod;     // kartlardan gelen dash cooldown degisimi (negatif = azaltir)
-    private const float MinDashCooldown = 0.3f; // dash cooldown bunun altina inemez
+    private const float MinDashCooldown = 0.5f; // dash cooldown bunun altina inemez
     private Vector2 _dashDirection; // dash yonu (basta kilitlenir; egri boyunca bu yonde sonumlenir)
     private readonly Collider2D[] dashHitBuffer = new Collider2D[16]; // dash itme icin alloc'suz overlap tamponu
     private bool isPaused = false; // Upgrade paneli acikken true — Update input'u isler islemez keser
@@ -685,6 +685,8 @@ public class player : MonoBehaviour
 
     /// <summary>Vuruş hasarını kalıcı arttırır (hasar upgrade'i).</summary>
     public void AddDamage(float amount) => playerDamage += amount;
+    /// <summary>Hasar carpani (damage karti: sabit + carpan hissi icin).</summary>
+    public void MultiplyDamage(float mult) { if (mult > 0f) playerDamage *= mult; }
 
     /// <summary>Saldırı bekleme süresini çarpanla kısaltır (küçük = hızlı). Taban minAttackCooldown ile sınırlı.</summary>
     /// <param name="cooldownMultiplier">Örn. 0.85 → cooldown %15 kısalır. 0-1 arası verilmeli.</param>

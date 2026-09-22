@@ -198,7 +198,7 @@ MonoBehaviour:
   bossName: ALIEN OVERLORD
   maxHealth: 2200
   moveSpeed: 2.6
-  stopDistance: 1.5
+  stopDistance: 0.7
   centerMode: 0
   centerPoint: {x: 0, y: 0}
   kiteMode: 0
@@ -232,9 +232,9 @@ MonoBehaviour:
   headbuttOvershoot: 3.5
   retreatChance: 0.168
   zigzagChance: 0.5
-  arenaCenter: {x: -1.5, y: -0.5}
-  arenaHalfSize: {x: 18, y: 16}
-  wallClearance: 0.2
+  arenaCenter: {x: -1.4, y: -0.36}
+  arenaHalfSize: {x: 21.37, y: 19.55}
+  wallClearance: 1.2012789
   telegraphColor: {r: 0, g: 0.93333334, b: 0.21568628, a: 0.69411767}
   telegraphWidth: 0.35
   telegraphArrowSize: 0.4

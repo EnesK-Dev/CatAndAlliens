@@ -73,6 +73,8 @@ public class UltimateCinematic : MonoBehaviour
     private float _baseOrthoSize = 5f; // Sahnenin varsayilan zoom'u — restore hedefi (Awake'te okunur)
     private readonly List<Transform> _pulled = new List<Transform>(); // emilen dusman transformlari (alloc'suz yeniden kullanilir)
     private readonly List<Vector3> _pullTargets = new List<Vector3>(); // her dusmanin kedinin etrafindaki hedef noktasi (_pulled ile ayni index)
+    private readonly List<Vector3> _ultiHitPos = new List<Vector3>();   // ulti boss hasar sayilari (beyaz flash sonrasi gosterilir)
+    private readonly List<float> _ultiHitDmg = new List<float>();
 
     // Altin aci (~137.5°) radyan cinsinden — dusmanlari kedinin etrafina ust uste binmeden (phyllotaxis) dagitir.
     private const float GoldenAngleRad = 2.399963f;
@@ -127,7 +129,7 @@ public class UltimateCinematic : MonoBehaviour
         // --- Hazirlik ---
         if (playerRef != null) { playerRef.SetUltimateInvulnerable(true); playerRef.EnterUltimatePose(); } // sinema boyunca hasara immun
         ComboManager.KeepAlive(); // ulti "saldiri gibi" sayilir — charge boyunca combo decay penceresi sifirlanir
-        Time.timeScale = Mathf.Clamp01(slowMoTimeScale);
+        if (!GameFlow.Ended) Time.timeScale = Mathf.Clamp01(slowMoTimeScale);
         if (screenFX != null) screenFX.ResetFX();
         if (aura != null) aura.SetIntensity(0f); // baseline (senin ayarin) — buradan yukari rampa
 
@@ -173,7 +175,7 @@ public class UltimateCinematic : MonoBehaviour
         }
 
         // --- 2) IMPACT ---
-        Time.timeScale = 1f;
+        if (!GameFlow.Ended) Time.timeScale = 1f;
         if (cameraShake != null) cameraShake.EndSustainedShake(); // sarsintiyi durdur, kamerayi yerine al
         if (screenFX != null) screenFX.SetWhite(1f); // tam ekran beyaz (her seyin ustunde)
         SfxManager.Play(SfxId.UltimateImpact); // beyaz flash / patlama sesi (aktivasyondan ayri)
@@ -199,6 +201,10 @@ public class UltimateCinematic : MonoBehaviour
         }
 
         RestoreState();
+        // Ulti hasar sayilarini beyaz flash bitince goster (yoksa flash ardinda gizli kalirdi).
+        for (int i = 0; i < _ultiHitPos.Count; i++)
+            DamagePopupManager.Show(_ultiHitPos[i], _ultiHitDmg[i]);
+        _ultiHitPos.Clear(); _ultiHitDmg.Clear();
         _sequence = null;
     }
 
@@ -243,13 +249,15 @@ public class UltimateCinematic : MonoBehaviour
     private void VaporizeAllEnemies()
     {
         int killed = 0; // vaporize edilen dusman sayisi -> combo'ya "vurus" olarak eklenir
+        float ultiDmg = bossUltimateDamage + RunStats.UltimateDamageBonus; // deck kartlari ulti hasarini artirir
+        _ultiHitPos.Clear(); _ultiHitDmg.Clear();
 
         var chasers = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
         for (int i = 0; i < chasers.Length; i++)
         {
             if (chasers[i] == null) continue;
             // Splitter BOSS vaporize OLMAZ (instakill degil) — sadece sabit hasar alir, combo saymaz.
-            if (chasers[i] is SplitterEnemy sp && sp.IsBossLineage) { chasers[i].TakeDamage(bossUltimateDamage); continue; }
+            if (chasers[i] is SplitterEnemy sp && sp.IsBossLineage) { _ultiHitPos.Add(chasers[i].transform.position + Vector3.up * 1.5f); _ultiHitDmg.Add(ultiDmg); chasers[i].TakeDamage(ultiDmg); continue; }
             chasers[i].Vaporize();
             killed++;
         }
@@ -261,7 +269,7 @@ public class UltimateCinematic : MonoBehaviour
         // BOSSLAR (BossController: dash/laser/kamikaze/burst) — emilmez/vaporize olmaz, SABIT hasar alir (combo saymaz).
         var bosses = FindObjectsByType<BossController>(FindObjectsSortMode.None);
         for (int i = 0; i < bosses.Length; i++)
-            if (bosses[i] != null && !bosses[i].IsDying) bosses[i].TakeDamage(bossUltimateDamage);
+            if (bosses[i] != null && !bosses[i].IsDying) { _ultiHitPos.Add(bosses[i].transform.position + Vector3.up * 1.5f); _ultiHitDmg.Add(ultiDmg); bosses[i].TakeDamage(ultiDmg); }
 
         // Ulti "saldiri" sayilir: her oldurulen dusman +1 combo vurusu (combo firlar). Dusman yoksa en azindan
         // decay penceresini taze tut (KeepAlive) — ekran bosalinca combo dusmesin.
@@ -289,7 +297,7 @@ public class UltimateCinematic : MonoBehaviour
     /// <summary>Sinema durumunu guvenli varsayilana dondur: normal hiz, taban zoom, poz kapali, overlay temiz.</summary>
     private void RestoreState()
     {
-        Time.timeScale = 1f;
+        if (!GameFlow.Ended) Time.timeScale = 1f;
         if (cam != null && cam.orthographic) cam.orthographicSize = _baseOrthoSize;
         if (cameraShake != null) cameraShake.EndSustainedShake(); // sarsinti yarida kalmis olabilir — temizle
         if (playerRef != null) { playerRef.ExitUltimatePose(); playerRef.SetUltimateInvulnerable(false); } // immunity biter (yarida kesilse bile buradan temizlenir)

@@ -76,6 +76,7 @@
     <Compile Include="Assets/_Project/Scripts/MetaSave.cs" />
     <Compile Include="Assets/_Project/Scripts/player.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/FixedJoystick.cs" />
+    <Compile Include="Assets/_Project/Scripts/ShopCardSizer.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyDamage.cs" />
     <Compile Include="Assets/_Project/Scripts/KamikazeEnemy.cs" />
     <Compile Include="Assets/_Project/Scripts/SceneLoader.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Assets/_Project/Scripts/BossBurstAttack.cs" />
     <Compile Include="Assets/Joystick Pack/Examples/JoystickPlayerExample.cs" />
     <Compile Include="Assets/_Project/Scripts/SpriteAnimator.cs" />
+    <Compile Include="Assets/_Project/Scripts/GridColumnFitter.cs" />
     <Compile Include="Assets/_Project/Scripts/DashButtonUI.cs" />
     <Compile Include="Assets/_Project/Scripts/WeaponManager.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/VariableJoystick.cs" />
@@ -123,6 +125,7 @@
     <Compile Include="Assets/_Project/Scripts/BoomerangWeapon.cs" />
     <Compile Include="Assets/_Project/Scripts/VolumeSettings.cs" />
     <Compile Include="Assets/_Project/Scripts/AppConfig.cs" />
+    <Compile Include="Assets/_Project/Scripts/GameFlow.cs" />
     <Compile Include="Assets/_Project/Scripts/BossHealthBarUI.cs" />
     <Compile Include="Assets/_Project/Scripts/SfxId.cs" />
     <Compile Include="Assets/_Project/Scripts/PooledObject.cs" />

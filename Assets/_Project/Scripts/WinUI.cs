@@ -43,6 +43,7 @@ public class WinUI : MonoBehaviour
         // Guvenlik: panel sahne acilisinda kapali baslasin
         if (winPanel != null)
             winPanel.SetActive(false);
+        GameFlow.Ended = false; // yeni run: bayragi sifirla
     }
 
     #endregion
@@ -72,6 +73,8 @@ public class WinUI : MonoBehaviour
     /// <summary>Kazanma kosulu saglaninca cagrilir: paneli acar, istenirse oyunu dondurur.</summary>
     private void HandleGameWon()
     {
+        GameFlow.Ended = true; // baska sistemler (ulti sinemasi) timeScale'i 1'e dondurmesin
+
         if (winPanel != null)
             winPanel.SetActive(true);
 

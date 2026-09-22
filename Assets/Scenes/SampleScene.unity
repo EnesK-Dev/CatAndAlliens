@@ -295,8 +295,8 @@ MonoBehaviour:
   attackDuration: 0.19
   attackCooldown: 0.85
   minAttackCooldown: 0.1
-  autoAttackRange: 1.4
-  playerDamage: 10
+  autoAttackRange: 2.4
+  playerDamage: 25
   attackRadius: 0.3
   attackKnockback: 0.3
   attackVisualAngleOffset: 10
@@ -350,7 +350,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  maxHealth: 8
+  maxHealth: 6
   hurtColor: {r: 0, g: 0, b: 0, a: 1}
   hurtFlashDuration: 0.35
   deathAnimDuration: 1
@@ -507,9 +507,10 @@ MonoBehaviour:
   baseFireInterval: 0.5
   baseDamage: 15
   fireIntervalMultiplier: 0.88
-  maxFireRateLevel: 5
-  damagePerLevel: 5
-  maxDamageLevel: 8
+  maxFireRateLevel: 20
+  damagePerLevel: 16
+  damageMult: 1.14
+  maxDamageLevel: 20
 --- !u!114 &19887879
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -551,12 +552,13 @@ MonoBehaviour:
   baseRestCooldown: 1.2
   maxCountLevel: 2
   speedPerLevel: 1.5
-  maxSpeedLevel: 5
-  damagePerLevel: 12
-  maxDamageLevel: 8
+  maxSpeedLevel: 20
+  damagePerLevel: 15
+  damageMult: 1.14
+  maxDamageLevel: 20
   restCooldownMultiplier: 0.85
-  minRestCooldown: 0.2
-  maxCooldownLevel: 5
+  minRestCooldown: 0.1
+  maxCooldownLevel: 20
 --- !u!114 &19887881
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -579,11 +581,12 @@ MonoBehaviour:
   baseDamage: 60
   maxCountLevel: 2
   rotationSpeedPerLevel: 30
-  maxRotationLevel: 5
+  maxRotationLevel: 20
   damagePerLevel: 18
-  maxDamageLevel: 8
+  damageMult: 1.14
+  maxDamageLevel: 20
   radiusPerLevel: 0.35
-  maxRadiusLevel: 5
+  maxRadiusLevel: 20
 --- !u!114 &19887882
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14416,6 +14419,12 @@ MonoBehaviour:
     clips:
     - {fileID: 8300000, guid: 175c0f9cfecbd1a7db8c2a148a0c8676, type: 3}
     volume: 0.335
+    pitchRange: {x: 1, y: 1}
+  bossMusic:
+    id: 22
+    clips:
+    - {fileID: 8300000, guid: 2a03648ae3358b5199e0033a04ecdaa5, type: 3}
+    volume: 0.6
     pitchRange: {x: 1, y: 1}
   playMusicOnStart: 1
 --- !u!4 &1564156895

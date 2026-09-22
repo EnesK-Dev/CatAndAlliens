@@ -17,7 +17,8 @@ public enum CardStatType
     AttackRange,     // + menzil (additive)
     MaxHealth,       // + maksimum can (additive)
     DashCooldown,    // - dash cooldown saniye (additive, negatif etki = azaltir)
-    FoodDropChance   // + food drop sansi (additive, 0-1)
+    FoodDropChance,  // + food drop sansi (additive, 0-1)
+    UltimateDamage   // + ulti (boss) hasari (additive) — RunStats.UltimateDamageBonus'a eklenir
 }
 
 /// <summary>
@@ -43,6 +44,9 @@ public class CardDefinition
     [Tooltip("Kart cerceve sprite'i (kategori rengi). Kart gorseli bunu arka plan yapar.")]
     public Sprite frameSprite;
 
+    [Tooltip("Cerceve Image renk tint'i. Beyaz = sprite'in kendi rengi. Silahlar gri sprite + ozel tint kullanir.")]
+    public Color frameTint = Color.white;
+
     [Tooltip("Kartin kategorisi.")]
     public CardCategory category = CardCategory.Stat;
 
@@ -59,6 +63,9 @@ public class CardDefinition
     [Tooltip("Etki miktari. Damage/Range/MaxHealth/FoodDrop: additive. AttackSpeed: cooldown carpani (0.92). " +
              "DashCooldown: saniye (negatif verilirse azaltir).")]
     public float amount = 1f;
+
+    [Tooltip("Damage karti icin EK carpan (her kart: (hasar+amount)*amountMult). 1 = carpan yok.")]
+    public float amountMult = 1f;
 
     [Header("Silah karti (category = Weapon / WeaponUpgrade)")]
     [Tooltip("Hedef silahin id'si (WeaponManager FAZ 5'te eslestirir).")]

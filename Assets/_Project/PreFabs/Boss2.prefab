@@ -233,9 +233,9 @@ MonoBehaviour:
   headbuttOvershoot: 3.5
   retreatChance: 0.22
   zigzagChance: 0.5
-  arenaCenter: {x: -1.5, y: -0.5}
-  arenaHalfSize: {x: 18, y: 16}
-  wallClearance: 0.4
+  arenaCenter: {x: -1.4, y: -0.36}
+  arenaHalfSize: {x: 21.37, y: 19.55}
+  wallClearance: 1.232965
   telegraphColor: {r: 1, g: 0.12, b: 0.12, a: 0.78039217}
   telegraphWidth: 0.35
   telegraphArrowSize: 0.4

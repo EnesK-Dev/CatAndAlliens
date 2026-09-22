@@ -31,17 +31,19 @@ public class BoomerangWeapon : WeaponBase
 
     [Header("Hiz Track'i")]
     [SerializeField] private float speedPerLevel = 1.5f;
-    [SerializeField] private int maxSpeedLevel = 5;
+    [SerializeField] private int maxSpeedLevel = 20;
 
     [Header("Hasar Track'i")]
-    [SerializeField] private float damagePerLevel = 12f;
-    [SerializeField] private int maxDamageLevel = 8;
+    [SerializeField] private float damagePerLevel = 15f;
+    [Tooltip("Hasar bilesik carpani (her level x bu). 1 = duz additive.")]
+    [SerializeField] private float damageMult = 1.14f;
+    [SerializeField] private int maxDamageLevel = 20;
 
     [Header("Dinlenme (Cooldown) Track'i")]
     [Tooltip("Her seviyede dinlenme carpani (0.85 = %15 kisa).")]
     [SerializeField] private float restCooldownMultiplier = 0.85f;
-    [SerializeField] private float minRestCooldown = 0.2f;
-    [SerializeField] private int maxCooldownLevel = 5;
+    [SerializeField] private float minRestCooldown = 0.1f;
+    [SerializeField] private int maxCooldownLevel = 20;
     #endregion
 
     #region Private Fields
@@ -97,7 +99,14 @@ public class BoomerangWeapon : WeaponBase
     #region Private Methods
     private int CurrentCount() => 1 + _countLevel;
     private float CurrentSpeed() => baseSpeed + speedPerLevel * _speedLevel;
-    private float CurrentDamage() => baseDamage + damagePerLevel * _damageLevel;
+    // Bileşik hasar: her level (hasar + damagePerLevel) * damageMult -> sabit + carpan (Sharp Claws hissi).
+    private float CurrentDamage()
+    {
+        if (_damageLevel <= 0) return baseDamage;
+        if (damageMult <= 1.0001f) return baseDamage + damagePerLevel * _damageLevel; // carpan yoksa additive
+        float mp = Mathf.Pow(damageMult, _damageLevel);
+        return baseDamage * mp + damagePerLevel * damageMult * (mp - 1f) / (damageMult - 1f);
+    }
     private float CurrentRestCooldown() => Mathf.Max(minRestCooldown, baseRestCooldown * Mathf.Pow(restCooldownMultiplier, _cooldownLevel));
 
     /// <summary>

@@ -74,6 +74,8 @@ public class GameOverUI : MonoBehaviour
     /// <summary>Player öldüğünde çağrılır: paneli açar, istenirse oyunu dondurur.</summary>
     private void HandlePlayerDied()
     {
+        GameFlow.Ended = true; // olum sonrasi ulti sinemasi timeScale'i 1'e dondurmesin
+
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
 

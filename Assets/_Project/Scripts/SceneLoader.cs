@@ -22,6 +22,7 @@ public class SceneLoader : MonoBehaviour
     #region Private Fields
 
     private Coroutine _fadeRoutine;
+    private bool _loading; // gercek sahne yukleme basladi mi (fade-in'den bagimsiz)
 
     #endregion
 
@@ -56,7 +57,8 @@ public class SceneLoader : MonoBehaviour
     /// <param name="sceneName">Build listesindeki sahne adi (orn: "SampleScene", "MainMenu").</param>
     public void LoadScene(string sceneName)
     {
-        if (_fadeRoutine != null) return; // Zaten gecis yapiliyorsa tekrar tetikleme
+        if (_loading) return; // Zaten SAHNE YUKLENIYORSA tekrar tetikleme (fade-in bunu engellemez)
+        _loading = true;
 
         if (fadeCanvasGroup == null)
         {
@@ -65,8 +67,11 @@ public class SceneLoader : MonoBehaviour
             return;
         }
 
+        // Acilis fade-in'i hala calisiyorsa onu KES (yoksa erken skip'te donardik).
+        if (_fadeRoutine != null) { StopCoroutine(_fadeRoutine); _fadeRoutine = null; }
+
         fadeCanvasGroup.blocksRaycasts = true; // Gecis sirasinda tiklamayi kilitle
-        _fadeRoutine = StartCoroutine(FadeRoutine(0f, 1f, () => SceneManager.LoadScene(sceneName)));
+        _fadeRoutine = StartCoroutine(FadeRoutine(fadeCanvasGroup.alpha, 1f, () => SceneManager.LoadScene(sceneName)));
     }
 
     /// <summary>Mevcut sahneyi yeniden yukler. (Tekrar oyna icin hazir; istege bagli.)</summary>

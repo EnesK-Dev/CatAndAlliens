@@ -45,5 +45,7 @@ public enum SfxId
 
     // ---- Silahlar (oyuncu) — klip atanmazsa sessiz ----
     BlasterFire,     // auto-blaster mermi ateslenince
-    OrbitalHit       // orbital yildiz dusmana degince
+    OrbitalHit,      // orbital yildiz dusmana degince
+
+    BossMusic        // boss savasi muzigi (ayri kaynak, OnBossSpawned ile baslar)
 }

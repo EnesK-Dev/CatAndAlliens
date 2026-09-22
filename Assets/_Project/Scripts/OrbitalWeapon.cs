@@ -24,15 +24,17 @@ public class OrbitalWeapon : WeaponBase
 
     [Header("Donme Hizi Track'i")]
     [SerializeField] private float rotationSpeedPerLevel = 30f;
-    [SerializeField] private int maxRotationLevel = 5;
+    [SerializeField] private int maxRotationLevel = 20;
 
     [Header("Hasar Track'i")]
     [SerializeField] private float damagePerLevel = 18f;
-    [SerializeField] private int maxDamageLevel = 8;
+    [Tooltip("Hasar bilesik carpani (her level x bu). 1 = duz additive.")]
+    [SerializeField] private float damageMult = 1.14f;
+    [SerializeField] private int maxDamageLevel = 20;
 
     [Header("Radius Track'i")]
     [SerializeField] private float radiusPerLevel = 0.35f;
-    [SerializeField] private int maxRadiusLevel = 5;
+    [SerializeField] private int maxRadiusLevel = 20;
     #endregion
 
     #region Private Fields
@@ -76,7 +78,7 @@ public class OrbitalWeapon : WeaponBase
         switch (key)
         {
             case "count":  _countLevel += times; EnsureOrbs(); ConfigureOrbs(); break;
-            case "speed":  _rotationLevel = Mathf.Min(maxRotationLevel, _rotationLevel + times); break;
+            case "speed":  _rotationLevel = Mathf.Min(maxRotationLevel, _rotationLevel + times); ConfigureOrbs(); break;
             case "damage": _damageLevel = Mathf.Min(maxDamageLevel, _damageLevel + times); ConfigureOrbs(); break;
             case "radius": _radiusLevel = Mathf.Min(maxRadiusLevel, _radiusLevel + times); break;
         }
@@ -103,7 +105,16 @@ public class OrbitalWeapon : WeaponBase
     private int CurrentOrbCount() => 1 + _countLevel;
     private float CurrentRadius() => baseRadius + radiusPerLevel * _radiusLevel;
     private float CurrentRotationSpeed() => baseRotationSpeed + rotationSpeedPerLevel * _rotationLevel;
-    private float CurrentDamage() => baseDamage + damagePerLevel * _damageLevel;
+    // Bileşik hasar: her level (hasar + damagePerLevel) * damageMult -> sabit + carpan (Sharp Claws hissi).
+    private float CurrentDamage()
+    {
+        if (_damageLevel <= 0) return baseDamage;
+        if (damageMult <= 1.0001f) return baseDamage + damagePerLevel * _damageLevel; // carpan yoksa additive
+        float mp = Mathf.Pow(damageMult, _damageLevel);
+        return baseDamage * mp + damagePerLevel * damageMult * (mp - 1f) / (damageMult - 1f);
+    }
+    // Option 3: donme hizi arttikca vurus araligi kisalir -> ayni dusmani daha sik vurur (min 0.08).
+    private float CurrentHitCooldown() => Mathf.Max(0.08f, hitCooldown - _rotationLevel * 0.02f);
 
     private void EnsureOrbs()
     {
@@ -124,7 +135,7 @@ public class OrbitalWeapon : WeaponBase
     {
         if (_orbs == null) return;
         foreach (var o in _orbs)
-            if (o != null) o.Configure(CurrentDamage(), hitCooldown);
+            if (o != null) o.Configure(CurrentDamage(), CurrentHitCooldown());
     }
 
     private void DestroyOrbs()

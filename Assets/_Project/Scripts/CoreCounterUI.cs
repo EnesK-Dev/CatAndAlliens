@@ -27,9 +27,9 @@ public class CoreCounterUI : MonoBehaviour
     #region Private Methods
     private void HandleCoreCountChanged(int total)
     {
-        // Bar: 'bakiye / kart maliyeti' (ornek 7/10). Kart alinca bakiye harcanir, maliyet buyur -> 0/25 gibi.
+        // Sadece guncel core sayisi (eski esik/slash sistemi kaldirildi).
         if (countText != null)
-            countText.SetText("{0}/{1}", total, CoreManager.NextThreshold); // alloc yok
+            countText.SetText("{0}", total); // alloc yok
     }
     #endregion
 }

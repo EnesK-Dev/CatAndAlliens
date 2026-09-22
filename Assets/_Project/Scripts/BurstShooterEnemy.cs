@@ -299,12 +299,14 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
     /// </summary>
     public void Vaporize() { _noFoodDrop = true; Die(dropLoot: true, playDeathAnim: false); } // nuke/ulti: core EVET, yemek HAYIR
 
-    private bool _noFoodDrop; // nuke (bombardiman) ile olurse: SADECE core, ultFood YOK
+    private bool _noFoodDrop; // nuke (bombardiman) ile olurse: ultFood YOK
+    private bool _noCoreDrop; // bomb rain/nuke ile olurse: core de BIRAKMAZ
 
     /// <summary>Boss-oncesi bombardiman (nuke) bu dusmani oldururken cagirir: core birakir ama ultFood BIRAKMAZ.</summary>
     public void NukeKill(float damage)
     {
         _noFoodDrop = true;
+        _noCoreDrop = true; // bomb rain: core de birakma
         TakeDamage(damage);
     }
 
@@ -331,10 +333,10 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
         {
             // Olum aninda core birak — araliktan rastgele.
             // Random.Range(int, int) ust sinir HARIC oldugu icin +1.
-            CoreManager.SpawnCores(transform.position, UnityEngine.Random.Range(coreDropMin, coreDropMax + 1));
+            if (!_noCoreDrop) CoreManager.SpawnCores(transform.position, UnityEngine.Random.Range(coreDropMin, coreDropMax + 1));
 
             // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
-            if (!_noFoodDrop && UnityEngine.Random.value < ultFoodDropChance + RunStats.FoodDropChanceBonus)
+            if (!_noFoodDrop && UnityEngine.Random.value < RunStats.EffectiveFoodDropChance)
                 UltimateManager.SpawnFood(transform.position, shooterColor, 1);
         }
 

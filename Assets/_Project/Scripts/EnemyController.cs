@@ -202,6 +202,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         _isDashing = false;
         _healthOverridden = false;
         _noFoodDrop = false;
+        _noCoreDrop = false;
         _suppressDeathEffects = false;
 
         transform.localScale = _baseScale;
@@ -714,7 +715,8 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     /// </summary>
     public void Vaporize() { _noFoodDrop = true; _suppressDeathEffects = true; Die(dropLoot: true, playDeathAnim: false); } // nuke/ulti: core EVET, yemek + olum-efekti HAYIR
 
-    private bool _noFoodDrop;          // nuke (bombardiman) ile olurse: SADECE core, ultFood YOK
+    private bool _noFoodDrop;          // nuke (bombardiman) ile olurse: ultFood YOK
+    private bool _noCoreDrop;          // bomb rain/nuke ile olurse: core de BIRAKMAZ
     private bool _suppressDeathEffects; // nuke/ulti ile olurse: alt sinif olum efekti (patlama/bolunme) YOK
     private bool _healthOverridden;    // can disaridan set edildi (splitter yavrusu) -> zorlukla tekrar olcekleme
 
@@ -722,6 +724,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     public void NukeKill(float damage)
     {
         _noFoodDrop = true;
+        _noCoreDrop = true;           // bomb rain: core de birakma
         _suppressDeathEffects = true; // kitle temizliginde kamikaze zinciri / splitter cogalmasi olmasin
         TakeDamage(damage);
     }
@@ -787,10 +790,10 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
             int coreAmount = canUseLaser
                 ? Random.Range(coreDropEliteMin, Mathf.Max(coreDropEliteMin, coreDropEliteMax) + 1)
                 : Random.Range(coreDropNormal, Mathf.Max(coreDropNormal, coreDropNormalMax) + 1);
-            CoreManager.SpawnCores(transform.position, coreAmount);
+            if (!_noCoreDrop) CoreManager.SpawnCores(transform.position, coreAmount);
 
             // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
-            if (!_noFoodDrop && Random.value < ultFoodDropChance + RunStats.FoodDropChanceBonus)
+            if (!_noFoodDrop && Random.value < RunStats.EffectiveFoodDropChance)
                 UltimateManager.SpawnFood(transform.position, baseColor, 1);
         }
 

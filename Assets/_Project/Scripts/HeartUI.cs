@@ -68,11 +68,18 @@ public class HeartUI : MonoBehaviour
     /// <summary>Mevcut can degerine göre kalp ikonlarini günceller.</summary>
     public void RefreshHearts(float currentHealth)
     {
-        // currentHealth = yarım-kalp cinsinden (ör. 18 = tam dolu, 9 = yarısı)
+        // currentHealth/maxHealth = yarım-kalp cinsinden (2 birim = 1 tam kalp).
+        if (playerRef != null) maxHealth = playerRef.GetMaxHealth();
+        int heartCount = Mathf.Clamp(Mathf.CeilToInt(maxHealth / 2f), 0, TotalHearts);
+
         for (int i = 0; i < TotalHearts; i++)
         {
-            float halfHeartsForThisSlot = currentHealth - (i * 2f);
+            // Sadece max can kadar kalp goster (fazladan bos kalp yok).
+            bool active = i < heartCount;
+            heartImages[i].enabled = active;
+            if (!active) continue;
 
+            float halfHeartsForThisSlot = currentHealth - (i * 2f);
             if (halfHeartsForThisSlot >= 2f)
                 heartImages[i].sprite = fullHeartSprite;
             else if (halfHeartsForThisSlot >= 1f)

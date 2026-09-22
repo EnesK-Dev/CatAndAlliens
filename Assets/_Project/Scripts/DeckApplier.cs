@@ -38,6 +38,7 @@ public class DeckApplier : MonoBehaviour
         _upgradeAccum.Clear();
         var deck = MetaSave.GetActiveDeck();
         int applied = 0;
+        int multislashCopies = 0; // multislash silah karti stack'lendikce yon ekler
         for (int i = 0; i < deck.Count; i++)
         {
             var card = CardCatalog.Get(deck[i]);
@@ -45,7 +46,7 @@ public class DeckApplier : MonoBehaviour
             switch (card.category)
             {
                 case CardCategory.Stat: ApplyStat(card); break;
-                case CardCategory.Weapon: AcquireWeapon(card.weaponId); break;
+                case CardCategory.Weapon: AcquireWeapon(card.weaponId); if (card.weaponId == "multislash") multislashCopies++; break;
                 case CardCategory.WeaponUpgrade:
                     string k = card.weaponId + "|" + card.upgradeKey;
                     _upgradeAccum.TryGetValue(k, out int had); _upgradeAccum[k] = had + 1;
@@ -61,6 +62,13 @@ public class DeckApplier : MonoBehaviour
             var w = FindWeapon(kv.Key.Substring(0, sep));
             if (w != null) w.ApplyTrack(kv.Key.Substring(sep + 1), kv.Value);
         }
+        // Multi-Slash: her ekstra kopya +1 yon (1 kopya = temel 2 yon).
+        if (multislashCopies > 1)
+        {
+            var ms = FindWeapon("multislash");
+            if (ms != null) ms.ApplyTrack("dir", multislashCopies - 1);
+        }
+
         if (logApplied) GameLog.Log("[DeckApplier] Aktif slot " + MetaSave.ActiveSlot + " - uygulanan kart: " + applied + "/" + deck.Count, this);
     }
     #endregion
@@ -71,12 +79,13 @@ public class DeckApplier : MonoBehaviour
     {
         switch (card.statType)
         {
-            case CardStatType.Damage:         if (playerRef != null) playerRef.AddDamage(card.amount); break;
+            case CardStatType.Damage:         if (playerRef != null) { playerRef.AddDamage(card.amount); playerRef.MultiplyDamage(card.amountMult); } break;
             case CardStatType.AttackSpeed:    if (playerRef != null) playerRef.ApplyAttackSpeedMultiplier(card.amount); break;
             case CardStatType.AttackRange:    if (playerRef != null) playerRef.AddAttackRange(card.amount); break;
             case CardStatType.MaxHealth:      if (playerRef != null) playerRef.AddMaxHealth(card.amount); break;
             case CardStatType.DashCooldown:   if (playerRef != null) playerRef.AddDashCooldown(card.amount); break;
             case CardStatType.FoodDropChance: RunStats.FoodDropChanceBonus += card.amount; break;
+            case CardStatType.UltimateDamage: RunStats.UltimateDamageBonus += card.amount; break;
         }
     }
 
@@ -104,7 +113,7 @@ public class DeckApplier : MonoBehaviour
     public static string PreviewActiveDeck()
     {
         var deck = MetaSave.GetActiveDeck();
-        float dmg = 0f, range = 0f, hp = 0f, dash = 0f, food = 0f, atkMul = 1f;
+        float dmg = 0f, range = 0f, hp = 0f, dash = 0f, food = 0f, ulti = 0f, atkMul = 1f;
         int weapons = 0, unknown = 0;
         var wlist = new List<string>();
         foreach (var id in deck)
@@ -121,11 +130,12 @@ public class DeckApplier : MonoBehaviour
                 case CardStatType.MaxHealth: hp += c.amount; break;
                 case CardStatType.DashCooldown: dash += c.amount; break;
                 case CardStatType.FoodDropChance: food += c.amount; break;
+                case CardStatType.UltimateDamage: ulti += c.amount; break;
             }
         }
         var sb = new StringBuilder();
         sb.AppendLine("Deck (slot " + MetaSave.ActiveSlot + ") kart=" + deck.Count + " bilinmeyen=" + unknown);
-        sb.AppendLine("  +dmg=" + dmg + "  atkCooldownMul=" + atkMul.ToString("0.###") + "  +range=" + range + "  +maxHP=" + hp + "  dashMod=" + dash + "  +food=" + food);
+        sb.AppendLine("  +dmg=" + dmg + "  atkCooldownMul=" + atkMul.ToString("0.###") + "  +range=" + range + "  +maxHP=" + hp + "  dashMod=" + dash + "  +food=" + food + "  +ultiDmg=" + ulti);
         sb.AppendLine("  silah karti=" + weapons + " [" + string.Join(",", wlist) + "] (FAZ5'te baglanacak)");
         return sb.ToString();
     }
