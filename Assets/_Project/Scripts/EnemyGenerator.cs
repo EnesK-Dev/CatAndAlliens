@@ -88,6 +88,17 @@ public class EnemyGenerator : MonoBehaviour
 
     [Tooltip("Bu milestone ve sonrasinda finalMilestoneMaxAlive gecerli olur (son boss milestone'u).")]
     [SerializeField] private int finalMilestoneIndex = 5;
+
+    [Header("Bos Alan Hizlandirmasi (guclu oyuncu bos beklemesin)")]
+    [Tooltip("Alandaki dusman azaldikca spawn HIZLANIR. Guclu oyuncu hepsini kesince aninda yenileri gelir; " +
+             "gucsuz oyuncu (alan zaten dolu) icin degismez. Kapatmak icin false.")]
+    [SerializeField] private bool emptyFieldAccelerate = true;
+
+    [Tooltip("Hedef doluluk (cap'in yuzdesi). Alandaki canli dusman bunun ALTINA dusunce hizlanma devreye girer. 0.6 = cap'in %60'i.")]
+    [SerializeField] private float fillTargetRatio = 0.6f;
+
+    [Tooltip("Alan TAMAMEN bosken iki spawn arasi bekleme (cok kisa). Alan doldukca normal araliga geri doner.")]
+    [SerializeField] private float emptyFieldInterval = 0.3f;
     #endregion
 
     #region Private Fields
@@ -153,6 +164,24 @@ public class EnemyGenerator : MonoBehaviour
         {
             float factor = DifficultyManager.DifficultyFactor;
             interval = Mathf.Lerp(maxSpawnInterval, minSpawnInterval, factor);
+        }
+
+        // Bos alan hizlandirmasi: alandaki dusman hedefin altindaysa, bosluk oranina gore araligi
+        // emptyFieldInterval'e dogru kis. Boylece guclu oyuncu alani bosaltinca yeniler HIZLI gelir,
+        // gucsuz oyuncu (alan dolu) icin hicbir sey degismez. Cap zaten toplam yogunlugu sinirlar.
+        if (emptyFieldAccelerate)
+        {
+            int cap = EffectiveMaxAlive();
+            float target = cap > 0 ? cap * fillTargetRatio : 0f;
+            if (target > 0f)
+            {
+                int alive = CountAliveEnemies();
+                if (alive < target)
+                {
+                    float emptiness = 1f - alive / target; // 0 = hedef dolu, 1 = tamamen bos
+                    interval = Mathf.Lerp(interval, emptyFieldInterval, emptiness);
+                }
+            }
         }
 
         interval += UnityEngine.Random.Range(-spawnIntervalJitter, spawnIntervalJitter);

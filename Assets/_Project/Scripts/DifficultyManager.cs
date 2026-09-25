@@ -22,6 +22,18 @@ public class DifficultyManager : MonoBehaviour
     [Tooltip("Bu dakikalara ulasinca OnMilestoneReached firlar (index sirasiyla). Artan sirada girin. Ileride enemy tipi/elite orani acmak icin.")]
     [SerializeField] private float[] milestoneMinutes = { 0f, 2f, 5f, 8f };
 
+    [Header("Adaptif Dusman Cani (oyuncu hizli kesiyorsa can biraz artar)")]
+    [Tooltip("Acik ise: oyuncu hizli oldurdukce dusman cani 1 -> maxEnemyHealthMult arasina cikar.")]
+    [SerializeField] private bool adaptiveEnemyHealth = true;
+    [Tooltip("Kill hizini kac saniyede bir olcup ayarlasin.")]
+    [SerializeField] private float adaptWindow = 1.5f;
+    [Tooltip("Saniyedeki oldurme bunun ALTINDA ise can carpani 1 (zayif oyuncu).")]
+    [SerializeField] private float lowKillsPerSec = 1.2f;
+    [Tooltip("Saniyedeki oldurme bunun USTUNDE ise can carpani tavana ulasir (cok hizli kesen oyuncu).")]
+    [SerializeField] private float highKillsPerSec = 4f;
+    [Tooltip("Dusman cani carpani tavani. 1.3 = en fazla %30 fazla can.")]
+    [SerializeField] private float maxEnemyHealthMult = 1.3f;
+
     [Header("Debug")]
     [Tooltip("TEST: Oyunu bu MILESTONE'dan baslat. 0 = normal bas. 1 = dash boss'tan, 2 = splitter boss'tan... " +
              "Sadece hedef milestone tetiklenir (oncekiler atlanir). RELEASE'de 0 birak!")]
@@ -39,6 +51,8 @@ public class DifficultyManager : MonoBehaviour
     private float _elapsedTime;
     private float _currentFactor;
     private int _reachedMilestoneIndex = -1;
+    private int _killsInWindow;
+    private float _windowTimer;
     private GUIStyle _debugStyle;
     #endregion
 
@@ -69,6 +83,21 @@ public class DifficultyManager : MonoBehaviour
         if (mm == null || milestoneIndex < 0 || milestoneIndex >= mm.Length)
             return _instance._elapsedTime; // unlock=0 gibi durumlar: bastan acik say
         return Mathf.Max(0f, _instance._elapsedTime - mm[milestoneIndex] * 60f);
+    }
+
+    /// <summary>Verilen milestone'un tetiklenecegi (olcekli) saniye. index &lt; 0 -> 0. Tasarsa son milestone. Bar/geri sayim icin.</summary>
+    public static float MilestoneSeconds(int index)
+    {
+        if (_instance == null || _instance.milestoneMinutes == null || _instance.milestoneMinutes.Length == 0) return 0f;
+        if (index < 0) return 0f;
+        if (index >= _instance.milestoneMinutes.Length) index = _instance.milestoneMinutes.Length - 1;
+        return _instance.milestoneMinutes[index] * 60f;
+    }
+
+    /// <summary>Bir dusman (oyuncu tarafindan) oldurulunce cagrilir — adaptif can icin kill hizi sayaci.</summary>
+    public static void RegisterKill()
+    {
+        if (_instance != null) _instance._killsInWindow++;
     }
 
     /// <summary>Yeni bir milestone'a ulasilinca firlar. Parametre: milestone index'i.</summary>
@@ -110,6 +139,7 @@ public class DifficultyManager : MonoBehaviour
         _elapsedTime += Time.deltaTime;
         _currentFactor = EvaluateFactor(_elapsedTime);
         CheckMilestones();
+        UpdateAdaptiveEnemyHealth();
     }
 
     private void OnDestroy()
@@ -137,6 +167,21 @@ public class DifficultyManager : MonoBehaviour
     #endregion
 
     #region Private Methods
+    /// <summary>Kill hizini periyodik olcer; hizliysa RunStats.EnemyHealthMult'i yumusakca 1 -> tavan arasina ceker.</summary>
+    private void UpdateAdaptiveEnemyHealth()
+    {
+        if (!adaptiveEnemyHealth) { RunStats.EnemyHealthMult = 1f; return; }
+        _windowTimer += Time.deltaTime;
+        if (_windowTimer < adaptWindow) return;
+
+        float kps = _killsInWindow / Mathf.Max(0.01f, _windowTimer);
+        float u = Mathf.InverseLerp(lowKillsPerSec, highKillsPerSec, kps); // 0 (yavas) .. 1 (hizli)
+        float target = Mathf.Lerp(1f, Mathf.Max(1f, maxEnemyHealthMult), u);
+        RunStats.EnemyHealthMult = Mathf.Lerp(RunStats.EnemyHealthMult, target, 0.5f); // yumusak gecis (birkac pencerede oturur)
+        _killsInWindow = 0;
+        _windowTimer = 0f;
+    }
+
     private float EvaluateFactor(float time)
     {
         float normalized = timeToMaxDifficulty > 0f ? Mathf.Clamp01(time / timeToMaxDifficulty) : 1f;

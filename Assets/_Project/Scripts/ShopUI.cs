@@ -26,6 +26,8 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private float rowSpacing = 24f;
     [Tooltip("Stat kartlarinin bir satirda kac tane dizilecegi.")]
     [SerializeField] private int statsPerRow = 5;
+    [Tooltip("Bir statin her yeni aliminda fiyat bu carpanla artar (1.6 = her seferinde %60 pahali).")]
+    [SerializeField] private float statCostGrowth = 1.6f;
     #endregion
 
     #region Private Fields
@@ -68,49 +70,25 @@ public class ShopUI : MonoBehaviour
         _sizer = contentParent.GetComponent<ShopCardSizer>();
         var all = CardCatalog.All;
 
-        // Cerceve rengine gore stat ayrimi (gri/beyaz kartlar ayri satirda).
-        bool IsGrey(CardDefinition c) => c.frameSprite != null && c.frameSprite.name.Contains("grey");
-        int ColorRank(CardDefinition c)
+        // Duzen: SILAHLAR ustte -> cizgi -> STATLAR altta. Statlarin fiyati her alimda artar (CostFor).
+        const int perRow = 5;
+        var weapons = all.Where(c => c.category == CardCategory.Weapon).ToList();
+        Transform row = null;
+        for (int i = 0; i < weapons.Count; i++)
         {
-            string n = c.frameSprite != null ? c.frameSprite.name : "";
-            if (n.Contains("blue")) return 0;
-            if (n.Contains("red")) return 1;
-            if (n.Contains("yellow")) return 2;
-            if (n.Contains("green")) return 3;
-            return 4;
+            if (i % perRow == 0) row = CreateRow();
+            AddCard(row, weapons[i]);
         }
 
         var stats = all.Where(c => c.category == CardCategory.Stat).ToList();
-        var colored = stats.Where(c => !IsGrey(c)).OrderBy(ColorRank).ToList();
-        var greys   = stats.Where(IsGrey).ToList();
-        var multislash = all.FirstOrDefault(c => c.category == CardCategory.Weapon && c.weaponId == "multislash");
-
-        // Satir 1: renkli statlar (mavi/kirmizi/sari/yesil) + tek kartlik Multi-Slash
-        var row1 = CreateRow();
-        foreach (var c in colored) AddCard(row1, c);
-        if (multislash != null) AddCard(row1, multislash);
-
-        // Satir 2: gri/beyaz kartlar (dash / food / ultimate)
-        if (greys.Count > 0)
+        if (stats.Count > 0)
         {
             CreateDivider();
-            var row2 = CreateRow();
-            foreach (var c in greys) AddCard(row2, c);
-        }
-
-        // Sonra ozel silahlar (multislash haric): her silah kendi kategorisi -> arasina cizgi
-        var weapons = all.Where(c => c.category == CardCategory.Weapon && c.weaponId != "multislash").ToList();
-        foreach (var w in weapons)
-        {
-            CreateDivider();
-            var wRow = CreateRow();
-            AddCard(wRow, w);
-
-            var ups = all.Where(c => c.category == CardCategory.WeaponUpgrade && c.weaponId == w.weaponId).ToList();
-            if (ups.Count > 0)
+            row = null;
+            for (int i = 0; i < stats.Count; i++)
             {
-                var uRow = CreateRow();
-                foreach (var u in ups) AddCard(uRow, u);
+                if (i % perRow == 0) row = CreateRow();
+                AddCard(row, stats[i]);
             }
         }
 
@@ -153,6 +131,18 @@ public class ShopUI : MonoBehaviour
         _itemCardIds.Add(card.id);
     }
 
+    /// <summary>Bir kartin GUNCEL fiyati. Statlar: her sahip olunan adette carpanla artar. Silah: sabit.</summary>
+    private int CostFor(CardDefinition card)
+    {
+        if (card == null) return 0;
+        if (card.category == CardCategory.Stat)
+        {
+            int owned = MetaSave.OwnedCount(card.id);
+            return Mathf.RoundToInt(card.cost * Mathf.Pow(Mathf.Max(1f, statCostGrowth), owned));
+        }
+        return card.cost;
+    }
+
     /// <summary>Tum kartlari (owned/afford/kilit) ve core yazisini gunceller.</summary>
     private void RefreshAll()
     {
@@ -166,10 +156,11 @@ public class ShopUI : MonoBehaviour
             int effMax = card.maxPerSlot > 0 ? card.maxPerSlot : MetaSave.MaxCardsPerSlot;
             int owned = MetaSave.OwnedCount(card.id);
             bool soldOut = owned >= effMax; // max faydali adete ulasildi
-            bool canBuy = !locked && !soldOut && bank >= card.cost;
+            int cost = CostFor(card);
+            bool canBuy = !locked && !soldOut && bank >= cost;
             // Stack gorseli faydali max'i asmasin (silah=1 -> tek tepe, cok tepe yaniltici olmasin)
             int shownOwned = Mathf.Min(owned, effMax);
-            _items[i].Bind(card, shownOwned, canBuy, locked, soldOut, HandleBuy);
+            _items[i].Bind(card, shownOwned, canBuy, locked, soldOut, HandleBuy, cost);
         }
         RefreshCores();
         if (_sizer != null) _sizer.Apply();
@@ -186,7 +177,7 @@ public class ShopUI : MonoBehaviour
         if (card == null) return;
         // Guvenlik: upgrade ise silah sahipligini burada da dogrula (UI kilidi atlansa bile).
         if (card.category == CardCategory.WeaponUpgrade && MetaSave.OwnedCount("wpn_" + card.weaponId) == 0) return;
-        if (MetaSave.SpendCores(card.cost))
+        if (MetaSave.SpendCores(CostFor(card)))
             MetaSave.AddOwned(cardId);
         RefreshAll();
     }

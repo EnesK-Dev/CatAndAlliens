@@ -93,7 +93,7 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
         _bodyCollider = GetComponent<Collider2D>();
         _spriteAnimator = GetComponent<SpriteAnimator>();
         // Zamanla (global zorluk) can olceklenir — maxHealth yerinde buyutulur ki clamp dogru kalsin.
-        maxHealth *= Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor);
+        maxHealth *= Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor) * RunStats.EnemyHealthMult;
         _currentHealth = maxHealth;
         _nextShootTime = Time.time + shootCooldown;
 
@@ -331,6 +331,7 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
 
         if (dropLoot)
         {
+            if (playDeathAnim) DifficultyManager.RegisterKill(); // adaptif can: normal (nuke/ulti degil) oyuncu olumu
             // Olum aninda core birak — araliktan rastgele.
             // Random.Range(int, int) ust sinir HARIC oldugu icin +1.
             if (!_noCoreDrop) CoreManager.SpawnCores(transform.position, UnityEngine.Random.Range(coreDropMin, coreDropMax + 1));

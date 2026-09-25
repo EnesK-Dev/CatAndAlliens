@@ -58,7 +58,9 @@ public class OrbitalWeapon : WeaponBase
             if (_orbs[i] == null) continue;
             float a = (_angle + i * step) * Mathf.Deg2Rad;
             _orbs[i].transform.position = center + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * r;
-            // Orb'lar SADECE oyuncunun etrafinda doner; kendi ekseninde donme KALDIRILDI.
+            // Juice: hiz yukseltilince orb kendi ekseninde de doner (0 -> hizla artar).
+            float selfSpin = CurrentSelfSpin();
+            if (selfSpin != 0f) _orbs[i].transform.Rotate(0f, 0f, selfSpin * Time.deltaTime);
         }
     }
 
@@ -82,6 +84,7 @@ public class OrbitalWeapon : WeaponBase
             case "damage": _damageLevel = Mathf.Min(maxDamageLevel, _damageLevel + times); ConfigureOrbs(); break;
             case "radius": _radiusLevel = Mathf.Min(maxRadiusLevel, _radiusLevel + times); break;
         }
+        PulseOrbs(); // her level'da gorsel pop
     }
 
     public override void CollectUpgrades(List<WeaponUpgradeOption> into)
@@ -102,19 +105,30 @@ public class OrbitalWeapon : WeaponBase
     #endregion
 
     #region Private Methods
-    private int CurrentOrbCount() => 1 + _countLevel;
-    private float CurrentRadius() => baseRadius + radiusPerLevel * _radiusLevel;
+    public override void RefreshStats() { EnsureOrbs(); ConfigureOrbs(); }
+
+    private int CurrentOrbCount() => 1 + _countLevel + RunStats.AmountBonus;
+    private float CurrentRadius() => (baseRadius + radiusPerLevel * _radiusLevel) * RunStats.AreaMult;
     private float CurrentRotationSpeed() => baseRotationSpeed + rotationSpeedPerLevel * _rotationLevel;
     // Bileşik hasar: her level (hasar + damagePerLevel) * damageMult -> sabit + carpan (Sharp Claws hissi).
     private float CurrentDamage()
     {
-        if (_damageLevel <= 0) return baseDamage;
-        if (damageMult <= 1.0001f) return baseDamage + damagePerLevel * _damageLevel; // carpan yoksa additive
-        float mp = Mathf.Pow(damageMult, _damageLevel);
-        return baseDamage * mp + damagePerLevel * damageMult * (mp - 1f) / (damageMult - 1f);
+        float d;
+        if (_damageLevel <= 0) d = baseDamage;
+        else if (damageMult <= 1.0001f) d = baseDamage + damagePerLevel * _damageLevel;
+        else { float mp = Mathf.Pow(damageMult, _damageLevel); d = baseDamage * mp + damagePerLevel * damageMult * (mp - 1f) / (damageMult - 1f); }
+        return d; // hasar artik silah-basina (Charge/Firepower/Impact -> damage track)
     }
     // Option 3: donme hizi arttikca vurus araligi kisalir -> ayni dusmani daha sik vurur (min 0.08).
-    private float CurrentHitCooldown() => Mathf.Max(0.08f, hitCooldown - _rotationLevel * 0.02f);
+    private float CurrentHitCooldown() => Mathf.Max(0.08f, (hitCooldown - _rotationLevel * 0.02f) * RunStats.CooldownMult);
+    // Juice: hasar (level + global Might) arttikca orb gorseli buyur; sansliysa devasa (cap 3.5x).
+    private float OrbVisualScale() => Mathf.Min(4.2f, 0.65f + 0.22f * _damageLevel);  // kucuk basla, level basi belirgin buyu
+    // Juice: hasar arttikca orb isinir (kendi rengi -> sicak).
+    private float OrbTintT() => Mathf.Clamp01(0.11f * _damageLevel);  // daha hizli isin
+    // Juice: level atlayinca orb'lar zipla.
+    private void PulseOrbs() { if (_orbs == null) return; foreach (var o in _orbs) if (o != null) o.Pop(); }
+    // Juice: donme hizi yukseltildikce orb kendi ekseninde doner (base 0).
+    private float CurrentSelfSpin() => _rotationLevel * 80f;
 
     private void EnsureOrbs()
     {
@@ -135,7 +149,7 @@ public class OrbitalWeapon : WeaponBase
     {
         if (_orbs == null) return;
         foreach (var o in _orbs)
-            if (o != null) o.Configure(CurrentDamage(), CurrentHitCooldown());
+            if (o != null) o.Configure(CurrentDamage(), CurrentHitCooldown(), OrbVisualScale(), OrbTintT());
     }
 
     private void DestroyOrbs()

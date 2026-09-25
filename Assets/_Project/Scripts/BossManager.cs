@@ -87,6 +87,26 @@ public class BossManager : MonoBehaviour
     #endregion
 
     #region Private Methods
+    /// <summary>afterMilestone'dan SONRAKI ilk boss dalgasini (en kucuk milestoneIndex) bulur; renk + milestone doner.
+    /// Bomba/geri sayim bari icin: "sonraki boss ne zaman, hangi renk". Yoksa false.</summary>
+    public bool TryGetNextBoss(int afterMilestone, out int milestoneIndex, out Color color)
+    {
+        milestoneIndex = -1; color = Color.white;
+        if (waves == null) return false;
+        int best = int.MaxValue; BossWave bestWave = null;
+        for (int i = 0; i < waves.Length; i++)
+        {
+            var w = waves[i];
+            if (w == null) continue;
+            if (w.milestoneIndex > afterMilestone && w.milestoneIndex < best) { best = w.milestoneIndex; bestWave = w; }
+        }
+        if (bestWave == null) return false;
+        milestoneIndex = best;
+        if (bestWave.enemyBossPrefab != null) color = EnemyBossColor(bestWave.enemyBossPrefab, bestWave.tint);
+        else { var pf = bestWave.bossPrefab != null ? bestWave.bossPrefab : bossPrefab; color = EffectiveBossColor(pf, bestWave.tint); }
+        return true;
+    }
+
     private void HandleMilestone(int milestoneIndex)
     {
         if (waves == null) return;

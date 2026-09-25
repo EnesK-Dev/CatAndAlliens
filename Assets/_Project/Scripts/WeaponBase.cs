@@ -42,6 +42,10 @@ public abstract class WeaponBase : MonoBehaviour
     /// <summary>Deck: bir upgrade track'ini 'times' kez arttirir (stack). Alt siniflar override eder.</summary>
     public virtual void ApplyTrack(string key, int times) { }
 
+    /// <summary>In-run global stat degisince (Amount/Area vb.) cache'li degerleri yeniden uygular.
+    /// Live okuyan silahlar (blaster/boomerang) override gerektirmez; orbital/multislash override eder.</summary>
+    public virtual void RefreshStats() { }
+
     public void Acquire()
     {
         if (IsAcquired) return;

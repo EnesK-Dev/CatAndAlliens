@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// Upgrade paneli. CoreManager.OnThresholdReached'i dinler; esige ulasinca oyunu duraklatir
@@ -16,10 +17,14 @@ public class UpgradeSelectionUI : MonoBehaviour
     /// <summary>Uygulanacak stat turu. player'daki upgrade API'sine denk gelir.</summary>
     public enum UpgradeType
     {
-        Damage,
-        AttackSpeed,
-        AttackRange,
-        GainHealth // Anlik can doldurur (max can DEGISMEZ). NOT: 4. sirada kalmali — sahne serialize'i int deger.
+        Damage,       // Might     -> SADECE Sharp Claws hasari (tracker). Global degil.
+        AttackSpeed,  // Haste     -> RunStats.CooldownMult (tum atis/vurus hizi, ORTAK)
+        AttackRange,  // Area      -> RunStats.AreaMult (menzil/yaricap/orbit, ORTAK)
+        GainHealth,   // Max Health-> player.AddMaxHealth. NOT: 4. sirada kalmali (sahne serialize int).
+        Amount,       // +1 mermi/orb/yon/hedef -> RunStats.AmountBonus (ORTAK)
+        Charge,       // -> SADECE Orbital hasari (tracker)
+        Firepower,    // -> SADECE Auto-Blaster hasari (tracker)
+        Impact        // -> SADECE Boomerang hasari (tracker)
     }
 
     /// <summary>Bir stat upgrade seceneginin verisi — Inspector'dan doldurulur (denge burada tutulur).</summary>
@@ -34,6 +39,9 @@ public class UpgradeSelectionUI : MonoBehaviour
         [Tooltip("Damage: +hasar | AttackSpeed: cooldown carpani (0.85 = %15 hizli) | " +
                  "AttackRange: +menzil | GainHealth: anlik +can (max can degismez)")]
         public float amount = 1f;
+
+        [Tooltip("Kartlarda cikma agirligi. 1 = normal, <1 = daha nadir (ornek Amount 0.35).")]
+        public float weight = 1f;
 
         [HideInInspector] public int level; // kac kez secildi (runtime stack sayaci)
     }
@@ -54,8 +62,19 @@ public class UpgradeSelectionUI : MonoBehaviour
     [Tooltip("Panelin kok GameObject'i — acilip kapanacak (bu script'in objesi OLMAMALI).")]
     [SerializeField] private GameObject panelRoot;
 
-    [Tooltip("Sahnedeki sabit kart slotlari (genelde 3 tane).")]
+    [Tooltip("Sol canli stat paneli — SADECE upgrade paneli acikken gorunur. Bos ise atlanir.")]
+    [SerializeField] private GameObject liveStatsPanel;
+
+    [Tooltip("Sahnedeki sabit kart slotlari (artik 2 tane, yan yana dikey kart).")]
     [SerializeField] private UpgradeCard[] cardSlots;
+
+    [Header("Reroll")]
+    [Tooltip("Kartlari yeniden dagitan buton (beyaz/siyah). Bos ise reroll kapali.")]
+    [SerializeField] private Button rerollButton;
+    [Tooltip("Reroll butonundaki yazi (kalan hak gosterilir). Bos ise atlanir.")]
+    [SerializeField] private TMP_Text rerollLabel;
+    [Tooltip("Panel her acildiginda kac reroll hakki. 2 = 2x reroll.")]
+    [SerializeField] private int rerollsPerOpen = 2;
 
     [Tooltip("Bos birakilirsa Awake'te otomatik bulunur.")]
     [SerializeField] private player playerRef;
@@ -76,6 +95,8 @@ public class UpgradeSelectionUI : MonoBehaviour
     [SerializeField] private Sprite attackRangeCardSprite; // yesil
     [SerializeField] private Sprite healthCardSprite;      // kirmizi
     [SerializeField] private Sprite weaponCardSprite;      // mor
+    [SerializeField] private Sprite greyCardSprite;        // gri cerceve (yeni statlar: gri + tint)
+    [SerializeField] private Sprite amountCardSprite;      // Amount icin rengarenk gradient cerceve (guclu his)
 
     [Tooltip("Renkli sprite'lar zaten renkli oldugu icin frame tint beyaz kalir.")]
     [SerializeField] private Color cardTint = Color.white;
@@ -94,12 +115,15 @@ public class UpgradeSelectionUI : MonoBehaviour
     #region Private Fields
     private static UpgradeSelectionUI _instance;
     private int _pendingSelections;
+    private int _rerollsLeft;
     private bool _isOpen;
     private Action<int> _cardCallback;
 
     private readonly List<CardOption> _available = new List<CardOption>(); // her acilista yeniden doldurulur
     private readonly List<WeaponUpgradeOption> _weaponUpgradeBuffer = new List<WeaponUpgradeOption>();
     private CardOption[] _shown;                                           // o an gosterilen kartlar (slot sirasi)
+    private readonly List<CardOption> _picked = new List<CardOption>();    // agirlikli secilen (gosterilecek) kartlar
+    private readonly List<CardOption> _weightPool = new List<CardOption>(); // agirlikli secim calisma listesi
 
     // --- Secim animasyonu (deneysel): secilmeyenler yukari kayip solar; secilen kucule kucule kedinin ARKASINA gider ---
     private const float SelectAnimDuration = 0.38f;      // animasyon suresi (unscaled)
@@ -128,6 +152,7 @@ public class UpgradeSelectionUI : MonoBehaviour
         _instance = this;
 
         _cardCallback = HandleCardSelected;
+        if (rerollButton != null) rerollButton.onClick.AddListener(HandleReroll);
 
         if (playerRef == null) playerRef = FindFirstObjectByType<player>();
         if (weaponManager == null && playerRef != null) weaponManager = playerRef.GetComponent<WeaponManager>();
@@ -143,6 +168,7 @@ public class UpgradeSelectionUI : MonoBehaviour
     private void OnDestroy()
     {
         CoreManager.OnThresholdReached -= HandleThresholdReached;
+        if (rerollButton != null) rerollButton.onClick.RemoveListener(HandleReroll);
         if (_instance == this) _instance = null;
     }
     #endregion
@@ -152,6 +178,77 @@ public class UpgradeSelectionUI : MonoBehaviour
     {
         if (_isOpen) { _pendingSelections++; return; }
         OpenPanel();
+    }
+
+    /// <summary>Reroll: kalan hak varsa kartlari YENIDEN (tamamen rastgele) dagitir.</summary>
+    private void HandleReroll()
+    {
+        if (!_isOpen || _animating) return;
+        if (_rerollsLeft <= 0) return;
+        _rerollsLeft--;
+        UpdateRerollButton();
+        StartCoroutine(RerollSlotMachine()); // slot makinesi gibi don, en son otur
+    }
+
+    /// <summary>Slot makinesi: kartlar hizla rastgele yuzler gosterir + dikey kayar (sol yukari, sag asagi),
+    /// yavaslayarak en son yeni kartlara oturur. UNSCALED (panel timeScale=0).</summary>
+    private System.Collections.IEnumerator RerollSlotMachine()
+    {
+        _animating = true;
+        if (_cardRowLayout != null) _cardRowLayout.enabled = false; // pozisyonlari elle oynatabilmek icin
+
+        int n = cardSlots != null ? cardSlots.Length : 0;
+        var rts = new RectTransform[n];
+        var basePos = new Vector2[n];
+        for (int i = 0; i < n; i++)
+        {
+            if (cardSlots[i] == null) continue;
+            rts[i] = cardSlots[i].GetComponent<RectTransform>();
+            basePos[i] = rts[i].anchoredPosition;
+            var cg = EnsureGroup(i); cg.blocksRaycasts = false; cg.interactable = false;
+        }
+
+        // Havuzu tazele (rastgele yuzler bundan gelir)
+        BuildAvailableOptions();
+        ShuffleAvailable();
+
+        const float dur = 0.7f;
+        float t = 0f, tick = 0f;
+        while (t < dur)
+        {
+            t += Time.unscaledDeltaTime; tick += Time.unscaledDeltaTime;
+            if (tick >= 0.05f && _available.Count > 0)
+            {
+                tick = 0f;
+                for (int i = 0; i < n; i++)
+                {
+                    if (cardSlots[i] == null || !cardSlots[i].gameObject.activeSelf) continue;
+                    var opt = _available[UnityEngine.Random.Range(0, _available.Count)];
+                    BindOptionToCard(cardSlots[i], i, opt); // rastgele yuz (gorsel)
+                }
+            }
+            float amp = Mathf.Lerp(170f, 0f, t / dur); // sona dogru sonumlenir
+            float e = t * 26f;
+            for (int i = 0; i < n; i++)
+            {
+                if (rts[i] == null) continue;
+                float dir = (i % 2 == 0) ? 1f : -1f; // sol yukari, sag asagi (zit)
+                rts[i].anchoredPosition = basePos[i] + new Vector2(0f, Mathf.Sin(e) * amp * dir);
+            }
+            yield return null;
+        }
+
+        for (int i = 0; i < n; i++) if (rts[i] != null) rts[i].anchoredPosition = basePos[i];
+        if (_cardRowLayout != null) _cardRowLayout.enabled = true;
+        PopulateCards(); // final kartlar (raycast/interactable geri acilir)
+        _animating = false;
+    }
+
+    /// <summary>Reroll butonu yazisini/etkinligini gunceller (kalan hak; 0 ise pasif).</summary>
+    private void UpdateRerollButton()
+    {
+        if (rerollButton != null) rerollButton.interactable = _rerollsLeft > 0;
+        if (rerollLabel != null) rerollLabel.SetText("REROLL ({0})", _rerollsLeft);
     }
 
     private void OpenPanel()
@@ -164,10 +261,13 @@ public class UpgradeSelectionUI : MonoBehaviour
 
         _isOpen = true;
         panelRoot.SetActive(true);
+        if (liveStatsPanel != null) liveStatsPanel.SetActive(true); // statlar sadece kart secimi sirasinda gorunsun
         Time.timeScale = 0f;
         if (playerRef != null) playerRef.SetPaused(true);
 
+        _rerollsLeft = rerollsPerOpen;
         PopulateCards();
+        UpdateRerollButton();
     }
 
     /// <summary>Dinamik havuzu (stat + silah) kurar, karistirir, slotlara basar.</summary>
@@ -175,20 +275,20 @@ public class UpgradeSelectionUI : MonoBehaviour
     {
         ResetCardVisuals(); // onceki secim animasyonunun (pozisyon/olcek/alpha/parent) izlerini temizle
         BuildAvailableOptions();
-        ShuffleAvailable();
 
         int show = Mathf.Min(cardSlots.Length, _available.Count);
+        PickWeighted(show); // agirliga gore N farkli kart sec (Amount daha nadir)
 
         for (int i = 0; i < cardSlots.Length; i++)
         {
             UpgradeCard card = cardSlots[i];
             if (card == null) continue;
 
-            bool visible = i < show;
+            bool visible = i < _picked.Count;
             card.gameObject.SetActive(visible);
             if (!visible) continue;
 
-            CardOption opt = _available[i];
+            CardOption opt = _picked[i];
             _shown[i] = opt;
             BindOptionToCard(card, i, opt);
         }
@@ -199,29 +299,54 @@ public class UpgradeSelectionUI : MonoBehaviour
     {
         _available.Clear();
 
+        // Yeni model: kartlar SADECE stat. Sahip olunmayan silahin hasar stati (Charge/Firepower/Impact) havuza girmez.
         int statCount = upgrades != null ? upgrades.Length : 0;
         for (int i = 0; i < statCount; i++)
-            _available.Add(new CardOption { isWeapon = false, statIndex = i });
+            if (IsStatRelevant(upgrades[i].type))
+                _available.Add(new CardOption { isWeapon = false, statIndex = i });
+    }
 
-        if (weaponManager != null && weaponManager.Weapons != null)
+    /// <summary>Silah-ozel hasar stati mi ve o silah kusanildi mi? Ortak statlar hep gecerli.</summary>
+    private bool IsStatRelevant(UpgradeType t)
+    {
+        string wid = t == UpgradeType.Charge ? "orbital"
+                   : t == UpgradeType.Firepower ? "blaster"
+                   : t == UpgradeType.Impact ? "boomerang" : null;
+        if (wid == null) return true; // ortak stat (Might/Haste/Area/Amount/MaxHealth)
+        if (weaponManager == null || weaponManager.Weapons == null) return false;
+        foreach (var w in weaponManager.Weapons)
+            if (w != null && w.IsAcquired && w.GetType().Name.ToLowerInvariant().Contains(wid)) return true;
+        return false; // silah kusanilmadi -> bu hasar stati cikmasin
+    }
+
+    /// <summary>Agirliga gore (Amount daha nadir) N FARKLI secenek secip _picked'e koyar.</summary>
+    private void PickWeighted(int count)
+    {
+        _picked.Clear();
+        _weightPool.Clear();
+        _weightPool.AddRange(_available);
+        for (int n = 0; n < count && _weightPool.Count > 0; n++)
         {
-            foreach (WeaponBase w in weaponManager.Weapons)
+            float total = 0f;
+            for (int i = 0; i < _weightPool.Count; i++) total += StatWeight(_weightPool[i]);
+            float roll = UnityEngine.Random.value * total;
+            int idx = _weightPool.Count - 1;
+            for (int i = 0; i < _weightPool.Count; i++)
             {
-                if (w == null) continue;
-                if (!w.IsAcquired)
-                {
-                    _available.Add(new CardOption { isWeapon = true, weapon = w, isNewWeapon = true });
-                }
-                else
-                {
-                    // Silahin AYRI yukseltmelerini (track'lerini) ayri kart secenekleri olarak ekle
-                    _weaponUpgradeBuffer.Clear();
-                    w.CollectUpgrades(_weaponUpgradeBuffer);
-                    foreach (var up in _weaponUpgradeBuffer)
-                        _available.Add(new CardOption { isWeapon = true, weapon = w, isNewWeapon = false, upgrade = up });
-                }
+                roll -= StatWeight(_weightPool[i]);
+                if (roll <= 0f) { idx = i; break; }
             }
+            _picked.Add(_weightPool[idx]);
+            _weightPool.RemoveAt(idx);
         }
+    }
+
+    /// <summary>Bir secenegin cikma agirligi (stat.weight; silah/gecersizse 1).</summary>
+    private float StatWeight(CardOption o)
+    {
+        if (!o.isWeapon && upgrades != null && o.statIndex >= 0 && o.statIndex < upgrades.Length)
+            return Mathf.Max(0.001f, upgrades[o.statIndex].weight);
+        return 1f;
     }
 
     /// <summary>_available listesini Fisher-Yates ile karistirir (List, ekstra alloc yok).</summary>
@@ -249,8 +374,29 @@ public class UpgradeSelectionUI : MonoBehaviour
         else
         {
             UpgradeDefinition def = upgrades[opt.statIndex];
-            card.Bind(slotIndex, def.icon, Color.white, statIconHeight, def.title, def.description, def.level + 1, StatCardSprite(def.type), cardTint, false, _cardCallback, false);
+            StatFrame(def.type, out Sprite frame, out Color tint);
+            Color iconColor = (frame == greyCardSprite) ? tint : Color.white; // yeni statlar: ikon da kart rengi
+            card.Bind(slotIndex, def.icon, iconColor, statIconHeight, def.title, def.description, def.level + 1, frame, tint, false, _cardCallback, false);
         }
+    }
+
+    /// <summary>Stat turune gore kart cercevesi + tint. Yeni statlar (Amount/Charge/Firepower/Impact) GRI cerceve + ozel tint.</summary>
+    private void StatFrame(UpgradeType type, out Sprite frame, out Color tint)
+    {
+        tint = cardTint; // beyaz (renkli sprite'lar zaten renkli)
+        switch (type)
+        {
+            case UpgradeType.Damage:      frame = damageCardSprite; break;      // sari
+            case UpgradeType.AttackSpeed: frame = attackSpeedCardSprite; break; // mavi
+            case UpgradeType.AttackRange: frame = attackRangeCardSprite; break; // yesil
+            case UpgradeType.GainHealth:  frame = healthCardSprite; break;      // kirmizi
+            case UpgradeType.Amount:      frame = amountCardSprite != null ? amountCardSprite : greyCardSprite; tint = Color.white; break; // rengarenk gradient (guclu his)
+            case UpgradeType.Charge:      frame = greyCardSprite; tint = new Color(0.80f, 0.38f, 0.98f, 1f); break; // mor (orbital)
+            case UpgradeType.Firepower:   frame = greyCardSprite; tint = new Color(1f, 0.50f, 0.14f, 1f);   break; // turuncu (blaster)
+            case UpgradeType.Impact:      frame = greyCardSprite; tint = new Color(0.24f, 0.86f, 0.52f, 1f); break; // yesil (boomerang)
+            default:                      frame = greyCardSprite; break;
+        }
+        if (frame == null) frame = greyCardSprite; // guvenlik
     }
 
     /// <summary>Stat turune gore kart cerceve sprite'i (kategori rengi).</summary>
@@ -462,25 +608,40 @@ public class UpgradeSelectionUI : MonoBehaviour
 
         switch (def.type)
         {
-            case UpgradeType.Damage:
-                playerRef.AddDamage(def.amount);
+            case UpgradeType.Damage:      // Might: SADECE Sharp Claws (tracker uygular) - global YOK
+            case UpgradeType.Charge:      // Orbital hasari (tracker)
+            case UpgradeType.Firepower:   // Blaster hasari (tracker)
+            case UpgradeType.Impact:      // Boomerang hasari (tracker)
+                break; // hasar artik silah-basina: WeaponLevelTracker ilgili silahin damage track'ini yukseltir
+            case UpgradeType.AttackSpeed: // Haste: tum atis/vurus hizi (carpan, tabanla sinirli)
+                RunStats.CooldownMult = Mathf.Max(RunStats.MinCooldownMult, RunStats.CooldownMult * def.amount);
                 break;
-            case UpgradeType.AttackSpeed:
-                playerRef.ApplyAttackSpeedMultiplier(def.amount);
+            case UpgradeType.AttackRange: // Area: menzil/yaricap
+                RunStats.AreaMult += def.amount;
                 break;
-            case UpgradeType.AttackRange:
-                playerRef.AddAttackRange(def.amount);
+            case UpgradeType.GainHealth:  // Max Health: kalici +can
+                playerRef.AddMaxHealth(def.amount);
                 break;
-            case UpgradeType.GainHealth:
-                playerRef.Heal(def.amount);
+            case UpgradeType.Amount:      // +sayi (mermi/orb/yon/hedef)
+                RunStats.AmountBonus += Mathf.Max(1, Mathf.RoundToInt(def.amount));
                 break;
         }
+        RefreshWeapons(); // cache'li silahlar (orbital/multislash) yeni stat'i hemen yansitsin
+    }
+
+    /// <summary>Alinmis tum silahlara RefreshStats cagirir (global stat degisince cache yenilensin).</summary>
+    private void RefreshWeapons()
+    {
+        if (weaponManager == null || weaponManager.Weapons == null) return;
+        foreach (var w in weaponManager.Weapons)
+            if (w != null && w.IsAcquired) w.RefreshStats();
     }
 
     private void ClosePanel()
     {
         _isOpen = false;
         if (panelRoot != null) panelRoot.SetActive(false);
+        if (liveStatsPanel != null) liveStatsPanel.SetActive(false);
         Time.timeScale = 1f;
         if (playerRef != null) playerRef.SetPaused(false);
         EnemyFreeze.FreezeFor(enemyFreezeAfterUpgrade);

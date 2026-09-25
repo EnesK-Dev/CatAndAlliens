@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/_Project/Scripts/ComboManager.cs" />
+    <Compile Include="Assets/_Project/Scripts/BombWarningBarUI.cs" />
     <Compile Include="Assets/_Project/Scripts/DamageNumber.cs" />
     <Compile Include="Assets/_Project/Scripts/UpgradeCard.cs" />
     <Compile Include="Assets/_Project/Scripts/DifficultyManager.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="Assets/_Project/Scripts/EnemyBullet.cs" />
     <Compile Include="Assets/_Project/Scripts/SplashIntro.cs" />
     <Compile Include="Assets/_Project/Scripts/CameraFollow.cs" />
+    <Compile Include="Assets/_Project/Scripts/WeaponLevelTracker.cs" />
     <Compile Include="Assets/_Project/Scripts/AudioManager.cs" />
     <Compile Include="Assets/_Project/Scripts/MetaSave.cs" />
     <Compile Include="Assets/_Project/Scripts/player.cs" />
@@ -122,6 +124,7 @@
     <Compile Include="Assets/_Project/Scripts/UpgradeSelectionUI.cs" />
     <Compile Include="Assets/_Project/Scripts/BossTestSpawner.cs" />
     <Compile Include="Assets/_Project/Scripts/BuildItemUI.cs" />
+    <Compile Include="Assets/_Project/Scripts/LiveStatsUI.cs" />
     <Compile Include="Assets/_Project/Scripts/BoomerangWeapon.cs" />
     <Compile Include="Assets/_Project/Scripts/VolumeSettings.cs" />
     <Compile Include="Assets/_Project/Scripts/AppConfig.cs" />
@@ -158,6 +161,7 @@
     <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile-2-Pass.shader" />
+    <None Include="Assets/_Project/Sprites/Free-Skill-32x32-Icons-for-Cyberpunk-Game/Font.txt" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_Bitmap.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMPro_Mobile.cginc" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF SSD.shader" />
@@ -178,6 +182,7 @@
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF Overlay.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_Bitmap-Mobile.shader" />
+    <None Include="Assets/_Project/Sprites/Free-Skill-32x32-Icons-for-Cyberpunk-Game/License.txt" />
     <None Include="Assets/TextMesh Pro/Fonts/LiberationSans - OFL.txt" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_Sprite.shader" />

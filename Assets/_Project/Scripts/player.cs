@@ -124,6 +124,13 @@ public class player : MonoBehaviour
     private Vector2 lastMoveDirection = Vector2.right;
 
     private float currentHealth;
+    private float _startMaxHealth = -1f;               // oyun basi max can (buyume referansi)
+    private Vector3 _bodyBaseScale = Vector3.one;      // oyuncunun base olcegi
+    private const float HpSizeGrowthPerUnit = 0.02f;   // her yarim-kalp birimi +%2 boyut
+    private const float MaxBodyScaleMult = 1.25f;      // en fazla %25 buyume (cok olmasin)
+    private Vector3 _attackBaseScale = Vector3.zero; // pence gorseli base olcegi (juice icin)
+    private SpriteRenderer _clawSr; private Color _clawBaseColor; private bool _clawBaseCached;
+    private static readonly Color ClawHot = new Color(1f, 0.4f, 0.15f, 1f);
     private bool isDead;
     private SpriteRenderer spriteRenderer;
     private Coroutine _dieRoutine;
@@ -158,6 +165,8 @@ public class player : MonoBehaviour
     void Awake()
     {
         InitializeComponents();
+        _startMaxHealth = maxHealth;
+        _bodyBaseScale = transform.localScale;
     }
 
     void Start()
@@ -320,7 +329,7 @@ public class player : MonoBehaviour
     private Transform GetClosestEnemy()
     {
         // Sadece menzildeki enemyLayer'lari radarla tarar — NonAlloc (alloc'suz tampon, GC yok)
-        int count = Physics2D.OverlapCircleNonAlloc(transform.position, autoAttackRange, _closestBuffer, enemyLayers);
+        int count = Physics2D.OverlapCircleNonAlloc(transform.position, autoAttackRange * RunStats.AreaMult, _closestBuffer, enemyLayers);
 
         Transform closestEnemy = null;
         float closestDistance = Mathf.Infinity;
@@ -384,6 +393,11 @@ public class player : MonoBehaviour
     }
 
     attackPointObject.SetActive(true);
+    // Juice: hasar arttikca pence gorseli buyur (cap ~2.2x). Base olcek bir kez yakalanir.
+    if (_attackBaseScale == Vector3.zero) _attackBaseScale = attackPointObject.transform.localScale;
+    attackPointObject.transform.localScale = _attackBaseScale * ClawVisualScale();
+    if (_clawSr == null) _clawSr = attackPointObject.GetComponentInChildren<SpriteRenderer>();
+    if (_clawSr != null) { if (!_clawBaseCached) { _clawBaseColor = _clawSr.color; _clawBaseCached = true; } _clawSr.color = Color.Lerp(_clawBaseColor, ClawHot, ClawTintT()); }
 
     // Multi-slash (Silah 4): birden fazla yonde vur. dirs=1 iken davranis eskisiyle AYNI.
     int dirs = Mathf.Max(1, _attackDirectionCount);
@@ -420,13 +434,13 @@ public class player : MonoBehaviour
             float ang = (baseAngleDeg + d * dirStep) * Mathf.Deg2Rad;
             Vector2 dirVec = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
             Vector3 worldAttackPosition = (Vector2)transform.position + dirVec * currentDistance;
-            int hitCount = Physics2D.OverlapCircleNonAlloc(worldAttackPosition, attackRadius, _hitBuffer, enemyLayers);
+            int hitCount = Physics2D.OverlapCircleNonAlloc(worldAttackPosition, attackRadius * RunStats.AreaMult, _hitBuffer, enemyLayers);
             for (int i = 0; i < hitCount; i++)
             {
                 Collider2D col = _hitBuffer[i];
                 if (col == null || _swingHitSet.Contains(col)) continue; // ayni dusmani tekrar vurma
                 _swingHitSet.Add(col);
-                ApplyDamage(col, playerDamage * ComboManager.Multiplier); // combo carpani CARPILIR
+                ApplyDamage(col, playerDamage * ComboManager.Multiplier * RunStats.DamageMult); // combo carpani CARPILIR
                 ApplyKnockback(col); // hafif geri it
             }
         }
@@ -447,7 +461,7 @@ public class player : MonoBehaviour
         Collider2D targetCollider = targetEnemy.GetComponent<Collider2D>();
         if (targetCollider != null)
         {
-            ApplyDamage(targetCollider, playerDamage * ComboManager.Multiplier);
+            ApplyDamage(targetCollider, playerDamage * ComboManager.Multiplier * RunStats.DamageMult);
             ApplyKnockback(targetCollider);
             ComboManager.RegisterHit();
         }
@@ -457,7 +471,7 @@ public class player : MonoBehaviour
     DeactivateExtraClaws(); // multi-slash ekstra claw'larini gizle
 
     // Combo saldiri hizini ETKILEMEZ: cooldown sabit. Combo yalnizca HASAR ve HAREKET hizina uygulanir.
-    yield return new WaitForSeconds(attackCooldown);
+    yield return new WaitForSeconds(attackCooldown * RunStats.CooldownMult);
     isCooldown = false;
 }
 
@@ -669,6 +683,24 @@ public class player : MonoBehaviour
     /// <summary>Maksimum canı döndürür.</summary>
     public float GetMaxHealth() => maxHealth;
 
+    // ---- Canli stat okuma (LiveStatsUI sol panel icin — sadece OKUR, degistirmez) ----
+    /// <summary>Guncel vurus hasari (combo carpani HARIC taban deger).</summary>
+    public float GetDamage() => playerDamage * RunStats.DamageMult;
+    /// <summary>Juice: hasara gore pence gorsel olcegi (cap 2.2x).</summary>
+    private float ClawVisualScale() => Mathf.Min(2.9f, 0.6f + Mathf.Max(0f, GetDamage() - 25f) / 40f);  // kucuk basla, belirgin buyu
+    /// <summary>Juice: hasara gore pence renk isisi (0..1).</summary>
+    private float ClawTintT() => Mathf.Clamp01((GetDamage() - 25f) / 110f);
+    /// <summary>Guncel saldiri bekleme suresi (saniye). Kucuk = hizli.</summary>
+    public float GetAttackCooldown() => attackCooldown * RunStats.CooldownMult;
+    /// <summary>Saniyedeki saldiri sayisi (1/cooldown) — UI'da "ATK SPD" olarak gosterilebilir.</summary>
+    public float GetAttacksPerSecond() { float cd = attackCooldown * RunStats.CooldownMult; return cd > 0.0001f ? 1f / cd : 0f; }
+    /// <summary>Guncel oto-saldiri menzili.</summary>
+    public float GetAttackRange() => autoAttackRange * RunStats.AreaMult;
+    /// <summary>Guncel hareket hizi.</summary>
+    public float GetMoveSpeed() => moveSpeed;
+    /// <summary>Efektif dash cooldown (kart modifiyeleri dahil).</summary>
+    public float GetDashCooldownEffective() => ComputeDashCooldown();
+
     // ---- Upgrade / Pause API (FAZ 5) ----
     // UpgradeSelectionUI bu metodları çağırır. Denge (miktar) UI tarafında SerializeField;
     // player sadece stat'ı uygular, "God" mantık tutmaz.
@@ -712,6 +744,17 @@ public class player : MonoBehaviour
         maxHealth = Mathf.Max(1f, maxHealth + amount);
         currentHealth = maxHealth; // run basi: yeni max ile dolu basla
         OnHealthChanged?.Invoke(currentHealth);
+        ApplyBodyScale(); // max can arttikca oyuncu biraz buyusun
+    }
+
+    /// <summary>Max can arttikca oyuncuyu HAFIF buyutur (base olcek x [1 .. MaxBodyScaleMult]).</summary>
+    private void ApplyBodyScale()
+    {
+        if (_startMaxHealth < 0f) _startMaxHealth = maxHealth;
+        if (_bodyBaseScale == Vector3.zero) _bodyBaseScale = transform.localScale;
+        float extra = Mathf.Max(0f, maxHealth - _startMaxHealth);
+        float mult = Mathf.Min(MaxBodyScaleMult, 1f + extra * HpSizeGrowthPerUnit);
+        transform.localScale = _bodyBaseScale * mult;
     }
 
     /// <summary>Dash cooldown'u degistirir (deck dash karti). Negatif deger = cooldown azaltir. Taban MinDashCooldown.</summary>

@@ -23,6 +23,8 @@ public class PlayerProjectile : MonoBehaviour
     private bool _pierce;
     private Vector2 _travelDir = Vector2.right;
     private float _despawnAt; // bu ana gelince havuza doner (omru bitince)
+    private SpriteRenderer _sr; private Color _baseColor; private bool _baseCached; private Vector3 _baseScale = Vector3.one;
+    private static readonly Color HotColor = new Color(1f, 0.40f, 0.15f, 1f);
     #endregion
 
     #region Public Methods
@@ -39,6 +41,14 @@ public class PlayerProjectile : MonoBehaviour
         transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
 
         _despawnAt = Time.time + lifetime; // Destroy yerine zamanli despawn (havuz)
+    }
+
+    /// <summary>Juice: hasara gore mermiyi buyut + isit (beyaz->turuncu). Havuz kullaniminda her atista cagrilir.</summary>
+    public void SetPower(float scale, float hotTint)
+    {
+        if (!_baseCached) { _sr = GetComponentInChildren<SpriteRenderer>(); if (_sr != null) _baseColor = _sr.color; _baseScale = transform.localScale; _baseCached = true; }
+        transform.localScale = _baseScale * Mathf.Max(0.1f, scale); // prefab olcegi TABAN, kod uzerine buyume carpar
+        if (_sr != null) _sr.color = Color.Lerp(_baseColor, HotColor, Mathf.Clamp01(hotTint));
     }
     #endregion
 

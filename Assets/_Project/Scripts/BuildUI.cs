@@ -88,7 +88,7 @@ public class BuildUI : MonoBehaviour
         _itemCardIds.Clear();
 
         int active = MetaSave.ActiveSlot;
-        var owned = MetaSave.OwnedIds().Select(CardCatalog.Get).Where(c => c != null).ToList();
+        var owned = MetaSave.OwnedIds().Select(CardCatalog.Get).Where(c => c != null && (c.category == CardCategory.Weapon || c.category == CardCategory.Stat)).OrderBy(c => c.category == CardCategory.Weapon ? 0 : 1).ToList(); // silah + stat (silahlar once)
         var used = owned.Where(c => MetaSave.CountInSlot(active, c.id) > 0).ToList();
         var unused = owned.Where(c => MetaSave.CountInSlot(active, c.id) == 0).ToList();
 
@@ -104,40 +104,13 @@ public class BuildUI : MonoBehaviour
     {
         if (list == null || list.Count == 0) return;
 
-        bool IsGrey(CardDefinition c) => c.frameSprite != null && c.frameSprite.name.Contains("grey");
-        int ColorRank(CardDefinition c)
+        // Yeni model: loadout = sadece silah. 5'li satirlara diz.
+        const int perRow = 5;
+        Transform r = null;
+        for (int i = 0; i < list.Count; i++)
         {
-            string n = c.frameSprite != null ? c.frameSprite.name : "";
-            if (n.Contains("blue")) return 0;
-            if (n.Contains("red")) return 1;
-            if (n.Contains("yellow")) return 2;
-            if (n.Contains("green")) return 3;
-            return 4;
-        }
-
-        var stats = list.Where(c => c.category == CardCategory.Stat).ToList();
-        var colored = stats.Where(c => !IsGrey(c)).OrderBy(ColorRank).ToList();
-        var greys = stats.Where(IsGrey).ToList();
-        var multislash = list.FirstOrDefault(c => c.category == CardCategory.Weapon && c.weaponId == "multislash");
-
-        if (colored.Count > 0 || multislash != null)
-        {
-            var r = CreateRow();
-            foreach (var c in colored) AddCard(r, c);
-            if (multislash != null) AddCard(r, multislash);
-        }
-        if (greys.Count > 0)
-        {
-            var r = CreateRow();
-            foreach (var c in greys) AddCard(r, c);
-        }
-
-        foreach (var wid in new[] { "blaster", "boomerang", "orbital" })
-        {
-            var w = list.FirstOrDefault(c => c.category == CardCategory.Weapon && c.weaponId == wid);
-            if (w != null) { var r = CreateRow(); AddCard(r, w); }
-            var ups = list.Where(c => c.category == CardCategory.WeaponUpgrade && c.weaponId == wid).ToList();
-            if (ups.Count > 0) { var r = CreateRow(); foreach (var u in ups) AddCard(r, u); }
+            if (i % perRow == 0) r = CreateRow();
+            AddCard(r, list[i]);
         }
     }
 

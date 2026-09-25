@@ -97,17 +97,26 @@ public class BoomerangWeapon : WeaponBase
     #endregion
 
     #region Private Methods
-    private int CurrentCount() => 1 + _countLevel;
-    private float CurrentSpeed() => baseSpeed + speedPerLevel * _speedLevel;
+    private int CurrentCount() => 1 + _countLevel + RunStats.AmountBonus;
+    private float CurrentSpeed() => (baseSpeed + speedPerLevel * _speedLevel) * RunStats.ProjectileSpeedMult;
     // Bileşik hasar: her level (hasar + damagePerLevel) * damageMult -> sabit + carpan (Sharp Claws hissi).
     private float CurrentDamage()
     {
-        if (_damageLevel <= 0) return baseDamage;
-        if (damageMult <= 1.0001f) return baseDamage + damagePerLevel * _damageLevel; // carpan yoksa additive
-        float mp = Mathf.Pow(damageMult, _damageLevel);
-        return baseDamage * mp + damagePerLevel * damageMult * (mp - 1f) / (damageMult - 1f);
+        float d;
+        if (_damageLevel <= 0) d = baseDamage;
+        else if (damageMult <= 1.0001f) d = baseDamage + damagePerLevel * _damageLevel;
+        else { float mp = Mathf.Pow(damageMult, _damageLevel); d = baseDamage * mp + damagePerLevel * damageMult * (mp - 1f) / (damageMult - 1f); }
+        return d; // hasar artik silah-basina (Charge/Firepower/Impact -> damage track)
     }
-    private float CurrentRestCooldown() => Mathf.Max(minRestCooldown, baseRestCooldown * Mathf.Pow(restCooldownMultiplier, _cooldownLevel));
+    private float CurrentRestCooldown() => Mathf.Max(minRestCooldown, baseRestCooldown * Mathf.Pow(restCooldownMultiplier, _cooldownLevel) * RunStats.CooldownMult);
+    // Juice: hasar (level + global Might) arttikca bumerang buyur (cap 3x).
+    private float BoomVisualScale() => Mathf.Min(3.6f, 0.65f + 0.22f * _damageLevel);  // kucuk basla, belirgin buyu
+    // Juice: hiz seviyesi (+ global ProjectileSpeed) arttikca beyaz -> sicak turuncu/kirmizi.
+    private Color BoomSpeedColor()
+    {
+        float t = Mathf.Clamp01(_speedLevel * 0.16f + (RunStats.ProjectileSpeedMult - 1f) * 0.6f);
+        return Color.Lerp(Color.white, new Color(1f, 0.45f, 0.15f, 1f), t);
+    }
 
     /// <summary>
     /// En yakin dusmani dondurur ama FARKLI dusman oncelikli: su an havadaki bumeranglarin gittigi
@@ -138,9 +147,12 @@ public class BoomerangWeapon : WeaponBase
     private void Throw(Vector2 dir, Transform target)
     {
         PlayerBoomerang b = Instantiate(boomerangPrefab, transform.position, Quaternion.identity);
+        b.transform.localScale = Vector3.one * BoomVisualScale();          // juice: hasarla buyu
+        var bsr = b.GetComponent<SpriteRenderer>();
+        if (bsr != null) bsr.color = BoomSpeedColor();                     // juice: hiz arttikca renk degisir
         _inFlight++;
         if (target != null) _activeTargets.Add(target); // bu hedef artik "hedeflenmis" (sonraki bumerang baskasina)
-        b.Launch(transform, dir, outDistance, CurrentSpeed(), CurrentDamage(), spin, catchDistance, () => OnBoomerangReturned(target));
+        b.Launch(transform, dir, outDistance * RunStats.AreaMult, CurrentSpeed(), CurrentDamage(), spin, catchDistance, () => OnBoomerangReturned(target));
         SfxManager.Play(SfxId.BoomerangThrow); // klip atanmazsa sessiz
     }
 

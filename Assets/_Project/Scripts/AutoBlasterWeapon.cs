@@ -80,16 +80,17 @@ public class AutoBlasterWeapon : WeaponBase
     #endregion
 
     #region Private Methods
-    private float CurrentFireInterval() => baseFireInterval * Mathf.Pow(fireIntervalMultiplier, _fireRateLevel);
+    private float CurrentFireInterval() => baseFireInterval * Mathf.Pow(fireIntervalMultiplier, _fireRateLevel) * RunStats.CooldownMult;
     // Bileşik hasar: her level (hasar + damagePerLevel) * damageMult -> sabit + carpan (Sharp Claws hissi).
     private float CurrentDamage()
     {
-        if (_damageLevel <= 0) return baseDamage;
-        if (damageMult <= 1.0001f) return baseDamage + damagePerLevel * _damageLevel; // carpan yoksa additive
-        float mp = Mathf.Pow(damageMult, _damageLevel);
-        return baseDamage * mp + damagePerLevel * damageMult * (mp - 1f) / (damageMult - 1f);
+        float d;
+        if (_damageLevel <= 0) d = baseDamage;
+        else if (damageMult <= 1.0001f) d = baseDamage + damagePerLevel * _damageLevel;
+        else { float mp = Mathf.Pow(damageMult, _damageLevel); d = baseDamage * mp + damagePerLevel * damageMult * (mp - 1f) / (damageMult - 1f); }
+        return d; // hasar artik silah-basina (Charge/Firepower/Impact -> damage track)
     }
-    private int CurrentTargets() => 1 + _targetLevel;
+    private int CurrentTargets() => 1 + _targetLevel + RunStats.AmountBonus;
 
     /// <summary>En yakin 'targets' FARKLI dusmana birer mermi atar. Atilan mermi sayisini dondurur (0 = dusman yok).</summary>
     private int FireVolley(int targets)
@@ -121,11 +122,20 @@ public class AutoBlasterWeapon : WeaponBase
     private void FireAt(Vector3 targetPos)
     {
         Vector2 dir = (Vector2)targetPos - (Vector2)transform.position;
+        // Juice: atis hizi arttikca cikis noktasi titrer (blaster titreme hissi)
+        Vector3 spawnPos = transform.position + (Vector3)(Random.insideUnitCircle * BlasterJitter());
         // Havuzdan cek (Instantiate yerine) — hizli ateste GC sicramasini onler
-        GameObject go = PoolManager.Spawn(bulletPrefab.gameObject, transform.position, Quaternion.identity);
+        GameObject go = PoolManager.Spawn(bulletPrefab.gameObject, spawnPos, Quaternion.identity);
         PlayerProjectile bullet = go.GetComponent<PlayerProjectile>();
-        if (bullet != null) bullet.Launch(dir, bulletSpeed, CurrentDamage(), bulletLifetime);
+        if (bullet != null) { bullet.Launch(dir, bulletSpeed * RunStats.ProjectileSpeedMult, CurrentDamage(), bulletLifetime); bullet.SetPower(BlasterVisualScale(), BlasterTintT()); }
         SfxManager.Play(SfxId.BlasterFire); // klip atanmazsa sessiz
     }
+
+    // Juice: hasar (level + global Might) arttikca mermi buyur (cap 3x).
+    private float BlasterVisualScale() => Mathf.Min(3.6f, 1f + 0.22f * _damageLevel);  // prefab olcegi=Lv0; her level +%22 (cap 3.6x)
+    // Juice: atis hizi seviyesiyle artan kucuk cikis-noktasi sarsintisi (titreme).
+    private float BlasterJitter() => Mathf.Min(0.28f, _fireRateLevel * 0.02f);
+    // Juice: hasar arttikca mermi isinir (beyaz->turuncu).
+    private float BlasterTintT() => Mathf.Clamp01(0.09f * _damageLevel);
     #endregion
 }

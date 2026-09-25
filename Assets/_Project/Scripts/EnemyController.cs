@@ -214,7 +214,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
         ComputeEffectiveMoveSpeed();
 
         // Can: base x GUNCEL zorluk (SetMaxHealth cagrilirsa sonra ezer — ornek splitter yavrusu)
-        maxHealth = _baseMaxHealth * Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor);
+        maxHealth = _baseMaxHealth * Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor) * RunStats.EnemyHealthMult;
         currentHealth = maxHealth;
 
         if (rb != null) { rb.simulated = true; rb.linearVelocity = Vector2.zero; }
@@ -512,7 +512,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     {
         // Can dışarıdan set edildiyse (ornek: splitter yavrusu) tekrar zorlukla olcekleme (cift-olcek olmasin).
         if (!_healthOverridden)
-            maxHealth *= Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor);
+            maxHealth *= Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor) * RunStats.EnemyHealthMult;
         currentHealth = maxHealth;
     }
 
@@ -785,6 +785,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
         if (dropLoot)
         {
+            if (playDeathAnim) DifficultyManager.RegisterKill(); // adaptif can: normal (nuke/ulti degil) oyuncu olumu
             // Olum aninda core birak — hem normal hem elite ARALIKTAN rastgele (ust sinir min'e esitse sabit).
             // Random.Range(int, int) ust sinir HARIC oldugu icin +1. Mathf.Max: yanlis/eksik ayarda kilit onler.
             int coreAmount = canUseLaser

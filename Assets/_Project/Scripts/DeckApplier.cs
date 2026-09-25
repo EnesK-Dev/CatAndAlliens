@@ -43,14 +43,14 @@ public class DeckApplier : MonoBehaviour
         {
             var card = CardCatalog.Get(deck[i]);
             if (card == null) continue;
+            // Yeni model: run BASINDA sadece SILAH alinir (loadout). Stat/upgrade kartlari yok sayilir —
+            // stat gelisimi artik OYUN ICINDE (UpgradeSelectionUI + RunStats globals). Eski kayitlardaki
+            // stat/upgrade kartlari sessizce atlanir.
             switch (card.category)
             {
-                case CardCategory.Stat: ApplyStat(card); break;
+                case CardCategory.Stat: ApplyStat(card); break; // deck stat kartlari run basinda uygulanir
                 case CardCategory.Weapon: AcquireWeapon(card.weaponId); if (card.weaponId == "multislash") multislashCopies++; break;
-                case CardCategory.WeaponUpgrade:
-                    string k = card.weaponId + "|" + card.upgradeKey;
-                    _upgradeAccum.TryGetValue(k, out int had); _upgradeAccum[k] = had + 1;
-                    break;
+                default: break; // WeaponUpgrade -> yok say
             }
             applied++;
         }

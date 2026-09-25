@@ -49,7 +49,9 @@ public class MultiSlashWeapon : WeaponBase
     #endregion
 
     #region Private Methods
-    private int CurrentDirections() => startDirections + _dirLevel; // clamp YOK — sonsuz
+    private int CurrentDirections() => startDirections + _dirLevel + RunStats.AmountBonus; // clamp YOK — sonsuz
+
+    public override void RefreshStats() { ApplyDirections(); } // Amount degisince yon sayisini yenile
     private void ApplyDirections() { if (playerRef != null) playerRef.SetAttackDirections(CurrentDirections()); }
     #endregion
 }

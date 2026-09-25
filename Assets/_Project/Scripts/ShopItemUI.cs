@@ -77,7 +77,7 @@ public class ShopItemUI : MonoBehaviour
 
     #region Public Methods
     /// <summary>Karti satira baglar. owned=sahipse Buy kapali + OWNED; degilse maliyet + (canAfford ise) aktif.</summary>
-    public void Bind(CardDefinition card, int ownedCount, bool canAfford, bool locked, bool soldOut, Action<string> onBuy)
+    public void Bind(CardDefinition card, int ownedCount, bool canAfford, bool locked, bool soldOut, Action<string> onBuy, int displayCost = -1)
     {
         _cardId = card != null ? card.id : "";
         _onBuy = onBuy;
@@ -95,7 +95,7 @@ public class ShopItemUI : MonoBehaviour
         if (frameImage != null) frameImage.color = card != null ? card.frameTint : Color.white;
         UpdateStack(ownedCount, card != null ? card.frameSprite : null, card != null ? card.frameTint : Color.white);
         if (ownedBadge != null) ownedBadge.SetActive(false);
-        if (costText != null) costText.text = card != null ? card.cost.ToString() : "0";
+        if (costText != null) costText.text = (displayCost >= 0 ? displayCost : (card != null ? card.cost : 0)).ToString(); // dinamik (artan) fiyat
         if (buyButton != null) buyButton.interactable = canAfford; // tekrarlanabilir alim
     }
     #endregion

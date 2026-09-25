@@ -35,7 +35,8 @@ public class CoreManager : MonoBehaviour
     private static CoreManager _instance;
     private readonly Queue<CoreItem> _pool = new Queue<CoreItem>();
     private Transform _playerTransform;
-    private int _totalCores;
+    private int _totalCores;               // HARCANABILIR in-run bakiye (kart alinca duser)
+    private int _coresCollectedThisRun;    // bu run'da TOPLANAN brut core (harcamadan bagimsiz) — olunce bankaya bu yazilir
     private int _nextThreshold;
     private int _thresholdLevel;
     #endregion
@@ -89,6 +90,7 @@ public class CoreManager : MonoBehaviour
 
         _instance = this;
         _totalCores = 0;
+        _coresCollectedThisRun = 0;
         _nextThreshold = Mathf.Max(1, firstThreshold); // en az 1 — 0 verilirse kilitlenmeyi onle
         _thresholdLevel = 0;
         CachePlayer();
@@ -142,8 +144,10 @@ public class CoreManager : MonoBehaviour
     /// Sonra sayac sifirlanir (ayni run'da iki kez bankalanmasin).</summary>
     private void HandleRunEnd()
     {
-        if (_totalCores > 0) MetaSave.AddCores(_totalCores);
+        // Ayri takip: run icinde core HARCANSA da, bankaya bu run'da TOPLANAN brut miktar yazilir.
+        if (_coresCollectedThisRun > 0) MetaSave.AddCores(_coresCollectedThisRun);
         _totalCores = 0;
+        _coresCollectedThisRun = 0;
         OnCoreCountChanged?.Invoke(_totalCores);
     }
 
@@ -169,8 +173,9 @@ public class CoreManager : MonoBehaviour
     private void HandleCollected(CoreItem instance)
     {
         _totalCores++;
+        _coresCollectedThisRun++;               // brut toplanan (banka icin) — harcamadan etkilenmez
         OnCoreCountChanged?.Invoke(_totalCores);
-        // Roguelite: core run icinde HARCANMAZ, sadece birikir; olunce bankaya yazilir (HandlePlayerDied).
+        CheckThreshold();                        // in-run level-up: bakiye esige yetince kart paneli acilir
         ReturnToPool(instance);
     }
 
