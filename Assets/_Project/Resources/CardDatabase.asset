@@ -13,104 +13,6 @@ MonoBehaviour:
   m_Name: CardDatabase
   m_EditorClassIdentifier: Assembly-CSharp::CardDatabase
   cards:
-  - id: stat_damage
-    displayName: Sharp Claws
-    description: +8 damage
-    icon: {fileID: -8285997511256225826, guid: 3bc435cab7be966b485f8901a71b6d86, type: 3}
-    frameSprite: {fileID: -6476649989000015363, guid: 4fdd351667472291ebfdb939a4de2e28, type: 3}
-    frameTint: {r: 1, g: 1, b: 1, a: 1}
-    category: 0
-    cost: 20
-    maxPerSlot: 0
-    statType: 0
-    amount: 10
-    amountMult: 1.18
-    weaponId: 
-    upgradeKey: 
-  - id: stat_atkspeed
-    displayName: Quick Paws
-    description: Attack 8% faster
-    icon: {fileID: 7614817794888221515, guid: 7cf698bf1bf6e892bbe1a8374787e1bf, type: 3}
-    frameSprite: {fileID: 1806066430021436774, guid: 250e30a787ca159fea491a2b25978a5f, type: 3}
-    frameTint: {r: 1, g: 1, b: 1, a: 1}
-    category: 0
-    cost: 25
-    maxPerSlot: 0
-    statType: 1
-    amount: 0.88
-    amountMult: 1
-    weaponId: 
-    upgradeKey: 
-  - id: stat_range
-    displayName: Long Whiskers
-    description: +0.5 attack range
-    icon: {fileID: -8970998617824141593, guid: d5a969d4e3c14e27bae7d1fb47871dd9, type: 3}
-    frameSprite: {fileID: 983849462666196623, guid: 5c61cc098ca5a84e392a43a5e6220ece, type: 3}
-    frameTint: {r: 1, g: 1, b: 1, a: 1}
-    category: 0
-    cost: 20
-    maxPerSlot: 0
-    statType: 2
-    amount: 0.7
-    amountMult: 1
-    weaponId: 
-    upgradeKey: 
-  - id: stat_health
-    displayName: Thick Fur
-    description: +4 max health
-    icon: {fileID: -854701565890967653, guid: f27c00166eec9b8cd9c1cb533daf83e4, type: 3}
-    frameSprite: {fileID: -2261672979846821725, guid: a0c0cb7f52ee56c5f8e7b10fe2aaf344, type: 3}
-    frameTint: {r: 1, g: 1, b: 1, a: 1}
-    category: 0
-    cost: 20
-    maxPerSlot: 3
-    statType: 3
-    amount: 4
-    amountMult: 1
-    weaponId: 
-    upgradeKey: 
-  - id: stat_dash
-    displayName: Nimble Feet
-    description: -0.1s dash cooldown
-    icon: {fileID: 21300000, guid: fa474638075470f50960d65ab8a1857e, type: 3}
-    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
-    frameTint: {r: 1, g: 1, b: 1, a: 1}
-    category: 0
-    cost: 25
-    maxPerSlot: 15
-    statType: 4
-    amount: -0.1
-    amountMult: 1
-    weaponId: 
-    upgradeKey: 
-  - id: stat_food
-    displayName: Forager
-    description: +3% food drop chance
-    icon: {fileID: 7985313489852567808, guid: ec6c92679c8356d5c8fd59e04f321253, type: 3}
-    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
-    frameTint: {r: 1, g: 1, b: 1, a: 1}
-    category: 0
-    cost: 25
-    maxPerSlot: 10
-    statType: 5
-    amount: 0.04
-    amountMult: 1
-    weaponId: 
-    upgradeKey: 
-  - id: stat_ultidmg
-    displayName: Ultimate Power
-    description: +500 ultimate damage
-    icon: {fileID: -5518692159572036042, guid: 1875156cc545371f3be42415b5103c55, type: 3}
-    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
-    frameTint: {r: 1, g: 1, b: 1, a: 1}
-    category: 0
-    cost: 60
-    maxPerSlot: 0
-    statType: 6
-    amount: 500
-    amountMult: 1
-    weaponId: 
-    upgradeKey: 
   - id: wpn_blaster
     displayName: Blaster
     description: Auto-firing blaster
@@ -161,7 +63,7 @@ MonoBehaviour:
     frameTint: {r: 1, g: 1, b: 1, a: 1}
     category: 1
     cost: 70
-    maxPerSlot: 20
+    maxPerSlot: 1
     statType: 0
     amount: 1
     amountMult: 1
@@ -321,3 +223,115 @@ MonoBehaviour:
     amountMult: 1
     weaponId: orbital
     upgradeKey: radius
+  - id: meta_might
+    displayName: Might
+    description: +Sharp Claws damage
+    icon: {fileID: -8285997511256225826, guid: 3bc435cab7be966b485f8901a71b6d86, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 1, g: 0.85, b: 0.2, a: 1}
+    category: 0
+    cost: 30
+    maxPerSlot: 10
+    statType: 0
+    amount: 15
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_haste
+    displayName: Haste
+    description: Attacks faster
+    icon: {fileID: 7614817794888221515, guid: 7cf698bf1bf6e892bbe1a8374787e1bf, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 0.33, g: 0.7, b: 1, a: 1}
+    category: 0
+    cost: 30
+    maxPerSlot: 10
+    statType: 7
+    amount: 0.93
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_area
+    displayName: Area
+    description: +range & size
+    icon: {fileID: -8970998617824141593, guid: d5a969d4e3c14e27bae7d1fb47871dd9, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 0.3, g: 0.9, b: 0.5, a: 1}
+    category: 0
+    cost: 25
+    maxPerSlot: 10
+    statType: 8
+    amount: 0.12
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_maxhp
+    displayName: Max Health
+    description: +1 heart
+    icon: {fileID: -854701565890967653, guid: f27c00166eec9b8cd9c1cb533daf83e4, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 1, g: 0.35, b: 0.42, a: 1}
+    category: 0
+    cost: 25
+    maxPerSlot: 3
+    statType: 3
+    amount: 2
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_amount
+    displayName: Amount
+    description: +1 projectile / orb
+    icon: {fileID: -5512450159367960604, guid: bd4731aaa0db0d748a3cd013ffc79a4e, type: 3}
+    frameSprite: {fileID: 21300000, guid: 816d78c97abee4cd0a791622370f63df, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 0
+    cost: 60
+    maxPerSlot: 3
+    statType: 9
+    amount: 1
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_charge
+    displayName: Charge
+    description: +Orbital damage
+    icon: {fileID: 5697095726050013000, guid: a1196de3e7f3c44ec89c6e79770e592c, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 0.8, g: 0.4, b: 0.98, a: 1}
+    category: 0
+    cost: 35
+    maxPerSlot: 10
+    statType: 10
+    amount: 1
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_firepower
+    displayName: Firepower
+    description: +Blaster damage
+    icon: {fileID: -1736326233518769972, guid: 9c0195e8af9403d7ea036ebe356bb9c7, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 1, g: 0.5, b: 0.15, a: 1}
+    category: 0
+    cost: 35
+    maxPerSlot: 10
+    statType: 11
+    amount: 1
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_impact
+    displayName: Impact
+    description: +Boomerang damage
+    icon: {fileID: -8221737138467185080, guid: b0e3fbf022989a180a23b99f9dc8afd0, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 0.24, g: 0.86, b: 0.52, a: 1}
+    category: 0
+    cost: 35
+    maxPerSlot: 10
+    statType: 12
+    amount: 1
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 

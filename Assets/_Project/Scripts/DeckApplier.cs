@@ -86,6 +86,12 @@ public class DeckApplier : MonoBehaviour
             case CardStatType.DashCooldown:   if (playerRef != null) playerRef.AddDashCooldown(card.amount); break;
             case CardStatType.FoodDropChance: RunStats.FoodDropChanceBonus += card.amount; break;
             case CardStatType.UltimateDamage: RunStats.UltimateDamageBonus += card.amount; break;
+            case CardStatType.HasteGlobal:    RunStats.CooldownMult = Mathf.Max(RunStats.MinCooldownMult, RunStats.CooldownMult * card.amount); break;
+            case CardStatType.AreaGlobal:     RunStats.AreaMult += card.amount; break;
+            case CardStatType.AmountGlobal:   RunStats.AmountBonus += Mathf.Max(1, Mathf.RoundToInt(card.amount)); break;
+            case CardStatType.OrbitalDamage:  { var w = FindWeapon("orbital");  if (w != null) w.ApplyTrack("damage", Mathf.Max(1, Mathf.RoundToInt(card.amount))); } break;
+            case CardStatType.BlasterDamage:  { var w = FindWeapon("blaster");   if (w != null) w.ApplyTrack("damage", Mathf.Max(1, Mathf.RoundToInt(card.amount))); } break;
+            case CardStatType.BoomerangDamage:{ var w = FindWeapon("boomerang"); if (w != null) w.ApplyTrack("damage", Mathf.Max(1, Mathf.RoundToInt(card.amount))); } break;
         }
     }
 

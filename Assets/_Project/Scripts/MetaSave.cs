@@ -11,7 +11,7 @@ public static class MetaSave
 {
     #region Constants
     public const int SlotCount = 3;
-    public const int MaxCardsPerSlot = 20;
+    public const int MaxCardsPerSlot = 25; // 3 silah + 20 stat
     private const string PrefsKey = "MeowvivorsMeta_v2"; // v2: owned artik adet-tabanli
     #endregion
 

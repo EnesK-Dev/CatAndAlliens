@@ -18,7 +18,14 @@ public enum CardStatType
     MaxHealth,       // + maksimum can (additive)
     DashCooldown,    // - dash cooldown saniye (additive, negatif etki = azaltir)
     FoodDropChance,  // + food drop sansi (additive, 0-1)
-    UltimateDamage   // + ulti (boss) hasari (additive) — RunStats.UltimateDamageBonus'a eklenir
+    UltimateDamage,  // + ulti (boss) hasari (additive) — RunStats.UltimateDamageBonus'a eklenir
+    // ---- Oyun ici statlarin META (deck) karsiliklari (guclu baslangic) ----
+    HasteGlobal,     // RunStats.CooldownMult *= amount (tum atis/vurus hizi)
+    AreaGlobal,      // RunStats.AreaMult += amount (menzil/boyut)
+    AmountGlobal,    // RunStats.AmountBonus += amount (+mermi/orb/hedef)
+    OrbitalDamage,   // orbital silahi ApplyTrack("damage", amount)
+    BlasterDamage,   // blaster  silahi ApplyTrack("damage", amount)
+    BoomerangDamage  // boomerang silahi ApplyTrack("damage", amount)
 }
 
 /// <summary>
