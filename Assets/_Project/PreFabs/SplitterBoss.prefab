@@ -196,7 +196,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SplitterEnemy
   moveSpeed: 2.2
-  maxHealth: 3100
+  wallSlide: 1
+  wallProbeDistance: 0.4
+  maxHealth: 9300
   healthMultiplierAtMaxDifficulty: 3
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
   hitFlashDuration: 0.07

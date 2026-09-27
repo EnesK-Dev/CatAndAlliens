@@ -49,7 +49,7 @@ public class DeckApplier : MonoBehaviour
             switch (card.category)
             {
                 case CardCategory.Stat: ApplyStat(card); break; // deck stat kartlari run basinda uygulanir
-                case CardCategory.Weapon: AcquireWeapon(card.weaponId); if (card.weaponId == "multislash") multislashCopies++; break;
+                case CardCategory.Weapon: break; // silahlar weaponSlots'tan alinir; cards'taki silah kartlari yok sayilir
                 default: break; // WeaponUpgrade -> yok say
             }
             applied++;
@@ -67,6 +67,24 @@ public class DeckApplier : MonoBehaviour
         {
             var ms = FindWeapon("multislash");
             if (ms != null) ms.ApplyTrack("dir", multislashCopies - 1);
+        }
+
+        // Silahlar SABIT slotlardan alinir (BuildUI ile ayni). Combo silahi = orta slot (index 1); bos ise ilk dolu.
+        RunStats.ComboWeaponKey = "";
+        var wslots = MetaSave.GetWeaponSlots(MetaSave.ActiveSlot);
+        for (int i = 0; i < wslots.Length; i++)
+        {
+            if (string.IsNullOrEmpty(wslots[i])) continue;
+            var wc = CardCatalog.Get(wslots[i]);
+            if (wc != null && wc.category == CardCategory.Weapon) AcquireWeapon(wc.weaponId);
+        }
+        string comboId = wslots.Length > 1 ? wslots[1] : "";
+        if (string.IsNullOrEmpty(comboId))
+            for (int i = 0; i < wslots.Length; i++) if (!string.IsNullOrEmpty(wslots[i])) { comboId = wslots[i]; break; }
+        if (!string.IsNullOrEmpty(comboId))
+        {
+            var cc = CardCatalog.Get(comboId);
+            if (cc != null) RunStats.ComboWeaponKey = (cc.weaponId == "multislash") ? "claw" : cc.weaponId;
         }
 
         if (logApplied) GameLog.Log("[DeckApplier] Aktif slot " + MetaSave.ActiveSlot + " - uygulanan kart: " + applied + "/" + deck.Count, this);

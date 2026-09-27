@@ -73,6 +73,7 @@ public class ComboManager : MonoBehaviour
     private int _count;             // Guncel ardisik vurus sayisi
     private int _tierIndex;         // tiers[] icindeki guncel rank indeksi
     private float _timeSinceLastHit; // Son basarili vurustan beri gecen sure (zaman decay icin)
+    private float _fillAccum;        // Agirlikli combo birikimi (kesirli vuruslar; 1'e ulasinca sayac +1)
     #endregion
 
     #region Rank Renk Paleti
@@ -142,6 +143,21 @@ public class ComboManager : MonoBehaviour
     {
         if (_instance != null)
             _instance.RegisterHitInternal();
+    }
+
+    /// <summary>Agirlikli combo katkisi: weight kadar (kesirli) doldurur. 1 = tam bir vurus.</summary>
+    public static void RegisterHit(float weight)
+    {
+        if (_instance != null) _instance.RegisterHitWeighted(weight);
+    }
+
+    /// <summary>Sadece AKTIF combo silahi (RunStats.ComboWeaponKey) combo doldurur. weaponKey eslesirse weight kadar.
+    /// Diger silahlar hasar verir ama comboyu DOLDURMAZ. Hizli silah kucuk weight verir (yavas dolar), yavas silah buyuk.</summary>
+    public static void RegisterWeaponHit(string weaponKey, float weight)
+    {
+        if (_instance == null) return;
+        if (string.IsNullOrEmpty(RunStats.ComboWeaponKey) || RunStats.ComboWeaponKey != weaponKey) return;
+        _instance.RegisterHitWeighted(weight);
     }
 
     /// <summary>Combo rank'ini N kademe YUKARI tasir (odul). Ornek: bombardimanda hasar yemeyince cagrilir.</summary>
@@ -234,6 +250,20 @@ public class ComboManager : MonoBehaviour
     {
         _count++;
         _timeSinceLastHit = 0f; // Vurdu — decay penceresi sifirlanir
+        RecomputeRank();
+        OnComboChanged?.Invoke(_count, _tierIndex);
+    }
+
+    /// <summary>Agirlikli birikim: weight'i biriktirir; tam sayiya ulastikca sayaci arttirir. Her katkida decay penceresi sifirlanir.</summary>
+    private void RegisterHitWeighted(float weight)
+    {
+        if (weight <= 0f) return;
+        _timeSinceLastHit = 0f;      // combo silahi vurdukca canli kalsin
+        _fillAccum += weight;
+        int whole = Mathf.FloorToInt(_fillAccum);
+        if (whole <= 0) return;
+        _fillAccum -= whole;
+        _count += whole;
         RecomputeRank();
         OnComboChanged?.Invoke(_count, _tierIndex);
     }

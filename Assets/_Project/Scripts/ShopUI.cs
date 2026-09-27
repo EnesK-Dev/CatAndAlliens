@@ -28,6 +28,8 @@ public class ShopUI : MonoBehaviour
     [SerializeField] private int statsPerRow = 5;
     [Tooltip("Bir statin her yeni aliminda fiyat bu carpanla artar (1.6 = her seferinde %60 pahali).")]
     [SerializeField] private float statCostGrowth = 1.6f;
+    [Tooltip("Silah fiyat carpani. TUM silahlar PAYLASIR: herhangi bir silah alininca (claw haric) hepsinin fiyati bu carpanla artar.")]
+    [SerializeField] private float weaponCostGrowth = 2f;
     #endregion
 
     #region Private Fields
@@ -140,7 +142,26 @@ public class ShopUI : MonoBehaviour
             int owned = MetaSave.OwnedCount(card.id);
             return Mathf.RoundToInt(card.cost * Mathf.Pow(Mathf.Max(1f, statCostGrowth), owned));
         }
+        if (card.category == CardCategory.Weapon)
+        {
+            // PAYLASIMLI: alinan (claw disi) silah sayisi kadar TUM silahlarin fiyati artar.
+            float wg = weaponCostGrowth >= 1.01f ? weaponCostGrowth : 2f; // yeni alan 0 serialize olursa guvenli varsayilan
+            return Mathf.RoundToInt(card.cost * Mathf.Pow(wg, WeaponsOwnedCount()));
+        }
         return card.cost;
+    }
+
+    /// <summary>Sahip olunan (claw haric) silah sayisi — silah fiyat artisi TUM silahlar arasinda PAYLASILIR.</summary>
+    private int WeaponsOwnedCount()
+    {
+        int n = 0;
+        var all = CardCatalog.All;
+        for (int i = 0; i < all.Count; i++)
+        {
+            var c = all[i];
+            if (c != null && c.category == CardCategory.Weapon && c.id != "wpn_claw" && MetaSave.OwnedCount(c.id) > 0) n++;
+        }
+        return n;
     }
 
     /// <summary>Tum kartlari (owned/afford/kilit) ve core yazisini gunceller.</summary>

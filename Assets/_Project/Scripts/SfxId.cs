@@ -47,5 +47,7 @@ public enum SfxId
     BlasterFire,     // auto-blaster mermi ateslenince
     OrbitalHit,      // orbital yildiz dusmana degince
 
-    BossMusic        // boss savasi muzigi (ayri kaynak, OnBossSpawned ile baslar)
+    BossMusic,       // boss savasi muzigi (ayri kaynak, OnBossSpawned ile baslar)
+
+    Reroll           // oyun ici upgrade panelinde kart reroll butonu
 }

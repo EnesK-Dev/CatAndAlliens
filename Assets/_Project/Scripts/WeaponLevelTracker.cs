@@ -35,6 +35,7 @@ public class WeaponLevelTracker : MonoBehaviour
         public string statLabel, effect, trackKey;
         public WeaponBase weapon;   // null = Sharp Claws
         public int level = 0, progress = 0, cost = 3;
+        public bool instant; // Amount: esik yok, her alimda aninda +1 level (pip yok)
         public TMP_Text label;
         public Transform pipRow;
         public readonly List<Image> pips = new List<Image>();
@@ -75,9 +76,14 @@ public class WeaponLevelTracker : MonoBehaviour
         var FP = UpgradeSelectionUI.UpgradeType.Firepower;  // Blaster hasari
         var IM = UpgradeSelectionUI.UpgradeType.Impact;     // Boomerang hasari
 
-        // Sharp Claws (her zaman) — tek track: Might -> hasar
-        AddWeapon("Sharp Claws", clawsIcon, null,
-            new object[] { D, "Might", "Damage", "" });
+        // Sharp Claws — SADECE claw silahi kusanildiysa goster (artik claw da cikarilabilir silah)
+        var clawW = FindWeapon("claw");
+        if (clawW != null && clawW.IsAcquired)
+        {
+            var clawCard = CardCatalog.Get("wpn_claw");
+            Sprite ci = clawCard != null && clawCard.icon != null ? clawCard.icon : clawsIcon;
+            AddWeapon("Sharp Claws", ci, null, new object[] { D, "Might", "Damage", "" });
+        }
 
         // Orbital: Might->hasar, Haste->hiz, Amount->+1 orb, Area->buyume
         AddWeaponIfOwned("orbital", new object[] {
@@ -94,9 +100,9 @@ public class WeaponLevelTracker : MonoBehaviour
             FP,"Firepower","Damage","damage",  H,"Haste","Fire Rate","firerate",
             N,"Amount","Targets","targets" });
 
-        // Multi-Slash: Amount->+1 yon
+        // Multi-Slash: Might->hasar (esikli, claw buyur), Amount->+1 yon (aninda)
         AddWeaponIfOwned("multislash", new object[] {
-            N,"Amount","Slashes","dir" });
+            D,"Might","Damage","damage",  N,"Amount","Slashes","dir" });
 
         _built = true;
     }
@@ -135,7 +141,8 @@ public class WeaponLevelTracker : MonoBehaviour
                 statLabel = (string)tracks[i+1],
                 effect = (string)tracks[i+2],
                 trackKey = (string)tracks[i+3],
-                weapon = weapon, cost = firstCost
+                weapon = weapon, cost = firstCost,
+                instant = ((UpgradeSelectionUI.UpgradeType)tracks[i] == UpgradeSelectionUI.UpgradeType.Amount)
             };
             var row = NewRect("Track", weaponColumn);
             var rh = row.gameObject.AddComponent<HorizontalLayoutGroup>();
@@ -165,8 +172,8 @@ public class WeaponLevelTracker : MonoBehaviour
         foreach (var t in _tracks)
         {
             if (t.stat != type) continue;
-            t.progress++;
-            if (t.progress >= t.cost) { t.progress -= t.cost; t.level++; t.cost++; ApplyLevel(t); }
+            if (t.instant) { t.level++; ApplyLevel(t); } // Amount: aninda level
+            else { t.progress++; if (t.progress >= t.cost) { t.progress -= t.cost; t.level++; t.cost++; ApplyLevel(t); } }
         }
         RefreshAll();
     }
@@ -186,7 +193,7 @@ public class WeaponLevelTracker : MonoBehaviour
     private void RefreshTrack(Track t)
     {
         if (t.label != null) t.label.text = t.effect + "  <color=#B9B9C9>" + t.statLabel + "</color>  Lv." + t.level;
-        int shown = Mathf.Min(t.cost, maxPips);
+        int shown = t.instant ? 0 : Mathf.Min(t.cost, maxPips); // Amount: pip yok
         while (t.pips.Count < shown) t.pips.Add(NewPip(t.pipRow));
         for (int i = 0; i < t.pips.Count; i++)
         {

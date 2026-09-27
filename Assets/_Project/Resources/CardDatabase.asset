@@ -13,6 +13,20 @@ MonoBehaviour:
   m_Name: CardDatabase
   m_EditorClassIdentifier: Assembly-CSharp::CardDatabase
   cards:
+  - id: wpn_claw
+    displayName: Sharp Claws
+    description: "Basic melee \u2014 your default combo weapon."
+    icon: {fileID: 21300000, guid: 6d5455177cfe5dc0a868f1c8c535cbba, type: 3}
+    frameSprite: {fileID: -8735525269625259630, guid: 31d21c8edf6291a14b8f68948f9e0e06, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 1
+    cost: 0
+    maxPerSlot: 1
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: claw
+    upgradeKey: 
   - id: wpn_blaster
     displayName: Blaster
     description: Auto-firing blaster
@@ -58,7 +72,7 @@ MonoBehaviour:
   - id: wpn_multislash
     displayName: Multi-Slash
     description: Extra slash directions
-    icon: {fileID: 2835976423604859573, guid: 91d083da6b4f0436782a235788a8bda7, type: 3}
+    icon: {fileID: 21300000, guid: 4f1aa48254f68edc9ac51921cb2834a7, type: 3}
     frameSprite: {fileID: -8735525269625259630, guid: 31d21c8edf6291a14b8f68948f9e0e06, type: 3}
     frameTint: {r: 1, g: 1, b: 1, a: 1}
     category: 1

@@ -112,6 +112,7 @@ public class player : MonoBehaviour
     private Animator animator;
 
     private bool isCooldown = false;
+    private bool _clawEquipped = false; // ClawWeapon kusanilinca true — claw melee SADECE o zaman calisir
     private bool isDashing = false;
     private bool isDashOnCooldown = false;
     private float dashStartTime; // dash basladigi an — cooldown gostergesi (0->1) + hiz egrisi ilerlemesi icin
@@ -314,6 +315,7 @@ public class player : MonoBehaviour
 
     private void HandleVampireHunterAttack()
     {
+        if (!_clawEquipped) return; // claw silahi kusanili degilse melee yok
         if (isCooldown) return;
 
         Transform targetEnemy = GetClosestEnemy();
@@ -447,7 +449,7 @@ public class player : MonoBehaviour
         // Combo swing basina 1 kez artar (AoE'de her dusman icin ayri artmasin — combo sismesin).
         if (_swingHitSet.Count > 0 && !comboRegistered)
         {
-            ComboManager.RegisterHit();
+            ComboManager.RegisterWeaponHit("claw", 1f);
             comboRegistered = true;
         }
 
@@ -463,7 +465,7 @@ public class player : MonoBehaviour
         {
             ApplyDamage(targetCollider, playerDamage * ComboManager.Multiplier * RunStats.DamageMult);
             ApplyKnockback(targetCollider);
-            ComboManager.RegisterHit();
+            ComboManager.RegisterWeaponHit("claw", 1f);
         }
     }
 
@@ -514,6 +516,9 @@ public class player : MonoBehaviour
 
     /// <summary>Multi-slash silahi (Silah 4) cagirir: saldirinin kac YONDE vuracagini ayarlar (1 = normal, max 6).</summary>
     public void SetAttackDirections(int count) => _attackDirectionCount = Mathf.Max(1, count);
+
+    /// <summary>ClawWeapon kusanma durumunu bildirir: false ise claw melee calismaz (silah cikarilabilir).</summary>
+    public void SetClawEquipped(bool on) => _clawEquipped = on;
 
     /// <summary>Ekstra yonler icin claw gorsellerini hazirlar (havuz; gerekli kadar aktif, digerleri gizli).</summary>
     private void SetupExtraClaws(int dirs, float baseAngleDeg, float step)

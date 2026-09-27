@@ -102,7 +102,7 @@ public class BossManager : MonoBehaviour
         }
         if (bestWave == null) return false;
         milestoneIndex = best;
-        if (bestWave.enemyBossPrefab != null) color = EnemyBossColor(bestWave.enemyBossPrefab, bestWave.tint);
+        if (bestWave.enemyBossPrefab != null) color = Color.white; // enemy-based boss (Splitter, 2. boss) -> geri sayim bari BEYAZ (boss kendi rengini korur)
         else { var pf = bestWave.bossPrefab != null ? bestWave.bossPrefab : bossPrefab; color = EffectiveBossColor(pf, bestWave.tint); }
         return true;
     }

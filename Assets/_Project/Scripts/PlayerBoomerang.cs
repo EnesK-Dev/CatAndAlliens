@@ -96,7 +96,8 @@ public class PlayerBoomerang : MonoBehaviour
         Vector2 ownerPos = _owner != null ? (Vector2)_owner.position : _startPos;
         Vector2 enemyPos = (Vector2)other.transform.position;
         Vector2 knockDir = _returning ? (ownerPos - enemyPos) : (enemyPos - ownerPos);
-        EnemyDamage.Apply(other, _damage * ComboManager.Multiplier, knockDir, knockbackSpeed, knockbackDuration); // pierce; combo carpani vurus aninda
+        if (EnemyDamage.Apply(other, _damage * ComboManager.Multiplier, knockDir, knockbackSpeed, knockbackDuration)) // pierce; combo carpani vurus aninda
+            ComboManager.RegisterWeaponHit("boomerang", 0.5f); // combo: sadece boomerang combo silahiysa (yavas -> cok doldurur)
     }
     #endregion
 

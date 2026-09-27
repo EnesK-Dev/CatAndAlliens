@@ -17,10 +17,14 @@ public class MultiSlashWeapon : WeaponBase
 
     [Tooltip("Maksimum yon sayisi.")]
     [SerializeField] private int maxDirections = 6;
+
+    [Tooltip("Might (damage track) her level'inde eklenen claw hasari. Hasar arttikca claw'lar gorsel olarak da buyur (player.ClawVisualScale).")]
+    [SerializeField] private float damagePerLevel = 18f;
     #endregion
 
     #region Private Fields
     private int _dirLevel; // 0 = start (2 yon), her seviye +1
+    private int _damageLevel; // Might track seviyesi (claw hasari + gorsel buyume)
     #endregion
 
     #region Unity Callbacks
@@ -38,6 +42,7 @@ public class MultiSlashWeapon : WeaponBase
     {
         if (times <= 0) return;
         if (key == "dir") { _dirLevel += times; ApplyDirections(); }
+        else if (key == "damage") { _damageLevel += times; if (playerRef != null) playerRef.AddDamage(damagePerLevel * times); } // hasar + gorsel buyume (ClawVisualScale hasara bagli)
     }
 
     public override void CollectUpgrades(List<WeaponUpgradeOption> into)

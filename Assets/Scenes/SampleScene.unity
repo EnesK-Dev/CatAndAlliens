@@ -229,6 +229,7 @@ GameObject:
   - component: {fileID: 19887880}
   - component: {fileID: 19887881}
   - component: {fileID: 19887882}
+  - component: {fileID: 19887883}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -605,6 +606,23 @@ MonoBehaviour:
   playerRef: {fileID: 19887873}
   startDirections: 2
   maxDirections: 6
+  damagePerLevel: 18
+--- !u!114 &19887883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 19887871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ee82a4e1271128f90ecd69f6b348b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ClawWeapon
+  weaponName: Sharp Claws
+  weaponIcon: {fileID: -8285997511256225826, guid: 3bc435cab7be966b485f8901a71b6d86, type: 3}
+  acquireOnStartForTesting: 0
+  playerRef: {fileID: 19887873}
 --- !u!1 &24674384
 GameObject:
   m_ObjectHideFlags: 0
@@ -14780,28 +14798,28 @@ MonoBehaviour:
     milestoneIndex: 1
     tint: {r: 0.1, g: 0.85, b: 0.25, a: 1}
     isFinalBoss: 0
-    maxHealth: 6000
+    maxHealth: 18000
   - label: Laser Boss
     bossPrefab: {fileID: 733014060969819527, guid: dc337d24e43cb5d29a68ece93f69bc71, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 3
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 0
-    maxHealth: 8000
+    maxHealth: 40000
   - label: Kamikaze Boss
     bossPrefab: {fileID: 733014060969819527, guid: 41156fdc126fc33ab9e617abbbb08607, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 4
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 0
-    maxHealth: 10000
+    maxHealth: 50000
   - label: Burst Boss FINAL
     bossPrefab: {fileID: 733014060969819527, guid: 8e1b786b0f6d9b7b4bae2db97a9cedd4, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 5
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 1
-    maxHealth: 10500
+    maxHealth: 63000
   spawnOffset: {x: 0, y: 6}
 --- !u!4 &1532023695
 Transform:
@@ -14881,7 +14899,7 @@ MonoBehaviour:
   - id: 6
     clips:
     - {fileID: 8300000, guid: cedacf0ccb9d6a3f9a66171c8010d4a4, type: 3}
-    volume: 1
+    volume: 0.84999996
     pitchRange: {x: 0.95, y: 1.05}
   - id: 7
     clips:
@@ -14947,6 +14965,11 @@ MonoBehaviour:
     - {fileID: 8300000, guid: a0e7807acdf8c70b9a839abb15351b43, type: 3}
     volume: 0.703
     pitchRange: {x: 0.7, y: 1.3}
+  - id: 23
+    clips:
+    - {fileID: 8300000, guid: 4f4be889ed21229eab4080ed1f819f10, type: 3}
+    volume: 1
+    pitchRange: {x: 0.97, y: 1.03}
   voiceCount: 8
   sRankLoop:
     id: 11

@@ -61,7 +61,9 @@ public class PlayerProjectile : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         // Vurunca dusmani mermi gidis yonunde HAFIFCE it (burst shot hissi)
-        if (EnemyDamage.Apply(other, _damage * ComboManager.Multiplier, _travelDir, knockbackSpeed, knockbackDuration) && !_pierce)
+        bool hit = EnemyDamage.Apply(other, _damage * ComboManager.Multiplier, _travelDir, knockbackSpeed, knockbackDuration);
+        if (hit) ComboManager.RegisterWeaponHit("blaster", 1f); // combo: blaster combo silahiysa her vurus ~claw kadar doldurur
+        if (hit && !_pierce)
             PoolManager.Despawn(gameObject); // Destroy yerine havuza
     }
     #endregion

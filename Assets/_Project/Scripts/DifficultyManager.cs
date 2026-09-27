@@ -40,7 +40,7 @@ public class DifficultyManager : MonoBehaviour
     [SerializeField] private int debugStartMilestone = 0;
 
     [Tooltip("Ekranin sol ustunde gecen sure / faktor / milestone gosterir. Test icin; sonra kapat.")]
-    [SerializeField] private bool showDebugOverlay = true;
+    [SerializeField] private bool showDebugOverlay = false; // RELEASE: kapali
 
     [Tooltip("Debug yazisinin boyutu ekran yuksekligine gore oran (0.03 = ekranin %3'u). Buyut/kucult.")]
     [SerializeField] private float debugFontScale = 0.03f;

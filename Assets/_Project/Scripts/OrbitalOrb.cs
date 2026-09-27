@@ -69,6 +69,7 @@ public class OrbitalOrb : MonoBehaviour
         if (EnemyDamage.Apply(other, _damage * ComboManager.Multiplier, knockDir, knockbackSpeed, knockbackDuration)) // combo carpani vurus aninda
         {
             _lastHit[other] = Time.time;
+            ComboManager.RegisterWeaponHit("orbital", 0.25f); // combo: sadece orbital combo silahiysa
             SfxManager.Play(SfxId.OrbitalHit); // klip atanmazsa sessiz
         }
     }

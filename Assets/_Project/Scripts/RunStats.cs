@@ -40,6 +40,10 @@ public static class RunStats
     /// <summary>Adaptif dusman cani carpani (DifficultyManager, oyuncu hizli kesiyorsa 1 -> ~1.3 arasi). Dusmanlar spawn'da uygular.</summary>
     public static float EnemyHealthMult = 1f;
 
+    /// <summary>Combo'yu dolduran AKTIF silahin anahtari (weaponId: claw/orbital/blaster/boomerang).
+    /// BuildUI'da kedinin kafasindaki ORTA (turuncu COMBO) kutudaki silah. DeckApplier set eder. Bos = combo dolmaz.</summary>
+    public static string ComboWeaponKey = "";
+
     /// <summary>Run basinda tum run-modifiyelerini sifirlar (DeckApplier cagirir).</summary>
     public static void Reset()
     {
@@ -51,5 +55,6 @@ public static class RunStats
         AreaMult = 1f;
         ProjectileSpeedMult = 1f;
         EnemyHealthMult = 1f;
+        ComboWeaponKey = "";
     }
 }

@@ -93,6 +93,7 @@
     <Compile Include="Assets/_Project/Scripts/GridColumnFitter.cs" />
     <Compile Include="Assets/_Project/Scripts/DashButtonUI.cs" />
     <Compile Include="Assets/_Project/Scripts/WeaponManager.cs" />
+    <Compile Include="Assets/_Project/Scripts/PulseEffect.cs" />
     <Compile Include="Assets/Joystick Pack/Scripts/Joysticks/VariableJoystick.cs" />
     <Compile Include="Assets/_Project/Scripts/SplitterEnemy.cs" />
     <Compile Include="Assets/_Project/Scripts/BombWarning.cs" />
@@ -132,6 +133,7 @@
     <Compile Include="Assets/_Project/Scripts/BossHealthBarUI.cs" />
     <Compile Include="Assets/_Project/Scripts/SfxId.cs" />
     <Compile Include="Assets/_Project/Scripts/PooledObject.cs" />
+    <Compile Include="Assets/_Project/Scripts/ClawWeapon.cs" />
     <Compile Include="Assets/_Project/Scripts/OrbitalOrb.cs" />
     <Compile Include="Assets/_Project/Scripts/UltFoodItem.cs" />
     <Compile Include="Assets/_Project/Scripts/IDifficultyScaled.cs" />

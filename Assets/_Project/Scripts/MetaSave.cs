@@ -12,11 +12,12 @@ public static class MetaSave
     #region Constants
     public const int SlotCount = 3;
     public const int MaxCardsPerSlot = 25; // 3 silah + 20 stat
+    public const int WeaponSlotCap = 3;   // kafanin cevresindeki 3 silah slotu (orta index 1 = combo)
     private const string PrefsKey = "MeowvivorsMeta_v2"; // v2: owned artik adet-tabanli
     #endregion
 
     #region Data Model
-    [Serializable] private class SlotData { public List<string> cards = new List<string>(); }
+    [Serializable] private class SlotData { public List<string> cards = new List<string>(); public string[] weaponSlots; }
     [Serializable] private class OwnedEntry { public string id; public int count; }
 
     [Serializable]
@@ -26,6 +27,8 @@ public static class MetaSave
         public List<OwnedEntry> owned = new List<OwnedEntry>(); // kart id -> sahip olunan adet
         public SlotData[] slots;
         public int activeSlot;
+        public bool clawGranted;      // migration: herkes wpn_claw'a sahip + loadout'lara eklendi (bir kez)
+        public bool weaponsMigrated;  // migration: silahlar cards'tan sabit weaponSlots'a tasindi (bir kez)
     }
     #endregion
 
@@ -130,6 +133,78 @@ public static class MetaSave
         list.Add(id); Save(); return true;
     }
 
+    /// <summary>Slottaki bir karti listenin BASINA tasir (combo silahi = ilk silah oldugu icin combo'yu bu silaha verir).</summary>
+    public static bool MoveCardToFront(int slot, int index)
+    {
+        Ensure();
+        if (!ValidSlot(slot)) return false;
+        var list = _data.slots[slot].cards;
+        if (index < 0 || index >= list.Count) return false;
+        var id = list[index];
+        list.RemoveAt(index);
+        list.Insert(0, id);
+        Save();
+        return true;
+    }
+
+    // ---- Silah slotlari (sabit 3'lu; orta index 1 = combo). Silahlar cards'tan AYRI tutulur. ----
+    /// <summary>Loadout slotunun 3'lu silah dizisini (kopya) dondurur; [0]=sol [1]=orta(combo) [2]=sag.</summary>
+    public static string[] GetWeaponSlots(int slot)
+    {
+        Ensure();
+        if (!ValidSlot(slot)) return new string[WeaponSlotCap];
+        EnsureWeaponSlots(_data.slots[slot]);
+        return (string[])_data.slots[slot].weaponSlots.Clone();
+    }
+
+    /// <summary>Combo silahi = orta slot (index 1). Bos ise "".</summary>
+    public static string GetComboWeaponId(int slot)
+    {
+        var ws = GetWeaponSlots(slot);
+        return ws.Length > 1 ? ws[1] : "";
+    }
+
+    /// <summary>Dolu silah slotu sayisi.</summary>
+    public static int WeaponSlotFilledCount(int slot)
+    {
+        var ws = GetWeaponSlots(slot); int n = 0;
+        for (int i = 0; i < ws.Length; i++) if (!string.IsNullOrEmpty(ws[i])) n++;
+        return n;
+    }
+
+    /// <summary>Bu silah zaten bir slotta mi?</summary>
+    public static bool HasWeaponInSlots(int slot, string id)
+    {
+        var ws = GetWeaponSlots(slot);
+        for (int i = 0; i < ws.Length; i++) if (ws[i] == id) return true;
+        return false;
+    }
+
+    /// <summary>Silahi ilk BOS slota koyar (center-first: orta,1 -> sol,0 -> sag,2). Zaten varsa/doluysa false.</summary>
+    public static bool AddWeaponAuto(int slot, string id)
+    {
+        Ensure();
+        if (!ValidSlot(slot) || string.IsNullOrEmpty(id)) return false;
+        EnsureWeaponSlots(_data.slots[slot]);
+        var ws = _data.slots[slot].weaponSlots;
+        for (int i = 0; i < ws.Length; i++) if (ws[i] == id) return false; // zaten var
+        int[] order = { 1, 0, 2 };
+        for (int k = 0; k < order.Length; k++)
+            if (string.IsNullOrEmpty(ws[order[k]])) { ws[order[k]] = id; Save(); return true; }
+        return false; // dolu
+    }
+
+    /// <summary>Belirli bir silah slotunu bosaltir (sadece o slot; digerleri kaymaz).</summary>
+    public static bool RemoveWeaponSlot(int slot, int index)
+    {
+        Ensure();
+        if (!ValidSlot(slot)) return false;
+        EnsureWeaponSlots(_data.slots[slot]);
+        var ws = _data.slots[slot].weaponSlots;
+        if (index < 0 || index >= ws.Length || string.IsNullOrEmpty(ws[index])) return false;
+        ws[index] = ""; Save(); return true;
+    }
+
     public static bool RemoveCardFromSlotAt(int slot, int index)
     {
         Ensure();
@@ -165,7 +240,67 @@ public static class MetaSave
 
     private static bool ValidSlot(int s) => s >= 0 && s < SlotCount && _data.slots != null && s < _data.slots.Length && _data.slots[s] != null;
 
-    private static void Ensure() { if (_data == null) Load(); }
+    private static void Ensure() { if (_data == null) { Load(); MigrateClaw(); MigrateWeaponsToSlots(); } }
+
+    private const string ClawCardId = "wpn_claw"; // herkesin sahip oldugu temel pence silahi karti
+
+    /// <summary>Bir kez: herkes wpn_claw'a sahip olsun ve claw olmayan loadout'lara eklensin (eski kayitlar melee'siz kalmasin).</summary>
+    private static void MigrateClaw()
+    {
+        if (_data == null || _data.clawGranted) return;
+        _data.clawGranted = true;
+        var e = FindOwned(ClawCardId);
+        if (e == null) { e = new OwnedEntry { id = ClawCardId, count = 0 }; _data.owned.Add(e); }
+        if (e.count < 1) e.count = 1;
+        if (_data.slots != null)
+            for (int i = 0; i < _data.slots.Length; i++)
+                if (_data.slots[i] != null && _data.slots[i].cards != null && !_data.slots[i].cards.Contains(ClawCardId))
+                    _data.slots[i].cards.Insert(0, ClawCardId);
+        PlayerPrefs.SetString(PrefsKey, JsonUtility.ToJson(_data));
+        PlayerPrefs.Save(); // Save() cagirmiyoruz: Load ortasinda OnChanged firlatmak istemeyiz
+    }
+
+    /// <summary>Bir slotun weaponSlots dizisini 3 uzunlukta + null'suz garanti eder.</summary>
+    private static void EnsureWeaponSlots(SlotData sd)
+    {
+        if (sd == null) return;
+        if (sd.weaponSlots == null || sd.weaponSlots.Length != WeaponSlotCap)
+        {
+            var fix = new string[WeaponSlotCap];
+            for (int i = 0; i < WeaponSlotCap; i++)
+                fix[i] = (sd.weaponSlots != null && i < sd.weaponSlots.Length && sd.weaponSlots[i] != null) ? sd.weaponSlots[i] : "";
+            sd.weaponSlots = fix;
+        }
+        for (int i = 0; i < sd.weaponSlots.Length; i++) if (sd.weaponSlots[i] == null) sd.weaponSlots[i] = "";
+    }
+
+    /// <summary>Bir kez: cards icindeki SILAH kartlarini sabit weaponSlots'a tasir (center-first, orijinal sira). Statlar cards'ta kalir.</summary>
+    private static void MigrateWeaponsToSlots()
+    {
+        if (_data == null || _data.weaponsMigrated) return;
+        _data.weaponsMigrated = true;
+        if (_data.slots == null) return;
+        for (int s = 0; s < _data.slots.Length; s++)
+        {
+            var sd = _data.slots[s]; if (sd == null) continue;
+            EnsureWeaponSlots(sd);
+            if (sd.cards == null) continue;
+            // TAHRIBATSIZ: cards'tan SILMEDEN silah kartlarini topla (veri kaybi olmasin). cards'taki silah
+            // kartlari bundan sonra "hayalet" (DeckApplier/BuildUI yok sayar; kaynak = weaponSlots).
+            var weaponIds = new List<string>();
+            for (int i = 0; i < sd.cards.Count; i++)
+            {
+                var c = CardCatalog.Get(sd.cards[i]);
+                if (c != null && c.category == CardCategory.Weapon && !weaponIds.Contains(sd.cards[i])) weaponIds.Add(sd.cards[i]);
+            }
+            int[] order = { 1, 0, 2 }; // center-first
+            int wi = 0;
+            for (int k = 0; k < order.Length && wi < weaponIds.Count; k++)
+                if (string.IsNullOrEmpty(sd.weaponSlots[order[k]])) sd.weaponSlots[order[k]] = weaponIds[wi++];
+        }
+        PlayerPrefs.SetString(PrefsKey, JsonUtility.ToJson(_data));
+        PlayerPrefs.Save();
+    }
 
     private static MetaData FreshData()
     {
@@ -189,6 +324,7 @@ public static class MetaSave
             _data.slots = fix;
         }
         for (int i = 0; i < SlotCount; i++) if (_data.slots[i].cards == null) _data.slots[i].cards = new List<string>();
+        for (int i = 0; i < SlotCount; i++) EnsureWeaponSlots(_data.slots[i]);
     }
 
     private static void Save()

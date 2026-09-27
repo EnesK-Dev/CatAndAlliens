@@ -186,6 +186,7 @@ public class UpgradeSelectionUI : MonoBehaviour
         if (!_isOpen || _animating) return;
         if (_rerollsLeft <= 0) return;
         _rerollsLeft--;
+        SfxManager.Play(SfxId.Reroll); // rerol sesi (klip SfxManager entries tablosunda atanir)
         UpdateRerollButton();
         StartCoroutine(RerollSlotMachine()); // slot makinesi gibi don, en son otur
     }

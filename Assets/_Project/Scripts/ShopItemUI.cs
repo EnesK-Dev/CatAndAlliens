@@ -90,6 +90,7 @@ public class ShopItemUI : MonoBehaviour
         {
             iconImage.sprite = card != null ? card.icon : null;
             iconImage.enabled = card != null && card.icon != null;
+            iconImage.color = card != null ? card.frameTint : Color.white; // beyaz ikonu kart rengiyle boya (stat=renkli; silah/amount tint beyaz=degismez)
         }
         if (frameImage != null && card != null && card.frameSprite != null) frameImage.sprite = card.frameSprite;
         if (frameImage != null) frameImage.color = card != null ? card.frameTint : Color.white;
