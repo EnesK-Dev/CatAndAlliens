@@ -130,7 +130,7 @@ public class BossManager : MonoBehaviour
             _spawned[index] = true;
             GameObject pf = wave.enemyBossPrefab;
             Color col = EnemyBossColor(pf, wave.tint);
-            BombardmentDirector.Trigger(col, () => SpawnEnemyBoss(pf));
+            BombardmentDirector.Trigger(col, () => SpawnEnemyBoss(pf, wave.maxHealth));
             return;
         }
 
@@ -145,12 +145,21 @@ public class BossManager : MonoBehaviour
         BombardmentDirector.Trigger(bossColor, () => SpawnBoss(prefabToUse, wave));
     }
 
-    /// <summary>Enemy-tabanli boss'u (SplitterBoss vb.) oyuncunun yaninda spawn eder. Bombardiman bitince cagrilir.</summary>
-    private void SpawnEnemyBoss(GameObject prefab)
+    /// <summary>Enemy-tabanli boss'u (SplitterBoss vb.) oyuncunun yaninda spawn eder + wave.maxHealth override'ini uygular.
+    /// Bombardiman bitince cagrilir. Override > 0 ise boss DIGER bosslar gibi SABIT canli olur (difficulty/adaptif olcekleme yok).</summary>
+    private void SpawnEnemyBoss(GameObject prefab, float maxHealthOverride)
     {
         if (prefab == null) return;
         Vector3 basePos = playerRef != null ? playerRef.transform.position : Vector3.zero;
-        Instantiate(prefab, basePos + (Vector3)spawnOffset, Quaternion.identity);
+        GameObject go = Instantiate(prefab, basePos + (Vector3)spawnOffset, Quaternion.identity);
+
+        // Diger bosslar gibi SABIT can: SetMaxHealth _healthOverridden'i set eder -> Start/InitializeHealthSystem
+        // difficulty + adaptif EnemyHealthMult ile TEKRAR olceklemez. (0 = eski davranis: prefab cani x zorluk.)
+        if (maxHealthOverride > 0f)
+        {
+            var ec = go.GetComponent<EnemyController>();
+            if (ec != null) ec.SetMaxHealth(maxHealthOverride);
+        }
     }
 
     /// <summary>Enemy-tabanli boss'un gorunecek rengi (tint beyazsa prefab'in kendi rengi).</summary>

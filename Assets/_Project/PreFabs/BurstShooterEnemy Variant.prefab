@@ -92,7 +92,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BurstShooterEnemy
   moveSpeed: 2
   stopDistance: 5
-  maxHealth: 130
+  maxHealth: 165
   healthMultiplierAtMaxDifficulty: 3
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
   hitFlashDuration: 0.07

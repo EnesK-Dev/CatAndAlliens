@@ -581,10 +581,11 @@ MonoBehaviour:
   baseRotationSpeed: 120
   baseDamage: 60
   maxCountLevel: 2
+  maxOrbs: 6
   rotationSpeedPerLevel: 30
   maxRotationLevel: 20
-  damagePerLevel: 18
-  damageMult: 1.14
+  damagePerLevel: 12
+  damageMult: 1.1
   maxDamageLevel: 20
   radiusPerLevel: 0.35
   maxRadiusLevel: 20
@@ -6651,6 +6652,7 @@ MonoBehaviour:
   weaponCardSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
   greyCardSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
   amountCardSprite: {fileID: 21300000, guid: 816d78c97abee4cd0a791622370f63df, type: 3}
+  levelWeightFalloff: 0.7
   cardTint: {r: 1, g: 1, b: 1, a: 1}
   weaponIconColor: {r: 0.5882353, g: 0.3882353, b: 0.85882354, a: 1}
   weaponIconHeight: 260
@@ -7993,7 +7995,8 @@ MonoBehaviour:
   adaptWindow: 1.5
   lowKillsPerSec: 1.2
   highKillsPerSec: 4
-  maxEnemyHealthMult: 1.3
+  maxEnemyHealthMult: 1.5
+  maxEnemySpeedMult: 1.25
   debugStartMilestone: 0
   showDebugOverlay: 0
   debugFontScale: 0.03
@@ -14791,35 +14794,35 @@ MonoBehaviour:
     milestoneIndex: 2
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 0
-    maxHealth: 0
+    maxHealth: 27900
   - label: Dash Boss (green)
     bossPrefab: {fileID: 733014060969819527, guid: 504c3cff1b3c33405906b90c5ac80f2b, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 1
     tint: {r: 0.1, g: 0.85, b: 0.25, a: 1}
     isFinalBoss: 0
-    maxHealth: 18000
+    maxHealth: 54000
   - label: Laser Boss
     bossPrefab: {fileID: 733014060969819527, guid: dc337d24e43cb5d29a68ece93f69bc71, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 3
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 0
-    maxHealth: 40000
+    maxHealth: 120000
   - label: Kamikaze Boss
     bossPrefab: {fileID: 733014060969819527, guid: 41156fdc126fc33ab9e617abbbb08607, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 4
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 0
-    maxHealth: 50000
+    maxHealth: 150000
   - label: Burst Boss FINAL
     bossPrefab: {fileID: 733014060969819527, guid: 8e1b786b0f6d9b7b4bae2db97a9cedd4, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 5
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 1
-    maxHealth: 63000
+    maxHealth: 189000
   spawnOffset: {x: 0, y: 6}
 --- !u!4 &1532023695
 Transform:
@@ -17326,7 +17329,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -3.6727905}
+  m_AnchoredPosition: {x: 0, y: -3.6728516}
   m_SizeDelta: {x: -460, y: 26}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1926096500

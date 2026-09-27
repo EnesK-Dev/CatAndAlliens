@@ -37,8 +37,11 @@ public static class RunStats
     /// <summary>Haste'in inebilecegi taban cooldown carpani (sonsuz hizlanmayi onler).</summary>
     public const float MinCooldownMult = 0.35f;
 
-    /// <summary>Adaptif dusman cani carpani (DifficultyManager, oyuncu hizli kesiyorsa 1 -> ~1.3 arasi). Dusmanlar spawn'da uygular.</summary>
+    /// <summary>Adaptif dusman cani carpani (DifficultyManager, oyuncu hizli kesiyorsa 1 -> maxEnemyHealthMult). Dusmanlar spawn'da uygular.</summary>
     public static float EnemyHealthMult = 1f;
+
+    /// <summary>Adaptif dusman HIZ carpani (ayni kill-hizi verisi, 1 -> maxEnemySpeedMult). Dusmanlar spawn'da uygular.</summary>
+    public static float EnemySpeedMult = 1f;
 
     /// <summary>Combo'yu dolduran AKTIF silahin anahtari (weaponId: claw/orbital/blaster/boomerang).
     /// BuildUI'da kedinin kafasindaki ORTA (turuncu COMBO) kutudaki silah. DeckApplier set eder. Bos = combo dolmaz.</summary>
@@ -55,6 +58,7 @@ public static class RunStats
         AreaMult = 1f;
         ProjectileSpeedMult = 1f;
         EnemyHealthMult = 1f;
+        EnemySpeedMult = 1f;
         ComboWeaponKey = "";
     }
 }

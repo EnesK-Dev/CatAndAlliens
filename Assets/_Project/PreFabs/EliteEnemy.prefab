@@ -174,7 +174,7 @@ MonoBehaviour:
   moveSpeed: 3
   wallSlide: 1
   wallProbeDistance: 0.4
-  maxHealth: 100
+  maxHealth: 130
   healthMultiplierAtMaxDifficulty: 3
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
   hitFlashDuration: 0.07
@@ -210,7 +210,8 @@ MonoBehaviour:
   bodyContactDamage: 4
   contactDamageCooldown: 1
   chargeDuration: 1.5
-  laserDuration: 0.5
+  laserDuration: 1.5
+  laserTickInterval: 0.4
   minAttackCooldown: 3
   maxAttackCooldown: 7
   obstacleLayers:

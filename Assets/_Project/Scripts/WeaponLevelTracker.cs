@@ -35,7 +35,8 @@ public class WeaponLevelTracker : MonoBehaviour
         public string statLabel, effect, trackKey;
         public WeaponBase weapon;   // null = Sharp Claws
         public int level = 0, progress = 0, cost = 3;
-        public bool instant; // Amount: esik yok, her alimda aninda +1 level (pip yok)
+        public bool global;    // Amount: efekt RunStats.AmountBonus ile GLOBAL uygulanir -> burada ApplyTrack YAPMA
+        public bool fixedCost; // Amount: esik SABIT (artmaz); her AmountCardsPerBonus kartta +1 level
         public TMP_Text label;
         public Transform pipRow;
         public readonly List<Image> pips = new List<Image>();
@@ -43,6 +44,8 @@ public class WeaponLevelTracker : MonoBehaviour
     #endregion
 
     #region Private Fields
+    private static WeaponLevelTracker _inst; // UpgradeSelectionUI stat cikma agirligini level'e gore dusurmek icin okur
+    private const int AmountCardsPerBonus = 2; // Amount esigi: kac kart = +1 level. UpgradeSelectionUI ile AYNI olmali.
     private readonly List<Track> _tracks = new List<Track>();
     private bool _built;
     private TMP_FontAsset _font;
@@ -53,9 +56,20 @@ public class WeaponLevelTracker : MonoBehaviour
     #region Unity Callbacks
     private void OnEnable()
     {
+        _inst = this;
         UpgradeSelectionUI.OnUpgradeSelected += HandleStatPicked;
         if (!_built) BuildRows();
         RefreshAll();
+    }
+
+    /// <summary>Bir statin EN YUKSEK silah track level'i (o stat kartinin cikma orani bununla dusurulur — abuse engeli).</summary>
+    public static int StatLevel(UpgradeSelectionUI.UpgradeType type)
+    {
+        if (_inst == null) return 0;
+        int max = 0;
+        var tr = _inst._tracks;
+        for (int i = 0; i < tr.Count; i++) if (tr[i].stat == type && tr[i].level > max) max = tr[i].level;
+        return max;
     }
     private void OnDisable() { UpgradeSelectionUI.OnUpgradeSelected -= HandleStatPicked; }
     #endregion
@@ -136,13 +150,16 @@ public class WeaponLevelTracker : MonoBehaviour
         // Track satirlari
         for (int i = 0; i < tracks.Length; i += 4)
         {
+            bool isAmount = (UpgradeSelectionUI.UpgradeType)tracks[i] == UpgradeSelectionUI.UpgradeType.Amount;
             var t = new Track {
                 stat = (UpgradeSelectionUI.UpgradeType)tracks[i],
                 statLabel = (string)tracks[i+1],
                 effect = (string)tracks[i+2],
                 trackKey = (string)tracks[i+3],
-                weapon = weapon, cost = firstCost,
-                instant = ((UpgradeSelectionUI.UpgradeType)tracks[i] == UpgradeSelectionUI.UpgradeType.Amount)
+                weapon = weapon,
+                global = isAmount,                                   // Amount -> global (RunStats), ApplyTrack yok
+                fixedCost = isAmount,                                // Amount -> esik sabit
+                cost = isAmount ? AmountCardsPerBonus : firstCost    // Amount 2 kart = +1; digerleri 3'ten baslar
             };
             var row = NewRect("Track", weaponColumn);
             var rh = row.gameObject.AddComponent<HorizontalLayoutGroup>();
@@ -172,8 +189,14 @@ public class WeaponLevelTracker : MonoBehaviour
         foreach (var t in _tracks)
         {
             if (t.stat != type) continue;
-            if (t.instant) { t.level++; ApplyLevel(t); } // Amount: aninda level
-            else { t.progress++; if (t.progress >= t.cost) { t.progress -= t.cost; t.level++; t.cost++; ApplyLevel(t); } }
+            t.progress++;
+            if (t.progress >= t.cost)
+            {
+                t.progress -= t.cost;
+                t.level++;
+                if (!t.fixedCost) t.cost++; // Amount haric esik her level artar (3->4->5); Amount sabit 2
+                ApplyLevel(t);
+            }
         }
         RefreshAll();
     }
@@ -182,8 +205,9 @@ public class WeaponLevelTracker : MonoBehaviour
     {
         if (t.weapon != null)
         {
-            if (!string.IsNullOrEmpty(t.trackKey)) t.weapon.ApplyTrack(t.trackKey, 1);
-            t.weapon.RefreshStats();
+            // Amount (global) RunStats.AmountBonus ile uygulanir; burada ApplyTrack YAPMA (yoksa +2 olur). Diger track'ler normal.
+            if (!t.global && !string.IsNullOrEmpty(t.trackKey)) t.weapon.ApplyTrack(t.trackKey, 1);
+            t.weapon.RefreshStats(); // AmountBonus dahil global statlari yeniden oku
         }
         else if (playerRef != null) playerRef.AddDamage(clawsDamagePerLevel); // Sharp Claws
     }
@@ -193,7 +217,7 @@ public class WeaponLevelTracker : MonoBehaviour
     private void RefreshTrack(Track t)
     {
         if (t.label != null) t.label.text = t.effect + "  <color=#B9B9C9>" + t.statLabel + "</color>  Lv." + t.level;
-        int shown = t.instant ? 0 : Mathf.Min(t.cost, maxPips); // Amount: pip yok
+        int shown = Mathf.Min(t.cost, maxPips); // Amount dahil hepsi pip gosterir (0/2 -> 1/2 -> level)
         while (t.pips.Count < shown) t.pips.Add(NewPip(t.pipRow));
         for (int i = 0; i < t.pips.Count; i++)
         {

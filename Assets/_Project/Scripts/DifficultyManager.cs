@@ -31,8 +31,11 @@ public class DifficultyManager : MonoBehaviour
     [SerializeField] private float lowKillsPerSec = 1.2f;
     [Tooltip("Saniyedeki oldurme bunun USTUNDE ise can carpani tavana ulasir (cok hizli kesen oyuncu).")]
     [SerializeField] private float highKillsPerSec = 4f;
-    [Tooltip("Dusman cani carpani tavani. 1.3 = en fazla %30 fazla can.")]
-    [SerializeField] private float maxEnemyHealthMult = 1.3f;
+    [Tooltip("Dusman cani carpani tavani. 1.5 = en fazla %50 fazla can (cok hizli kesen oyuncu).")]
+    [SerializeField] private float maxEnemyHealthMult = 1.5f;
+
+    [Tooltip("Dusman HIZ carpani tavani (ayni kill-hizi verisi). 1.25 = en fazla %25 hizli.")]
+    [SerializeField] private float maxEnemySpeedMult = 1.25f;
 
     [Header("Debug")]
     [Tooltip("TEST: Oyunu bu MILESTONE'dan baslat. 0 = normal bas. 1 = dash boss'tan, 2 = splitter boss'tan... " +
@@ -139,7 +142,7 @@ public class DifficultyManager : MonoBehaviour
         _elapsedTime += Time.deltaTime;
         _currentFactor = EvaluateFactor(_elapsedTime);
         CheckMilestones();
-        UpdateAdaptiveEnemyHealth();
+        UpdateAdaptiveEnemyStats();
     }
 
     private void OnDestroy()
@@ -167,17 +170,28 @@ public class DifficultyManager : MonoBehaviour
     #endregion
 
     #region Private Methods
-    /// <summary>Kill hizini periyodik olcer; hizliysa RunStats.EnemyHealthMult'i yumusakca 1 -> tavan arasina ceker.</summary>
-    private void UpdateAdaptiveEnemyHealth()
+    /// <summary>Kill hizini periyodik olcer; hizli kesen oyuncuya karsi RunStats.EnemyHealthMult VE EnemySpeedMult'i
+    /// yumusakca 1 -> ilgili tavan arasina ceker. Ikisi de AYNI kill-hizi verisini (u) kullanir.</summary>
+    private void UpdateAdaptiveEnemyStats()
     {
-        if (!adaptiveEnemyHealth) { RunStats.EnemyHealthMult = 1f; return; }
+        if (!adaptiveEnemyHealth)
+        {
+            RunStats.EnemyHealthMult = 1f;
+            RunStats.EnemySpeedMult = 1f;
+            return;
+        }
         _windowTimer += Time.deltaTime;
         if (_windowTimer < adaptWindow) return;
 
         float kps = _killsInWindow / Mathf.Max(0.01f, _windowTimer);
-        float u = Mathf.InverseLerp(lowKillsPerSec, highKillsPerSec, kps); // 0 (yavas) .. 1 (hizli)
-        float target = Mathf.Lerp(1f, Mathf.Max(1f, maxEnemyHealthMult), u);
-        RunStats.EnemyHealthMult = Mathf.Lerp(RunStats.EnemyHealthMult, target, 0.5f); // yumusak gecis (birkac pencerede oturur)
+        float u = Mathf.InverseLerp(lowKillsPerSec, highKillsPerSec, kps); // 0 (yavas) .. 1 (hizli kesen)
+
+        float healthTarget = Mathf.Lerp(1f, Mathf.Max(1f, maxEnemyHealthMult), u);
+        RunStats.EnemyHealthMult = Mathf.Lerp(RunStats.EnemyHealthMult, healthTarget, 0.5f); // yumusak gecis
+
+        float speedTarget = Mathf.Lerp(1f, Mathf.Max(1f, maxEnemySpeedMult), u);
+        RunStats.EnemySpeedMult = Mathf.Lerp(RunStats.EnemySpeedMult, speedTarget, 0.5f); // ayni veri, hiz de artar
+
         _killsInWindow = 0;
         _windowTimer = 0f;
     }

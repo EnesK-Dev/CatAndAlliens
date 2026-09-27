@@ -212,7 +212,7 @@ public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
 
     private void ComputeEffectiveMoveSpeed()
     {
-        _effectiveMoveSpeed = moveSpeed * Mathf.Lerp(1f, moveSpeedMultiplierAtMaxDifficulty, EffectiveDifficulty);
+        _effectiveMoveSpeed = moveSpeed * Mathf.Lerp(1f, moveSpeedMultiplierAtMaxDifficulty, EffectiveDifficulty) * RunStats.EnemySpeedMult; // adaptif hiz (kill-rate)
     }
 
     /// <summary>Bu düşmana hasar verir; can bitince yok edilir.</summary>

@@ -97,6 +97,8 @@ public class UpgradeSelectionUI : MonoBehaviour
     [SerializeField] private Sprite weaponCardSprite;      // mor
     [SerializeField] private Sprite greyCardSprite;        // gri cerceve (yeni statlar: gri + tint)
     [SerializeField] private Sprite amountCardSprite;      // Amount icin rengarenk gradient cerceve (guclu his)
+    [Tooltip("Bir stat, ilgili silah track'i her level atladikca bu carpanla NADIR gelir (0.7 = %30 daha az). Abuse engeli.")]
+    [SerializeField] private float levelWeightFalloff = 0.7f;
 
     [Tooltip("Renkli sprite'lar zaten renkli oldugu icin frame tint beyaz kalir.")]
     [SerializeField] private Color cardTint = Color.white;
@@ -114,6 +116,8 @@ public class UpgradeSelectionUI : MonoBehaviour
 
     #region Private Fields
     private static UpgradeSelectionUI _instance;
+    private const int AmountCardsPerBonus = 2; // Amount: kac AMOUNT karti = +1 amount (tum silahlara). WeaponLevelTracker ile AYNI olmali.
+    private int _amountPickCount;              // bu run'da secilen Amount karti sayisi; esige ulasinca AmountBonus += 1
     private int _pendingSelections;
     private int _rerollsLeft;
     private bool _isOpen;
@@ -346,7 +350,17 @@ public class UpgradeSelectionUI : MonoBehaviour
     private float StatWeight(CardOption o)
     {
         if (!o.isWeapon && upgrades != null && o.statIndex >= 0 && o.statIndex < upgrades.Length)
-            return Mathf.Max(0.001f, upgrades[o.statIndex].weight);
+        {
+            var def = upgrades[o.statIndex];
+            float w = Mathf.Max(0.001f, def.weight);
+            int lvl = WeaponLevelTracker.StatLevel(def.type); // o statin en yuksek silah track level'i
+            if (lvl > 0)
+            {
+                float fo = (levelWeightFalloff >= 0.05f && levelWeightFalloff < 1f) ? levelWeightFalloff : 0.7f; // 0 serialize tuzagina karsi
+                w *= Mathf.Pow(fo, lvl); // yuksek level -> daha nadir (abuse engeli)
+            }
+            return Mathf.Max(0.001f, w);
+        }
         return 1f;
     }
 
@@ -623,8 +637,10 @@ public class UpgradeSelectionUI : MonoBehaviour
             case UpgradeType.GainHealth:  // Max Health: kalici +can
                 playerRef.AddMaxHealth(def.amount);
                 break;
-            case UpgradeType.Amount:      // +sayi (mermi/orb/yon/hedef)
-                RunStats.AmountBonus += Mathf.Max(1, Mathf.RoundToInt(def.amount));
+            case UpgradeType.Amount:      // +sayi (mermi/orb/yon/hedef) — HER AmountCardsPerBonus (2) kartta bir kez uygulanir
+                _amountPickCount++;
+                if (_amountPickCount % AmountCardsPerBonus == 0)
+                    RunStats.AmountBonus += Mathf.Max(1, Mathf.RoundToInt(def.amount)); // 2 Amount karti = tum silahlara +1
                 break;
         }
         RefreshWeapons(); // cache'li silahlar (orbital/multislash) yeni stat'i hemen yansitsin

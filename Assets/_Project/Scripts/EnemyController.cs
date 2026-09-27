@@ -63,6 +63,8 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     [SerializeField] private float contactDamageCooldown = 1f;   // saniyede max 1 kez vurur
     [SerializeField] private float chargeDuration = 1.5f;
     [SerializeField] private float laserDuration = 0.5f;
+    [Tooltip("Lazer YERDE dururken kac saniyede bir hasar verir (tick araligi). Isin gorundugu sure boyunca surekli vurur. <=0 ise 0.4.")]
+    [SerializeField] private float laserTickInterval = 0.4f;
     [SerializeField] private float minAttackCooldown = 3f;
     [SerializeField] private float maxAttackCooldown = 7f;
     [SerializeField] private LayerMask obstacleLayers;
@@ -529,7 +531,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     private void ComputeEffectiveMoveSpeed()
     {
         float factor = EffectiveDifficulty;
-        effectiveMoveSpeed = moveSpeed * Mathf.Lerp(1f, moveSpeedMultiplierAtMaxDifficulty, factor);
+        effectiveMoveSpeed = moveSpeed * Mathf.Lerp(1f, moveSpeedMultiplierAtMaxDifficulty, factor) * RunStats.EnemySpeedMult; // adaptif hiz (kill-rate)
     }
 
     private void DetermineEnemyVariation()
@@ -676,19 +678,29 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
         SfxManager.Play(SfxId.LaserFire); // lazer ateslendi
 
-        UpdateLaserVisual();
-
-        // Hasar uygula — engel ve player katmanlarini birlestirir
+        // Lazer YERDE kaldigi laserDuration boyunca SUREKLI hasar: her laserTickInterval'da bir raycast + hasar.
+        // Isin yonu sabit; oyuncu isinin icinden CIKARSA hasar durur, tekrar girerse devam eder.
         LayerMask damageLayerMask = obstacleLayers | playerLayer;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, moveDirection, Mathf.Infinity, damageLayerMask);
-        if (hit.collider != null)
+        float tickInterval = laserTickInterval > 0.01f ? laserTickInterval : 0.4f; // 0 serialize tuzagina karsi
+        float activeTimer = 0f;
+        float tickTimer = tickInterval; // >= interval -> ilk kare hemen vurur (ateslenir vurmaz)
+        while (activeTimer < laserDuration)
         {
-            player cat = hit.collider.GetComponent<player>();
-            if (cat != null)
-                cat.TakeDamage(laserDamage);
+            UpdateLaserVisual(); // dusman hareket etse bile isin guncel kalir
+            if (tickTimer >= tickInterval)
+            {
+                tickTimer = 0f;
+                RaycastHit2D hit = Physics2D.Raycast(transform.position, moveDirection, Mathf.Infinity, damageLayerMask);
+                if (hit.collider != null)
+                {
+                    player cat = hit.collider.GetComponent<player>();
+                    if (cat != null) cat.TakeDamage(laserDamage);
+                }
+            }
+            activeTimer += Time.deltaTime;
+            tickTimer += Time.deltaTime;
+            yield return null;
         }
-
-        yield return new WaitForSeconds(laserDuration);
 
         if (laserVisualInstance != null)
             laserVisualInstance.Hide();

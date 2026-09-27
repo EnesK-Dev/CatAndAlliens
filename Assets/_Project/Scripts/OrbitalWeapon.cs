@@ -22,14 +22,18 @@ public class OrbitalWeapon : WeaponBase
     [Tooltip("Kac kez +1 alinabilir (2 = max 3 orb: 1+2).")]
     [SerializeField] private int maxCountLevel = 2;
 
+    [Tooltip("Toplam orb tavani (sayi track'i + global Amount dahil). Amount limitsiz oldugu icin\n" +
+             "orbital'in ekrani orb'la doldurup abuse edilmesini engeller. <=0 ise 6 kabul edilir (serialize tuzagi).")]
+    [SerializeField] private int maxOrbs = 6;
+
     [Header("Donme Hizi Track'i")]
     [SerializeField] private float rotationSpeedPerLevel = 30f;
     [SerializeField] private int maxRotationLevel = 20;
 
     [Header("Hasar Track'i")]
-    [SerializeField] private float damagePerLevel = 18f;
+    [SerializeField] private float damagePerLevel = 12f;
     [Tooltip("Hasar bilesik carpani (her level x bu). 1 = duz additive.")]
-    [SerializeField] private float damageMult = 1.14f;
+    [SerializeField] private float damageMult = 1.10f;
     [SerializeField] private int maxDamageLevel = 20;
 
     [Header("Radius Track'i")]
@@ -107,7 +111,7 @@ public class OrbitalWeapon : WeaponBase
     #region Private Methods
     public override void RefreshStats() { EnsureOrbs(); ConfigureOrbs(); }
 
-    private int CurrentOrbCount() => 1 + _countLevel + RunStats.AmountBonus;
+    private int CurrentOrbCount() => Mathf.Min(maxOrbs > 0 ? maxOrbs : 6, 1 + _countLevel + RunStats.AmountBonus);
     private float CurrentRadius() => (baseRadius + radiusPerLevel * _radiusLevel) * RunStats.AreaMult;
     private float CurrentRotationSpeed() => baseRotationSpeed + rotationSpeedPerLevel * _rotationLevel;
     // Bileşik hasar: her level (hasar + damagePerLevel) * damageMult -> sabit + carpan (Sharp Claws hissi).
