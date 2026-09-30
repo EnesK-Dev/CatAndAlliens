@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8815592559685975083}
   - component: {fileID: 2830307093007107912}
   - component: {fileID: 578195630352048340}
+  - component: {fileID: 4324466297970159974}
   m_Layer: 8
   m_Name: SplitterBoss
   m_TagString: Untagged
@@ -235,6 +236,8 @@ MonoBehaviour:
   contactDamageCooldown: 1
   chargeDuration: 1.5
   laserDuration: 0.5
+  laserTickInterval: 0.4
+  laserDamageWidth: 1
   minAttackCooldown: 3
   maxAttackCooldown: 7
   obstacleLayers:
@@ -251,8 +254,8 @@ MonoBehaviour:
   maxAttackCooldownAtMaxDifficulty: 4.5
   moveSpeedMultiplierAtMaxDifficulty: 1.15
   laserWidthMultiplierAtMaxDifficulty: 1.6
-  coreDropNormal: 4
-  coreDropNormalMax: 6
+  coreDropNormal: 1
+  coreDropNormalMax: 2
   coreDropEliteMin: 4
   coreDropEliteMax: 6
   ultFoodDropChance: 0.25
@@ -264,3 +267,35 @@ MonoBehaviour:
   spawnSpread: 1.1
   childSpeedMultiplier: 1.2
   isBossLineage: 1
+  finalPieceCoreMin: 15
+  finalPieceCoreMax: 20
+--- !u!114 &4324466297970159974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3971847470037377216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6e49a6c09a4681138ba2dd4b23f13f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossMinionSpawner
+  minionPrefab: {fileID: 3971847470037377216, guid: 789b171024b669e22b735758d175d773, type: 3}
+  firstDelay: 4
+  interval: 6
+  minPerWave: 1
+  maxPerWave: 2
+  maxAliveMinions: 6
+  launchSpeed: 22
+  launchDuration: 0.5
+  safeConeDegrees: 20
+  spreadDegrees: 60
+  spawnOffset: 1.5
+  spawnStartScale: 0.4
+  scalePopDuration: 0.22
+  birthPause: 0
+  launchAfterImage: 1
+  afterImageAlpha: 0.55
+  afterImageFadeTime: 0.35
+  afterImageInterval: 0.045

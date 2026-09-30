@@ -281,7 +281,7 @@ MonoBehaviour:
     upgradeKey: 
   - id: meta_maxhp
     displayName: Max Health
-    description: +1 heart
+    description: +1 Max Heart & heal
     icon: {fileID: -854701565890967653, guid: f27c00166eec9b8cd9c1cb533daf83e4, type: 3}
     frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
     frameTint: {r: 1, g: 0.35, b: 0.42, a: 1}
@@ -346,6 +346,20 @@ MonoBehaviour:
     maxPerSlot: 10
     statType: 12
     amount: 1
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_curse
+    displayName: Curse
+    description: Enemies spawn faster
+    icon: {fileID: 6894929934875589815, guid: 87cc33ca5e991d27583657441f9ac3fd, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 0
+    cost: 20
+    maxPerSlot: 0
+    statType: 13
+    amount: 0.5
     amountMult: 1
     weaponId: 
     upgradeKey: 

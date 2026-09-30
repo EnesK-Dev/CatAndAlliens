@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 5660292161846498325}
   - component: {fileID: 733014060969819527}
   - component: {fileID: 6046573867050512515}
+  - component: {fileID: 2888512412628649092}
   m_Layer: 8
   m_Name: Boss2
   m_TagString: Untagged
@@ -276,3 +277,33 @@ MonoBehaviour:
   atk3CenterTrackSpeed: 0
   atk3CloseTime: 2.5
   atk3HoldTime: 0.7
+--- !u!114 &2888512412628649092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8193128965364514374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6e49a6c09a4681138ba2dd4b23f13f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossMinionSpawner
+  minionPrefab: {fileID: 3971847470037377216, guid: 4587ffeaed6bde239a4cd07683545152, type: 3}
+  firstDelay: 4
+  interval: 6
+  minPerWave: 1
+  maxPerWave: 2
+  maxAliveMinions: 6
+  launchSpeed: 22
+  launchDuration: 0.5
+  safeConeDegrees: 20
+  spreadDegrees: 60
+  spawnOffset: 1.5
+  spawnStartScale: 0.4
+  scalePopDuration: 0.22
+  birthPause: 0
+  launchAfterImage: 1
+  afterImageAlpha: 0.55
+  afterImageFadeTime: 0.35
+  afterImageInterval: 0.045

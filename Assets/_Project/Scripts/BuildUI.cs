@@ -163,8 +163,40 @@ public class BuildUI : MonoBehaviour
         BuildCatalog(stats.Count);
         BuildWeaponPreview();
 
+        // Scroll Content yuksekligini en alttaki bolume (stat grid / katalog) gore buyut ki fazla stat alinca alt kutular kesilmesin.
+        FitScrollContent();
+
         // Scroll'u SADECE panel acilinca en uste al (stat/silah ekle-cikar sirasinda konumu KORU).
         if (resetScroll && mainScroll != null) { Canvas.ForceUpdateCanvases(); mainScroll.verticalNormalizedPosition = 1f; }
+    }
+
+    private const float ScrollContentBottomPadding = 90f; // en alt kutunun altinda nefes payi
+    private const float ScrollContentMinHeight = 1450f;   // taban (kisa icerikte kuculmesin)
+
+    /// <summary>Scroll Content yuksekligini en alta uzanan bolume gore ayarlar. Stat grid / katalog CSF ile
+    /// buyuyunce Content SABIT kaldigi icin alt kutular scroll disinda kaliyordu; burada dinamik buyutuluyor.</summary>
+    private void FitScrollContent()
+    {
+        if (mainScroll == null || mainScroll.content == null) return;
+        Canvas.ForceUpdateCanvases(); // CSF'ler guncel yukseklik versin
+        LayoutRebuilder.ForceRebuildLayoutImmediate(mainScroll.content);
+
+        float needed = ScrollContentMinHeight;
+        needed = Mathf.Max(needed, SectionBottom(statGridContent as RectTransform));
+        needed = Mathf.Max(needed, SectionBottom(catalogContent as RectTransform));
+        needed += ScrollContentBottomPadding;
+
+        var c = mainScroll.content;
+        if (Mathf.Abs(c.sizeDelta.y - needed) > 1f)
+            c.sizeDelta = new Vector2(c.sizeDelta.x, needed);
+    }
+
+    /// <summary>Bir bolumun Content ustunden alt kenarina mesafesi. Varsayim: bolum ust-pivotlu ve Content ustune ankajli
+    /// (aPos.y negatif = asagi). statGrid/catalog ikisi de oyle. Boylece en dusuk kenari bulup Content'i ona gore buyuturuz.</summary>
+    private float SectionBottom(RectTransform rt)
+    {
+        if (rt == null) return 0f;
+        return -rt.anchoredPosition.y + rt.rect.height;
     }
 
     private static readonly Color PrevPipFull = new Color(1f, 0.82f, 0.30f, 1f);

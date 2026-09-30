@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// Sag ustteki DURAKLAT butonu + duraklatma paneli (Continue / Restart / Main Menu). Butona basinca
@@ -16,6 +17,9 @@ public class PauseMenu : MonoBehaviour
 
     [Tooltip("Duraklatma paneli (dimmer + butonlar). Baslangicta KAPALI olur.")]
     [SerializeField] private GameObject pausePanel;
+
+    [Tooltip("Bu run'da toplanan core sayisini gosteren yazi (yaninda core ikonu). Bos ise atlanir.")]
+    [SerializeField] private TMP_Text coreCountText;
 
     [SerializeField] private Button continueButton;
     [SerializeField] private Button restartButton;
@@ -66,6 +70,7 @@ public class PauseMenu : MonoBehaviour
         if (_paused) return;
         _paused = true;
         Time.timeScale = 0f;
+        if (coreCountText != null) coreCountText.SetText("{0}", CoreManager.CoresThisRun); // bu run'daki toplam core
         if (pausePanel != null) pausePanel.SetActive(true);
     }
 
@@ -90,6 +95,7 @@ public class PauseMenu : MonoBehaviour
     {
         _paused = false;
         Time.timeScale = 1f;
+        CoreManager.BankRunCores(); // run'da toplanan parayi bankaya aktar (yoksa menuye donunce kaybolur)
         if (sceneLoader != null) sceneLoader.LoadScene(mainMenuSceneName);
     }
     #endregion

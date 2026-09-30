@@ -20,15 +20,13 @@ public class CoreManager : MonoBehaviour
     [Tooltip("Ayni dusmandan birden fazla core dusunce ust uste binmesin diye bu yaricap icinde rastgele sacilirlar.")]
     [SerializeField] private float scatterRadius = 0.5f;
 
-    [Header("Upgrade Esigi (FAZ 5) — TIER modeli")]
-    [Tooltip("Ilk tier'in kart maliyeti (kac core ile kart alinir). Ornek 10.")]
+    [Header("Upgrade Esigi (FAZ 5) — USTEL model")]
+    [Tooltip("Ilk kartin maliyeti (kac core). Ornek 10.")]
     [SerializeField] private int firstThreshold = 10;
 
-    [Tooltip("KAC kartta bir maliyet artsin. Ornek 3 -> 3 kart ayni fiyat, sonra artar. (3 kere 10, 3 kere 20...)")]
-    [SerializeField] private int cardsPerTier = 3;
-
-    [Tooltip("Her tier'da maliyetin artis miktari. Ornek 10 -> 10, 20, 30, 40 ... Milestone'dan BAGIMSIZ, kendi ic sayaci.")]
-    [SerializeField] private int thresholdAdditiveStep = 10;
+    [Tooltip("Her kartta maliyet bu carpanla buyur (USTEL). 1.4 = her kart %40 daha pahali; sonuc 5'in katina yuvarlanir.\n" +
+             "Ornek (first=10, 1.4): 10, 15, 20, 25, 40, 55, 75... Kart sayisi dogal azalir (hizli OP olmayi yavaslatir).")]
+    [SerializeField] private float costMultiplier = 1.4f;
     #endregion
 
     #region Private Fields
@@ -44,6 +42,12 @@ public class CoreManager : MonoBehaviour
     #region Static API
     /// <summary>Harcanabilir GUNCEL core bakiyesi (kart alinca duser). Sahnede manager yoksa 0 doner.</summary>
     public static int TotalCores => _instance != null ? _instance._totalCores : 0;
+
+    /// <summary>Bu run'da TOPLANAN brut core (harcamadan bagimsiz). Pause ekrani bunu gosterir (canli).</summary>
+    public static int CoresThisRun => _instance != null ? _instance._coresCollectedThisRun : 0;
+
+    /// <summary>Son biten run'da bankaya yazilan brut core. Olum ekrani icin (HandleRunEnd sayaci sifirlar).</summary>
+    public static int LastRunCores { get; private set; }
 
     /// <summary>Core bakiyesi degisince firlar (toplama VEYA kartta harcama). Parametre: yeni bakiye.</summary>
     public static event Action<int> OnCoreCountChanged;
@@ -146,10 +150,15 @@ public class CoreManager : MonoBehaviour
     {
         // Ayri takip: run icinde core HARCANSA da, bankaya bu run'da TOPLANAN brut miktar yazilir.
         if (_coresCollectedThisRun > 0) MetaSave.AddCores(_coresCollectedThisRun);
+        LastRunCores = _coresCollectedThisRun; // run bitiminde son degeri sakla (olum ekrani sifirdan once okuyamayabilir)
         _totalCores = 0;
         _coresCollectedThisRun = 0;
         OnCoreCountChanged?.Invoke(_totalCores);
     }
+
+    /// <summary>Run'i erken birakinca (pause -> ana menu) bu run'da TOPLANAN core'lari bankaya yazar.
+    /// HandleRunEnd idempotent (yazdiktan sonra sayaci sifirlar) -> olum/kazanma ile ust uste gelse de cift yazmaz.</summary>
+    public static void BankRunCores() { if (_instance != null) _instance.HandleRunEnd(); }
 
     private void SpawnCoresInternal(Vector3 position, int amount, float scatter)
     {
@@ -190,21 +199,23 @@ public class CoreManager : MonoBehaviour
         {
             _totalCores -= _nextThreshold;                       // CORE HARCA (kart alindi)
             _thresholdLevel++;                                   // alinan kart sayaci (kendi ic sayaci)
-            _nextThreshold = CostForCardsTaken(_thresholdLevel); // her cardsPerTier kartta bir pahalanir
+            _nextThreshold = CostForCardsTaken(_thresholdLevel); // her kartta ustel pahalanir (5'e yuvarli)
             OnCoreCountChanged?.Invoke(_totalCores);             // bar: harcanmis bakiye + yeni maliyet
             OnThresholdReached?.Invoke(_thresholdLevel);         // upgrade paneli acilir
         }
     }
 
     /// <summary>
-    /// cardsTaken kadar kart alinmisken SIRADAKI kartin maliyeti. Her cardsPerTier kartta bir tier atlanir ve
-    /// maliyet thresholdAdditiveStep kadar artar. Milestone'dan BAGIMSIZ (kendi ic sayaci).
-    /// Ornek (first=10, perTier=3, step=10): 10,10,10, 20,20,20, 30,30,30, 40...
+    /// cardsTaken kadar kart alinmisken SIRADAKI kartin maliyeti: firstThreshold * costMultiplier^cardsTaken,
+    /// 5'in katina YUVARLANIR. Ustel -> gec oyunda kart cok pahali, toplam kart sayisi dusuk (OP olmayi yavaslatir).
+    /// Ornek (first=10, mult=1.4): 10, 15, 20, 25, 40, 55, 75...
     /// </summary>
     private int CostForCardsTaken(int cardsTaken)
     {
-        int tier = cardsTaken / Mathf.Max(1, cardsPerTier);
-        return Mathf.Max(1, firstThreshold + tier * thresholdAdditiveStep);
+        float mult = costMultiplier >= 1.05f ? costMultiplier : 1.4f; // 0/serialize tuzagina karsi
+        float raw = firstThreshold * Mathf.Pow(mult, cardsTaken);
+        int rounded = Mathf.RoundToInt(raw / 5f) * 5; // 5'in katina (yukari/asagi) yuvarla
+        return Mathf.Max(5, rounded);
     }
 
     private void ReturnToPool(CoreItem instance)

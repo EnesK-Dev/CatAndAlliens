@@ -25,7 +25,8 @@ public enum CardStatType
     AmountGlobal,    // RunStats.AmountBonus += amount (+mermi/orb/hedef)
     OrbitalDamage,   // orbital silahi ApplyTrack("damage", amount)
     BlasterDamage,   // blaster  silahi ApplyTrack("damage", amount)
-    BoomerangDamage  // boomerang silahi ApplyTrack("damage", amount)
+    BoomerangDamage, // boomerang silahi ApplyTrack("damage", amount)
+    CurseSpawn       // RunStats.CurseMult += amount (dusman spawn hizi + alive-cap ARTAR; risk stati)
 }
 
 /// <summary>

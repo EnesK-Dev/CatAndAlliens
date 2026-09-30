@@ -45,7 +45,6 @@ public class WeaponLevelTracker : MonoBehaviour
 
     #region Private Fields
     private static WeaponLevelTracker _inst; // UpgradeSelectionUI stat cikma agirligini level'e gore dusurmek icin okur
-    private const int AmountCardsPerBonus = 2; // Amount esigi: kac kart = +1 level. UpgradeSelectionUI ile AYNI olmali.
     private readonly List<Track> _tracks = new List<Track>();
     private bool _built;
     private TMP_FontAsset _font;
@@ -65,6 +64,7 @@ public class WeaponLevelTracker : MonoBehaviour
     /// <summary>Bir statin EN YUKSEK silah track level'i (o stat kartinin cikma orani bununla dusurulur — abuse engeli).</summary>
     public static int StatLevel(UpgradeSelectionUI.UpgradeType type)
     {
+        if (type == UpgradeSelectionUI.UpgradeType.Amount) return RunStats.AmountPicks / RunStats.AmountCardsPerBonus; // meta + in-run ortak
         if (_inst == null) return 0;
         int max = 0;
         var tr = _inst._tracks;
@@ -159,8 +159,14 @@ public class WeaponLevelTracker : MonoBehaviour
                 weapon = weapon,
                 global = isAmount,                                   // Amount -> global (RunStats), ApplyTrack yok
                 fixedCost = isAmount,                                // Amount -> esik sabit
-                cost = isAmount ? AmountCardsPerBonus : firstCost    // Amount 2 kart = +1; digerleri 3'ten baslar
+                cost = isAmount ? RunStats.AmountCardsPerBonus : firstCost // Amount 2 kart = +1; digerleri 3'ten baslar
             };
+            // META build ile gelen level'i goster: track'i meta kart sayisindan (esik replay) baslat. Claws (weapon==null) dahil.
+            if (!t.global)
+            {
+                RunStats.ThresholdReplay(RunStats.MetaStatPicks[(int)t.stat], firstCost, out int mlvl, out int mprog, out int mcost);
+                t.level = mlvl; t.progress = mprog; t.cost = mcost;
+            }
             var row = NewRect("Track", weaponColumn);
             var rh = row.gameObject.AddComponent<HorizontalLayoutGroup>();
             rh.spacing = 12; rh.childAlignment = TextAnchor.MiddleLeft; rh.padding = new RectOffset(24,0,0,0);
@@ -189,12 +195,13 @@ public class WeaponLevelTracker : MonoBehaviour
         foreach (var t in _tracks)
         {
             if (t.stat != type) continue;
+            if (t.global) { ApplyLevel(t); continue; } // Amount: seviye RunStats.AmountPicks'ten TUREME (meta+in-run ortak); sadece silahi yenile
             t.progress++;
             if (t.progress >= t.cost)
             {
                 t.progress -= t.cost;
                 t.level++;
-                if (!t.fixedCost) t.cost++; // Amount haric esik her level artar (3->4->5); Amount sabit 2
+                if (!t.fixedCost) t.cost++; // esik her level artar (3->4->5)
                 ApplyLevel(t);
             }
         }
@@ -216,6 +223,12 @@ public class WeaponLevelTracker : MonoBehaviour
 
     private void RefreshTrack(Track t)
     {
+        if (t.global) // Amount: seviye/ilerleme RunStats.AmountPicks'ten (meta build + in-run BIRLIKTE)
+        {
+            t.level = RunStats.AmountPicks / RunStats.AmountCardsPerBonus;
+            t.progress = RunStats.AmountPicks % RunStats.AmountCardsPerBonus;
+            t.cost = RunStats.AmountCardsPerBonus;
+        }
         if (t.label != null) t.label.text = t.effect + "  <color=#B9B9C9>" + t.statLabel + "</color>  Lv." + t.level;
         int shown = Mathf.Min(t.cost, maxPips); // Amount dahil hepsi pip gosterir (0/2 -> 1/2 -> level)
         while (t.pips.Count < shown) t.pips.Add(NewPip(t.pipRow));

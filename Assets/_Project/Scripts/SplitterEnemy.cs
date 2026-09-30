@@ -32,6 +32,11 @@ public class SplitterEnemy : EnemyController
 
     [Tooltip("SPLITTER BOSS soyu mu? Aciksa tum parcalar (1+2+4+8+16) olene kadar oyun ilerlemesi DURUR (boss dovusu). Normal splitter'da KAPALI.")]
     [SerializeField] private bool isBossLineage = false;
+
+    [Header("Boss Son Parca Odulu (sadece boss soyu + splitDepth=0)")]
+    [Tooltip("SADECE boss soyunun SON parcasi (artik bolunmeyen) bu kadar core dusurur (yuksek odul; odul sona toplanir). <=0 ise 15.")]
+    [SerializeField] private int finalPieceCoreMin = 15;
+    [SerializeField] private int finalPieceCoreMax = 20;
     #endregion
 
     #region Boss Soyu (dovus takibi)
@@ -71,6 +76,17 @@ public class SplitterEnemy : EnemyController
     #endregion
 
     #region Overrides
+    /// <summary>Core drop: boss soyu + SON parca (splitDepth<=0, artik bolunmez) -> yuksek odul; digerleri taban.</summary>
+    protected override int GetCoreDropAmount()
+    {
+        if (isBossLineage && splitDepth <= 0)
+        {
+            int min = finalPieceCoreMin > 0 ? finalPieceCoreMin : 15;                 // 0 serialize tuzagina karsi
+            return Random.Range(min, Mathf.Max(min, finalPieceCoreMax) + 1);
+        }
+        return base.GetCoreDropAmount();
+    }
+
     /// <summary>Olunce kucuk parcalara bolunur. Nuke/ulti ile olduysa (suppressed) bolunmez.</summary>
     protected override void OnDeath(bool suppressed)
     {

@@ -24,7 +24,8 @@ public class UpgradeSelectionUI : MonoBehaviour
         Amount,       // +1 mermi/orb/yon/hedef -> RunStats.AmountBonus (ORTAK)
         Charge,       // -> SADECE Orbital hasari (tracker)
         Firepower,    // -> SADECE Auto-Blaster hasari (tracker)
-        Impact        // -> SADECE Boomerang hasari (tracker)
+        Impact,       // -> SADECE Boomerang hasari (tracker)
+        Curse         // -> RunStats.CurseMult (dusman spawn hizi + alive-cap ARTAR; risk stati). Global.
     }
 
     /// <summary>Bir stat upgrade seceneginin verisi — Inspector'dan doldurulur (denge burada tutulur).</summary>
@@ -74,7 +75,7 @@ public class UpgradeSelectionUI : MonoBehaviour
     [Tooltip("Reroll butonundaki yazi (kalan hak gosterilir). Bos ise atlanir.")]
     [SerializeField] private TMP_Text rerollLabel;
     [Tooltip("Panel her acildiginda kac reroll hakki. 2 = 2x reroll.")]
-    [SerializeField] private int rerollsPerOpen = 2;
+    [SerializeField] private int rerollsPerOpen = 1;
 
     [Tooltip("Bos birakilirsa Awake'te otomatik bulunur.")]
     [SerializeField] private player playerRef;
@@ -97,6 +98,7 @@ public class UpgradeSelectionUI : MonoBehaviour
     [SerializeField] private Sprite weaponCardSprite;      // mor
     [SerializeField] private Sprite greyCardSprite;        // gri cerceve (yeni statlar: gri + tint)
     [SerializeField] private Sprite amountCardSprite;      // Amount icin rengarenk gradient cerceve (guclu his)
+    [SerializeField] private Sprite curseCardSprite;       // Curse icin SIYAH cerceve (bos ise grey frame + siyah tint)
     [Tooltip("Bir stat, ilgili silah track'i her level atladikca bu carpanla NADIR gelir (0.7 = %30 daha az). Abuse engeli.")]
     [SerializeField] private float levelWeightFalloff = 0.7f;
 
@@ -116,8 +118,6 @@ public class UpgradeSelectionUI : MonoBehaviour
 
     #region Private Fields
     private static UpgradeSelectionUI _instance;
-    private const int AmountCardsPerBonus = 2; // Amount: kac AMOUNT karti = +1 amount (tum silahlara). WeaponLevelTracker ile AYNI olmali.
-    private int _amountPickCount;              // bu run'da secilen Amount karti sayisi; esige ulasinca AmountBonus += 1
     private int _pendingSelections;
     private int _rerollsLeft;
     private bool _isOpen;
@@ -252,8 +252,17 @@ public class UpgradeSelectionUI : MonoBehaviour
     /// <summary>Reroll butonu yazisini/etkinligini gunceller (kalan hak; 0 ise pasif).</summary>
     private void UpdateRerollButton()
     {
-        if (rerollButton != null) rerollButton.interactable = _rerollsLeft > 0;
-        if (rerollLabel != null) rerollLabel.SetText("REROLL ({0})", _rerollsLeft);
+        bool canReroll = _rerollsLeft > 0;
+        if (rerollButton != null)
+        {
+            rerollButton.interactable = canReroll;
+            // Inactive olunca BUTON + YAZI birlikte soluklassin. ColorTint transition sadece butonun
+            // targetGraphic'ini soldurur (child TMP'yi degil), o yuzden CanvasGroup alpha ile hepsini birden soldururuz.
+            var cg = rerollButton.GetComponent<CanvasGroup>();
+            if (cg == null) cg = rerollButton.gameObject.AddComponent<CanvasGroup>();
+            cg.alpha = canReroll ? 1f : 0.4f;
+        }
+        if (rerollLabel != null) rerollLabel.SetText("REROLL"); // tek kullanim: kalan sayi gosterme
     }
 
     private void OpenPanel()
@@ -409,6 +418,7 @@ public class UpgradeSelectionUI : MonoBehaviour
             case UpgradeType.Charge:      frame = greyCardSprite; tint = new Color(0.80f, 0.38f, 0.98f, 1f); break; // mor (orbital)
             case UpgradeType.Firepower:   frame = greyCardSprite; tint = new Color(1f, 0.50f, 0.14f, 1f);   break; // turuncu (blaster)
             case UpgradeType.Impact:      frame = greyCardSprite; tint = new Color(0.24f, 0.86f, 0.52f, 1f); break; // yesil (boomerang)
+            case UpgradeType.Curse:       frame = curseCardSprite != null ? curseCardSprite : greyCardSprite; tint = cardTint; break; // gri kart (curse.png ikonu ayirt eder)
             default:                      frame = greyCardSprite; break;
         }
         if (frame == null) frame = greyCardSprite; // guvenlik
@@ -634,13 +644,15 @@ public class UpgradeSelectionUI : MonoBehaviour
             case UpgradeType.AttackRange: // Area: menzil/yaricap
                 RunStats.AreaMult += def.amount;
                 break;
-            case UpgradeType.GainHealth:  // Max Health: kalici +can
-                playerRef.AddMaxHealth(def.amount);
+            case UpgradeType.GainHealth:  // Kalp karti: MAX can'i +amount arttirir VE eksik cani +amount doldurur (TAM degil)
+                playerRef.AddMaxHealthAndHeal(def.amount);
                 break;
-            case UpgradeType.Amount:      // +sayi (mermi/orb/yon/hedef) — HER AmountCardsPerBonus (2) kartta bir kez uygulanir
-                _amountPickCount++;
-                if (_amountPickCount % AmountCardsPerBonus == 0)
-                    RunStats.AmountBonus += Mathf.Max(1, Mathf.RoundToInt(def.amount)); // 2 Amount karti = tum silahlara +1
+            case UpgradeType.Amount:      // her kart = 1 pick (meta ile ORTAK); AmountBonus = picks/2
+                RunStats.AmountPicks += 1;
+                RunStats.RecomputeAmountBonus();
+                break;
+            case UpgradeType.Curse:       // Curse: dusman spawn hizi + alive-cap ARTAR (risk stati)
+                RunStats.CurseMult += def.amount;
                 break;
         }
         RefreshWeapons(); // cache'li silahlar (orbital/multislash) yeni stat'i hemen yansitsin

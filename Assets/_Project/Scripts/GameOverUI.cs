@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 /// <summary>
 /// Player öldüğünde "YOU DIED" ekranını gösterir. player.cs'in static OnPlayerDied
@@ -12,6 +13,9 @@ public class GameOverUI : MonoBehaviour
     [Header("Referanslar")]
     [Tooltip("Ölünce açılacak GameOver paneli (YOU DIED + butonlar). Başlangıçta kapalı olmalı.")]
     [SerializeField] private GameObject gameOverPanel;
+
+    [Tooltip("Bu run'da toplanan core sayisini gosteren yazi (yaninda core ikonu). Bos ise atlanir.")]
+    [SerializeField] private TMP_Text coreCountText;
 
     [Tooltip("Sahne geçişlerini yapan SceneLoader objesi. Butonlar dolaylı olarak buna bağlanır.")]
     [SerializeField] private SceneLoader sceneLoader;
@@ -78,6 +82,13 @@ public class GameOverUI : MonoBehaviour
 
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
+
+        if (coreCountText != null)
+        {
+            // Olumde HandleRunEnd sayaci sifirlamis olabilir -> canli 0 ise son run degerini goster
+            int n = CoreManager.CoresThisRun > 0 ? CoreManager.CoresThisRun : CoreManager.LastRunCores;
+            coreCountText.SetText("{0}", n);
+        }
 
         if (pauseGameOnDeath)
             Time.timeScale = 0f;

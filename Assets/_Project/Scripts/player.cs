@@ -692,7 +692,7 @@ public class player : MonoBehaviour
     /// <summary>Guncel vurus hasari (combo carpani HARIC taban deger).</summary>
     public float GetDamage() => playerDamage * RunStats.DamageMult;
     /// <summary>Juice: hasara gore pence gorsel olcegi (cap 2.2x).</summary>
-    private float ClawVisualScale() => Mathf.Min(2.9f, 0.6f + Mathf.Max(0f, GetDamage() - 25f) / 40f);  // kucuk basla, belirgin buyu
+    private float ClawVisualScale() => Mathf.Min(3.0f, 1.2f + Mathf.Max(0f, GetDamage() - 25f) / 40f);  // taban 1.2 (cok kucuk gorunmesin), hasarla buyu
     /// <summary>Juice: hasara gore pence renk isisi (0..1).</summary>
     private float ClawTintT() => Mathf.Clamp01((GetDamage() - 25f) / 110f);
     /// <summary>Guncel saldiri bekleme suresi (saniye). Kucuk = hizli.</summary>
@@ -740,6 +740,16 @@ public class player : MonoBehaviour
     {
         currentHealth = Mathf.Clamp(currentHealth + amount, 0f, maxHealth);
         OnHealthChanged?.Invoke(currentHealth);
+    }
+
+    /// <summary>Kalp karti: MAX can'i +amount arttirir VE mevcut cani +amount doldurur (TAM doldurmaz, sadece +amount).</summary>
+    public void AddMaxHealthAndHeal(float amount)
+    {
+        if (amount == 0f) return;
+        maxHealth = Mathf.Max(1f, maxHealth + amount);
+        currentHealth = Mathf.Clamp(currentHealth + amount, 0f, maxHealth);
+        OnHealthChanged?.Invoke(currentHealth);
+        ApplyBodyScale(); // max can arttikca oyuncu biraz buyusun
     }
 
     /// <summary>Maksimum cani KALICI arttirir (deck can karti). Run baslangicinda cagrilir; cani da doldurur.</summary>

@@ -52,6 +52,8 @@ public class AutoBlasterWeapon : WeaponBase
     #endregion
 
     #region Overrides
+    public override int GetTrackLevel(string key) => key switch { "firerate" => _fireRateLevel, "damage" => _damageLevel, "targets" => _targetLevel, _ => 0 };
+
     public override void ApplyTrack(string key, int times)
     {
         if (times <= 0) return;
@@ -95,7 +97,7 @@ public class AutoBlasterWeapon : WeaponBase
     /// <summary>En yakin 'targets' FARKLI dusmana birer mermi atar. Atilan mermi sayisini dondurur (0 = dusman yok).</summary>
     private int FireVolley(int targets)
     {
-        int count = Physics2D.OverlapCircleNonAlloc(transform.position, range, _hitBuffer, enemyLayers);
+        int count = Physics2D.OverlapCircleNonAlloc(transform.position, range * RunStats.AreaMult, _hitBuffer, enemyLayers); // Area tum silahlara etki eder
         int fired = 0;
 
         for (int t = 0; t < targets; t++)

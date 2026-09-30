@@ -65,6 +65,8 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     [SerializeField] private float laserDuration = 0.5f;
     [Tooltip("Lazer YERDE dururken kac saniyede bir hasar verir (tick araligi). Isin gorundugu sure boyunca surekli vurur. <=0 ise 0.4.")]
     [SerializeField] private float laserTickInterval = 0.4f;
+    [Tooltip("Lazer hasar KUTUSUNUN genisligi (dunya birimi) ~gorsel isin kalinligi. Ince raycast yerine bu genislikte tarar -> isina SONRADAN giren de yer. <=0 ise 1.")]
+    [SerializeField] private float laserDamageWidth = 1f;
     [SerializeField] private float minAttackCooldown = 3f;
     [SerializeField] private float maxAttackCooldown = 7f;
     [SerializeField] private LayerMask obstacleLayers;
@@ -680,8 +682,8 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
         // Lazer YERDE kaldigi laserDuration boyunca SUREKLI hasar: her laserTickInterval'da bir raycast + hasar.
         // Isin yonu sabit; oyuncu isinin icinden CIKARSA hasar durur, tekrar girerse devam eder.
-        LayerMask damageLayerMask = obstacleLayers | playerLayer;
         float tickInterval = laserTickInterval > 0.01f ? laserTickInterval : 0.4f; // 0 serialize tuzagina karsi
+        float dmgWidth = (laserDamageWidth > 0.01f ? laserDamageWidth : 1f) * widthMultiplier; // gorsel genislige yakin + zorlukla buyur
         float activeTimer = 0f;
         float tickTimer = tickInterval; // >= interval -> ilk kare hemen vurur (ateslenir vurmaz)
         while (activeTimer < laserDuration)
@@ -690,11 +692,21 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
             if (tickTimer >= tickInterval)
             {
                 tickTimer = 0f;
-                RaycastHit2D hit = Physics2D.Raycast(transform.position, moveDirection, Mathf.Infinity, damageLayerMask);
-                if (hit.collider != null)
+                // Isin GENISLIGI kadar bir KUTU ile tara (ince raycast yerine) -> isinin icine sonradan giren de yer.
+                Vector2 origin = transform.position;
+                RaycastHit2D obs = Physics2D.Raycast(origin, moveDirection, Mathf.Infinity, obstacleLayers); // isin bir duvarda biter
+                Vector2 endP = obs.collider != null ? obs.point : origin + moveDirection * 50f;
+                float len = Vector2.Distance(origin, endP);
+                if (len > 0.05f)
                 {
-                    player cat = hit.collider.GetComponent<player>();
-                    if (cat != null) cat.TakeDamage(laserDamage);
+                    Vector2 center = (origin + endP) * 0.5f;
+                    float angleDeg = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
+                    Collider2D hitP = Physics2D.OverlapBox(center, new Vector2(len, dmgWidth), angleDeg, playerLayer);
+                    if (hitP != null)
+                    {
+                        player cat = hitP.GetComponent<player>();
+                        if (cat != null) cat.TakeDamage(laserDamage);
+                    }
                 }
             }
             activeTimer += Time.deltaTime;
@@ -748,13 +760,21 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     protected virtual void OnDeath(bool suppressed) { }
 
     /// <summary>Alt siniflar icin: oyuncuyu bu dusmanla oldurmeden dusmani KENDISI oldurur (ornek: kamikaze patlamasi).</summary>
+    /// <summary>Bu dusman olunce dusurecegi core miktari (elite/normal araligindan rastgele). Alt siniflar ozellestirir (SplitterEnemy son parca).</summary>
+    protected virtual int GetCoreDropAmount()
+    {
+        return canUseLaser
+            ? Random.Range(coreDropEliteMin, Mathf.Max(coreDropEliteMin, coreDropEliteMax) + 1)
+            : Random.Range(coreDropNormal, Mathf.Max(coreDropNormal, coreDropNormalMax) + 1);
+    }
+
     protected void KillSelf(bool dropLoot = true) => Die(dropLoot);
 
     /// <summary>Alt siniflarin oyuncu konumuna erismesi icin (kovaladigi hedef).</summary>
     protected Transform PlayerTransform => playerTransform;
 
     /// <summary>Bu dusmanin temel rengi (flash sonrasi donulen). Splitter yavrularini kendi rengine boyamak icin okur.</summary>
-    protected Color BaseColor => baseColor;
+    public Color BaseColor => baseColor; // boss minion iz rengi disaridan da okunur
 
     /// <summary>Dis sistem (ornek: splitter) bu dusmanin rengini ayarlar — hem gorsel hem flash-donus rengi. Awake sonrasi cagrilmali.</summary>
     public void SetTint(Color c)
@@ -800,9 +820,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
             if (playDeathAnim) DifficultyManager.RegisterKill(); // adaptif can: normal (nuke/ulti degil) oyuncu olumu
             // Olum aninda core birak — hem normal hem elite ARALIKTAN rastgele (ust sinir min'e esitse sabit).
             // Random.Range(int, int) ust sinir HARIC oldugu icin +1. Mathf.Max: yanlis/eksik ayarda kilit onler.
-            int coreAmount = canUseLaser
-                ? Random.Range(coreDropEliteMin, Mathf.Max(coreDropEliteMin, coreDropEliteMax) + 1)
-                : Random.Range(coreDropNormal, Mathf.Max(coreDropNormal, coreDropNormalMax) + 1);
+            int coreAmount = GetCoreDropAmount();
             if (!_noCoreDrop) CoreManager.SpawnCores(transform.position, coreAmount);
 
             // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)

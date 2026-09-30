@@ -62,6 +62,7 @@ public class DeckApplier : MonoBehaviour
             var w = FindWeapon(kv.Key.Substring(0, sep));
             if (w != null) w.ApplyTrack(kv.Key.Substring(sep + 1), kv.Value);
         }
+        ApplyMetaLevels(); // META level'li statlari esikle silah/claws'a uygula (meta = in-run)
         // Multi-Slash: her ekstra kopya +1 yon (1 kopya = temel 2 yon).
         if (multislashCopies > 1)
         {
@@ -93,24 +94,51 @@ public class DeckApplier : MonoBehaviour
 
     #region Private Methods
 
+    private const float ClawsDamagePerLevel = 20f; // WeaponLevelTracker ile AYNI olmali (Might claws hasari/level)
+    private const int TrackFirstCost = 3;          // WeaponLevelTracker.firstCost ile AYNI olmali (esik 3->4->5)
+
+    /// <summary>Deck stat karti: LEVEL'li statlar (Might/Haste/Area/Charge/Firepower/Impact) sadece SAYILIR (post-pass esikle uygular),
+    /// boylece meta = in-run (ayni esik + tracker'da gorunur). Global/degismeyen statlar (Amount/MaxHealth/Curse vb.) burada uygulanir.</summary>
     private void ApplyStat(CardDefinition card)
     {
+        // Her deck karti = 1 PICK. card.amount ESKI efekt buyuklugu (hasar/carpan), pick sayisi DEGIL. Stacking deck'te ayri girisle olur.
+        const int cnt = 1;
         switch (card.statType)
         {
-            case CardStatType.Damage:         if (playerRef != null) { playerRef.AddDamage(card.amount); playerRef.MultiplyDamage(card.amountMult); } break;
-            case CardStatType.AttackSpeed:    if (playerRef != null) playerRef.ApplyAttackSpeedMultiplier(card.amount); break;
-            case CardStatType.AttackRange:    if (playerRef != null) playerRef.AddAttackRange(card.amount); break;
-            case CardStatType.MaxHealth:      if (playerRef != null) playerRef.AddMaxHealth(card.amount); break;
+            // ---- LEVEL'li: sadece say (post-pass esikle silah/claws'a uygular) ----
+            case CardStatType.Damage:          RunStats.MetaStatPicks[(int)UpgradeSelectionUI.UpgradeType.Damage]      += cnt; break; // Might
+            case CardStatType.OrbitalDamage:   RunStats.MetaStatPicks[(int)UpgradeSelectionUI.UpgradeType.Charge]      += cnt; break;
+            case CardStatType.BlasterDamage:   RunStats.MetaStatPicks[(int)UpgradeSelectionUI.UpgradeType.Firepower]   += cnt; break;
+            case CardStatType.BoomerangDamage: RunStats.MetaStatPicks[(int)UpgradeSelectionUI.UpgradeType.Impact]      += cnt; break;
+            // ---- Haste/Area: global (per card) + LEVEL'li say (post-pass silah track'i) ----
+            case CardStatType.HasteGlobal:     RunStats.CooldownMult = Mathf.Max(RunStats.MinCooldownMult, RunStats.CooldownMult * card.amount); RunStats.MetaStatPicks[(int)UpgradeSelectionUI.UpgradeType.AttackSpeed] += cnt; break;
+            case CardStatType.AreaGlobal:      RunStats.AreaMult += card.amount; RunStats.MetaStatPicks[(int)UpgradeSelectionUI.UpgradeType.AttackRange] += cnt; break;
+            // ---- Amount: AmountPicks (2 kart = +1) ----
+            case CardStatType.AmountGlobal:    RunStats.AmountPicks += cnt; RunStats.RecomputeAmountBonus(); break;
+            // ---- Salt global / eski / degismeyenler ----
+            case CardStatType.AttackSpeed:    if (playerRef != null) playerRef.ApplyAttackSpeedMultiplier(card.amount); break; // eski tip
+            case CardStatType.AttackRange:    if (playerRef != null) playerRef.AddAttackRange(card.amount); break;            // eski tip
+            case CardStatType.MaxHealth:      if (playerRef != null) playerRef.AddMaxHealthAndHeal(card.amount); break;
             case CardStatType.DashCooldown:   if (playerRef != null) playerRef.AddDashCooldown(card.amount); break;
             case CardStatType.FoodDropChance: RunStats.FoodDropChanceBonus += card.amount; break;
             case CardStatType.UltimateDamage: RunStats.UltimateDamageBonus += card.amount; break;
-            case CardStatType.HasteGlobal:    RunStats.CooldownMult = Mathf.Max(RunStats.MinCooldownMult, RunStats.CooldownMult * card.amount); break;
-            case CardStatType.AreaGlobal:     RunStats.AreaMult += card.amount; break;
-            case CardStatType.AmountGlobal:   RunStats.AmountBonus += Mathf.Max(1, Mathf.RoundToInt(card.amount)); break;
-            case CardStatType.OrbitalDamage:  { var w = FindWeapon("orbital");  if (w != null) w.ApplyTrack("damage", Mathf.Max(1, Mathf.RoundToInt(card.amount))); } break;
-            case CardStatType.BlasterDamage:  { var w = FindWeapon("blaster");   if (w != null) w.ApplyTrack("damage", Mathf.Max(1, Mathf.RoundToInt(card.amount))); } break;
-            case CardStatType.BoomerangDamage:{ var w = FindWeapon("boomerang"); if (w != null) w.ApplyTrack("damage", Mathf.Max(1, Mathf.RoundToInt(card.amount))); } break;
+            case CardStatType.CurseSpawn:     RunStats.CurseMult += card.amount; break;
         }
+    }
+
+    /// <summary>Meta level'li statlari ESIKLE (3->4->5) silah/claws track'lerine uygular. In-run ile birebir ayni.</summary>
+    private void ApplyMetaLevels()
+    {
+        int L(UpgradeSelectionUI.UpgradeType t) => RunStats.ThresholdLevels(RunStats.MetaStatPicks[(int)t], TrackFirstCost);
+        int might = L(UpgradeSelectionUI.UpgradeType.Damage);
+        if (might > 0) { if (playerRef != null) playerRef.AddDamage(ClawsDamagePerLevel * might); var ms = FindWeapon("multislash"); if (ms != null) ms.ApplyTrack("damage", might); }
+        int haste = L(UpgradeSelectionUI.UpgradeType.AttackSpeed);
+        if (haste > 0) { var o = FindWeapon("orbital"); if (o != null) o.ApplyTrack("speed", haste); var b = FindWeapon("boomerang"); if (b != null) b.ApplyTrack("speed", haste); var bl = FindWeapon("blaster"); if (bl != null) bl.ApplyTrack("firerate", haste); }
+        int area = L(UpgradeSelectionUI.UpgradeType.AttackRange);
+        if (area > 0) { var o = FindWeapon("orbital"); if (o != null) o.ApplyTrack("radius", area); }
+        int ch = L(UpgradeSelectionUI.UpgradeType.Charge);     if (ch > 0) { var w = FindWeapon("orbital");   if (w != null) w.ApplyTrack("damage", ch); }
+        int fp = L(UpgradeSelectionUI.UpgradeType.Firepower);  if (fp > 0) { var w = FindWeapon("blaster");   if (w != null) w.ApplyTrack("damage", fp); }
+        int im = L(UpgradeSelectionUI.UpgradeType.Impact);     if (im > 0) { var w = FindWeapon("boomerang"); if (w != null) w.ApplyTrack("damage", im); }
     }
 
     /// <summary>weaponId'ye karsilik gelen silahi (tip adiyla eslesir) alir/aktif eder. Ornek: "blaster" -> AutoBlasterWeapon.</summary>

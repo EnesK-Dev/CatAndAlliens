@@ -166,6 +166,8 @@ public class EnemyGenerator : MonoBehaviour
             interval = Mathf.Lerp(maxSpawnInterval, minSpawnInterval, factor);
         }
 
+        interval /= Mathf.Max(1f, RunStats.CurseMult); // Curse: spawn araligini kisaltir (daha sik dusman)
+
         // Bos alan hizlandirmasi: alandaki dusman hedefin altindaysa, bosluk oranina gore araligi
         // emptyFieldInterval'e dogru kis. Boylece guclu oyuncu alani bosaltinca yeniler HIZLI gelir,
         // gucsuz oyuncu (alan dolu) icin hicbir sey degismez. Cap zaten toplam yogunlugu sinirlar.
@@ -279,9 +281,10 @@ public class EnemyGenerator : MonoBehaviour
     /// <summary>O anki gecerli eszamanli dusman limiti: son milestone'da (varsa) ayri limit, degilse normal.</summary>
     private int EffectiveMaxAlive()
     {
+        float curse = Mathf.Max(1f, RunStats.CurseMult); // Curse: alive-cap'i de buyut (spawn hizi cap'e takilmasin)
         if (finalMilestoneMaxAlive > 0 && DifficultyManager.CurrentMilestone >= finalMilestoneIndex)
-            return finalMilestoneMaxAlive;
-        return maxAliveEnemies;
+            return Mathf.RoundToInt(finalMilestoneMaxAlive * curse);
+        return Mathf.RoundToInt(maxAliveEnemies * curse);
     }
 
     /// <summary>Giris gecerli mi ve milestone'una ulasildi mi? unlockMilestone &lt;= 0 ise bastan aciktir (manager yoksa da).</summary>

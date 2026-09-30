@@ -4326,10 +4326,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1760979342}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.1, y: 0.88}
-  m_AnchorMax: {x: 0.9, y: 0.98}
-  m_AnchoredPosition: {x: -595, y: -637.0206}
-  m_SizeDelta: {x: 24, y: -47.113342}
+  m_AnchorMin: {x: 0.1, y: 1}
+  m_AnchorMax: {x: 0.9, y: 1}
+  m_AnchoredPosition: {x: -595, y: -738.5206}
+  m_SizeDelta: {x: 24, y: 97.88666}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &819482984
 MonoBehaviour:
@@ -4351,7 +4351,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: STATS
+  m_text: "\u2193 STATS \u2193"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9301dd4b527b502bb81949696689165f, type: 2}
   m_sharedMaterial: {fileID: 7647708993160149193, guid: 9301dd4b527b502bb81949696689165f, type: 2}
@@ -8140,10 +8140,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1760979342}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.1, y: 0.88}
-  m_AnchorMax: {x: 0.9, y: 0.98}
-  m_AnchoredPosition: {x: 631.00006, y: -54.02066}
-  m_SizeDelta: {x: 24, y: -47.113342}
+  m_AnchorMin: {x: 0.1, y: 1}
+  m_AnchorMax: {x: 0.9, y: 1}
+  m_AnchoredPosition: {x: 631.00006, y: -132.49998}
+  m_SizeDelta: {x: 24, y: 97.88669}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1755119319
 MonoBehaviour:
@@ -8165,7 +8165,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: ITEMS
+  m_text: "\u2193 ITEMS \u2193"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9301dd4b527b502bb81949696689165f, type: 2}
   m_sharedMaterial: {fileID: 7647708993160149193, guid: 9301dd4b527b502bb81949696689165f, type: 2}

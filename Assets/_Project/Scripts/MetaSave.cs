@@ -13,7 +13,8 @@ public static class MetaSave
     public const int SlotCount = 3;
     public const int MaxCardsPerSlot = 25; // 3 silah + 20 stat
     public const int WeaponSlotCap = 3;   // kafanin cevresindeki 3 silah slotu (orta index 1 = combo)
-    private const string PrefsKey = "MeowvivorsMeta_v2"; // v2: owned artik adet-tabanli
+    private const string PrefsKey = "MeowvivorsMeta_v3"; // v3: guncelleme ile TUM oyuncular sifirdan baslar (yeni anahtar = eski v2 verisi okunmaz)
+    private const string OldPrefsKey = "MeowvivorsMeta_v2"; // temizlik: v3'e gecince eski veriyi sil
     #endregion
 
     #region Data Model
@@ -311,6 +312,7 @@ public static class MetaSave
 
     private static void Load()
     {
+        if (PlayerPrefs.HasKey(OldPrefsKey)) PlayerPrefs.DeleteKey(OldPrefsKey); // v3: eski v2 kaydini birak (orphan kalmasin)
         string json = PlayerPrefs.GetString(PrefsKey, "");
         if (string.IsNullOrEmpty(json)) { _data = FreshData(); return; }
         try { _data = JsonUtility.FromJson<MetaData>(json); } catch { _data = null; }

@@ -71,6 +71,8 @@ public class BoomerangWeapon : WeaponBase
     #endregion
 
     #region Overrides
+    public override int GetTrackLevel(string key) => key switch { "count" => _countLevel, "speed" => _speedLevel, "damage" => _damageLevel, "cooldown" => _cooldownLevel, _ => 0 };
+
     public override void ApplyTrack(string key, int times)
     {
         if (times <= 0) return;

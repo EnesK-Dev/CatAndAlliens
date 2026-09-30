@@ -70,6 +70,7 @@
     <Compile Include="Assets/_Project/Scripts/LaserVisual.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyController.cs" />
     <Compile Include="Assets/_Project/Scripts/DamagePopupManager.cs" />
+    <Compile Include="Assets/_Project/Scripts/BossMinionSpawner.cs" />
     <Compile Include="Assets/_Project/Scripts/EnemyBullet.cs" />
     <Compile Include="Assets/_Project/Scripts/SplashIntro.cs" />
     <Compile Include="Assets/_Project/Scripts/CameraFollow.cs" />

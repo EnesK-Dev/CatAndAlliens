@@ -36,7 +36,15 @@ public class MultiSlashWeapon : WeaponBase
     #endregion
 
     #region Overrides
-    protected override void OnAcquired() => ApplyDirections();
+    protected override void OnAcquired()
+    {
+        // Multi-Slash MEVCUT pence saldirisini surdurur; Sharp Claws ayri alinmamis olsa bile melee'yi ac
+        // (yoksa _clawEquipped=false kalir ve HandleVampireHunterAttack hic calismaz -> vuruş/sprite yok).
+        if (playerRef != null) playerRef.SetClawEquipped(true);
+        ApplyDirections();
+    }
+
+    public override int GetTrackLevel(string key) => key switch { "dir" => _dirLevel, "damage" => _damageLevel, _ => 0 };
 
     public override void ApplyTrack(string key, int times)
     {

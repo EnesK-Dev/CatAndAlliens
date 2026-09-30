@@ -206,7 +206,7 @@ MonoBehaviour:
   dashAfterImageAlpha: 0.3
   dashAfterImageFadeTime: 0.25
   dashAfterImageColor: {r: 0.7, g: 0.9, b: 1, a: 1}
-  laserDamage: 1
+  laserDamage: 3
   bodyContactDamage: 4
   contactDamageCooldown: 1
   chargeDuration: 1.5

@@ -37,6 +37,9 @@ public class DifficultyManager : MonoBehaviour
     [Tooltip("Dusman HIZ carpani tavani (ayni kill-hizi verisi). 1.25 = en fazla %25 hizli.")]
     [SerializeField] private float maxEnemySpeedMult = 1.25f;
 
+    [Tooltip("Cok hizli kesen oyuncuda food drop sansi bu carpana kadar DUSER (0.3 = %70 az food). Asiri can/ulti spam'ini onler. <=0.02 ise 0.3.")]
+    [SerializeField] private float minFoodDropMult = 0.3f;
+
     [Header("Debug")]
     [Tooltip("TEST: Oyunu bu MILESTONE'dan baslat. 0 = normal bas. 1 = dash boss'tan, 2 = splitter boss'tan... " +
              "Sadece hedef milestone tetiklenir (oncekiler atlanir). RELEASE'de 0 birak!")]
@@ -178,6 +181,7 @@ public class DifficultyManager : MonoBehaviour
         {
             RunStats.EnemyHealthMult = 1f;
             RunStats.EnemySpeedMult = 1f;
+            RunStats.FoodDropRateMult = 1f;
             return;
         }
         _windowTimer += Time.deltaTime;
@@ -191,6 +195,11 @@ public class DifficultyManager : MonoBehaviour
 
         float speedTarget = Mathf.Lerp(1f, Mathf.Max(1f, maxEnemySpeedMult), u);
         RunStats.EnemySpeedMult = Mathf.Lerp(RunStats.EnemySpeedMult, speedTarget, 0.5f); // ayni veri, hiz de artar
+
+        // Hizli kesende food drop DUSER (asiri can/ulti onlenir) — ayni u verisi.
+        float minF = minFoodDropMult > 0.02f ? minFoodDropMult : 0.3f; // 0 serialize tuzagina karsi
+        float foodTarget = Mathf.Lerp(1f, minF, u);
+        RunStats.FoodDropRateMult = Mathf.Lerp(RunStats.FoodDropRateMult, foodTarget, 0.5f);
 
         _killsInWindow = 0;
         _windowTimer = 0f;
