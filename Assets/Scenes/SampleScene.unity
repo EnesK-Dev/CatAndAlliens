@@ -297,7 +297,7 @@ MonoBehaviour:
   attackCooldown: 0.85
   minAttackCooldown: 0.1
   autoAttackRange: 2.4
-  playerDamage: 25
+  playerDamage: 40
   attackRadius: 0.3
   attackKnockback: 0.3
   attackVisualAngleOffset: 10
@@ -3712,7 +3712,7 @@ MonoBehaviour:
   coreItemPrefab: {fileID: 2881820700993589565, guid: 324b8aadc43b4ebc088815f73e215aac, type: 3}
   initialPoolSize: 60
   scatterRadius: 0.5
-  firstThreshold: 10
+  firstThreshold: 5
   costMultiplier: 1.5
 --- !u!4 &416553798
 Transform:

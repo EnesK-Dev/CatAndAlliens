@@ -22,7 +22,7 @@ public class CoreManager : MonoBehaviour
 
     [Header("Upgrade Esigi (FAZ 5) — USTEL model")]
     [Tooltip("Ilk kartin maliyeti (kac core). Ornek 10.")]
-    [SerializeField] private int firstThreshold = 10;
+    [SerializeField] private int firstThreshold = 5;
 
     [Tooltip("Her kartta maliyet bu carpanla buyur (USTEL). 1.4 = her kart %40 daha pahali; sonuc 5'in katina yuvarlanir.\n" +
              "Ornek (first=10, 1.4): 10, 15, 20, 25, 40, 55, 75... Kart sayisi dogal azalir (hizli OP olmayi yavaslatir).")]
