@@ -18,13 +18,13 @@ definitions:
     name: Activate Unity (Personal - online login)
     script: |
       /Applications/Unity/Hub/Editor/6000.3.15f1/Unity.app/Contents/MacOS/Unity \
-        -batchmode -nographics -quit -logFile /dev/stdout \
+        -batchmode -nographics -quit -logFile - \
         -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD"
   unity_return: &unity_return
     name: Return Unity license (Personal seat'i serbest birak)
     script: |
       /Applications/Unity/Hub/Editor/6000.3.15f1/Unity.app/Contents/MacOS/Unity \
-        -batchmode -nographics -quit -returnlicense -logFile /dev/stdout \
+        -batchmode -nographics -quit -returnlicense -logFile - \
         -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" || true
 
 workflows:
@@ -45,7 +45,7 @@ workflows:
       - name: Build iOS Xcode project (Unity)
         script: |
           /Applications/Unity/Hub/Editor/6000.3.15f1/Unity.app/Contents/MacOS/Unity \
-            -batchmode -nographics -quit -logFile /dev/stdout \
+            -batchmode -nographics -quit -logFile - \
             -projectPath . -executeMethod BuildScript.BuildIos -buildTarget iOS
       - *unity_return
     artifacts:
@@ -79,7 +79,7 @@ workflows:
       - name: Build iOS Xcode project (Unity)
         script: |
           /Applications/Unity/Hub/Editor/6000.3.15f1/Unity.app/Contents/MacOS/Unity \
-            -batchmode -nographics -quit -logFile /dev/stdout \
+            -batchmode -nographics -quit -logFile - \
             -projectPath . -executeMethod BuildScript.BuildIos -buildTarget iOS
       - *unity_return
       - name: Set up code signing
