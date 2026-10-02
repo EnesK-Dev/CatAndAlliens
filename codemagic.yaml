@@ -1,20 +1,27 @@
 # ============================================================================
-# Meowvivors — Codemagic CI/CD (Unity 6000.3.15f1 -> iOS)   [Unity PERSONAL lisans]
-# DUZELTI: UNITY_HOME yerine `unity` komutunu kullan (Codemagic PATH'te var)
+# Meowvivors — Codemagic CI/CD (Unity 6000.3.15f1 -> iOS)
+# DÜZELTME: unity-hub ile Unity kurma + executable tam yolu
 # ============================================================================
 
 definitions:
+  unity_setup: &unity_setup
+    name: Install Unity via unity-hub
+    script: |
+      # unity-hub kur + Unity 6000.3.15f1 indir
+      brew install --cask unity-hub
+      /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install \
+        --version 6000.3.15f1 --changeset 7aa55fbf98c2
   unity_activate: &unity_activate
     name: Activate Unity (Personal - online login)
     script: |
-      # Personal: Unity hesabi kullanici adi + sifre ile online aktive olur.
-      # ONEMLI: Unity hesabinda 2FA (iki adimli dogrulama) KAPALI olmali.
-      unity -batchmode -nographics -quit -logFile /dev/stdout \
+      /Applications/Unity/Hub/Editor/6000.3.15f1/Unity.app/Contents/MacOS/Unity \
+        -batchmode -nographics -quit -logFile /dev/stdout \
         -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD"
   unity_return: &unity_return
     name: Return Unity license (Personal seat'i serbest birak)
     script: |
-      unity -batchmode -nographics -quit -returnlicense -logFile /dev/stdout \
+      /Applications/Unity/Hub/Editor/6000.3.15f1/Unity.app/Contents/MacOS/Unity \
+        -batchmode -nographics -quit -returnlicense -logFile /dev/stdout \
         -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" || true
 
 workflows:
@@ -24,22 +31,22 @@ workflows:
   # --------------------------------------------------------------------------
   ios-xcode-build:
     name: Meowvivors iOS (Xcode project only)
-    max_build_duration: 120
+    max_build_duration: 180
     instance_type: mac_mini_m2
     environment:
       groups:
         - unity
-      vars:
-        XCODE_PROJECT: "ios/Unity-iPhone.xcodeproj"
     scripts:
+      - *unity_setup
       - *unity_activate
       - name: Build iOS Xcode project (Unity)
         script: |
-          unity -batchmode -nographics -quit -logFile /dev/stdout \
+          /Applications/Unity/Hub/Editor/6000.3.15f1/Unity.app/Contents/MacOS/Unity \
+            -batchmode -nographics -quit -logFile /dev/stdout \
             -projectPath . -executeMethod BuildScript.BuildIos -buildTarget iOS
       - *unity_return
     artifacts:
-      - ios/**          # uretilen Xcode projesi
+      - ios/**
       - /tmp/unity_*.log
 
   # --------------------------------------------------------------------------
@@ -47,7 +54,7 @@ workflows:
   # --------------------------------------------------------------------------
   ios-appstore:
     name: Meowvivors iOS (App Store)
-    max_build_duration: 120
+    max_build_duration: 180
     instance_type: mac_mini_m2
     integrations:
       app_store_connect: codemagic
@@ -64,10 +71,12 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
+      - *unity_setup
       - *unity_activate
       - name: Build iOS Xcode project (Unity)
         script: |
-          unity -batchmode -nographis -quit -logFile /dev/stdout \
+          /Applications/Unity/Hub/Editor/6000.3.15f1/Unity.app/Contents/MacOS/Unity \
+            -batchmode -nographics -quit -logFile /dev/stdout \
             -projectPath . -executeMethod BuildScript.BuildIos -buildTarget iOS
       - *unity_return
       - name: Set up code signing
