@@ -31,7 +31,7 @@ workflows:
   # --------------------------------------------------------------------------
   ios-xcode-build:
     name: Meowvivors iOS (Xcode project only)
-    max_build_duration: 180
+    max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
       groups:
@@ -54,7 +54,7 @@ workflows:
   # --------------------------------------------------------------------------
   ios-appstore:
     name: Meowvivors iOS (App Store)
-    max_build_duration: 180
+    max_build_duration: 120
     instance_type: mac_mini_m2
     integrations:
       app_store_connect: codemagic
