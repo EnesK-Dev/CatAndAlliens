@@ -1,0 +1,101 @@
+# ============================================================================
+# Meowvivors — Codemagic CI/CD (Unity 6000.3.15f1 -> iOS)
+# ----------------------------------------------------------------------------
+# Codemagic panelinde YAPMAN GEREKENLER:
+#  1) Environment variables -> yeni grup "unity" olustur, icine (Secure):
+#        UNITY_SERIAL    = Unity Personal lisans serial (ucretsiz)
+#        UNITY_USERNAME  = Unity hesabi e-posta
+#        UNITY_PASSWORD  = Unity hesabi sifre
+#     (Unity Personal: id.unity.com'dan hesap + Unity Hub'dan lisans; serial'i
+#      Unity Hub > Preferences > Licenses'tan alabilirsin.)
+#  2) Apple Developer hesabi acilinca:
+#        Teams -> Integrations -> App Store Connect baglantisini kur
+#        (App Store Connect API key: Issuer ID + Key ID + .p8).
+#     Sonra 2. workflow (ios-appstore) calisabilir.
+#
+# ILK ONCE "ios-xcode-build" workflow'unu calistir -> Unity+lisans dogru mu test et.
+# ============================================================================
+
+workflows:
+
+  # --------------------------------------------------------------------------
+  # 1) SADECE Unity -> Xcode projesi uret. Apple hesabi GEREKMEZ.
+  #    Amac: Unity lisansi + build pipeline CI'da calisiyor mu dogrulamak.
+  # --------------------------------------------------------------------------
+  ios-xcode-build:
+    name: Meowvivors iOS (Xcode project only)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    environment:
+      groups:
+        - unity
+      vars:
+        UNITY_BIN: ${UNITY_HOME}/Contents/MacOS/Unity
+    scripts:
+      - name: Activate Unity license
+        script: |
+          "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
+            -serial "${UNITY_SERIAL}" -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}"
+      - name: Build iOS Xcode project (Unity)
+        script: |
+          "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
+            -projectPath . -executeMethod BuildScript.BuildIos -buildTarget iOS
+      - name: Return Unity license
+        script: |
+          "$UNITY_BIN" -batchmode -nographics -quit -returnlicense -logFile /dev/stdout || true
+    artifacts:
+      - ios/**           # uretilen Xcode projesi (indirip inceleyebilirsin)
+      - /tmp/unity_*.log
+
+  # --------------------------------------------------------------------------
+  # 2) TAM YAYIN: Unity -> Xcode -> imzala -> .ipa -> TestFlight/App Store.
+  #    Apple Developer hesabi + App Store Connect entegrasyonu GEREKIR.
+  #    com.yamineko.meowvivors icin App Store Connect'te app olusturulmus olmali.
+  # --------------------------------------------------------------------------
+  ios-appstore:
+    name: Meowvivors iOS (App Store)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic   # Teams>Integrations'ta verdigin baglanti adi
+    environment:
+      groups:
+        - unity
+      vars:
+        UNITY_BIN: ${UNITY_HOME}/Contents/MacOS/Unity
+        BUNDLE_ID: "com.yamineko.meowvivors"
+        XCODE_PROJECT: "ios/Unity-iPhone.xcodeproj"
+        XCODE_SCHEME: "Unity-iPhone"
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.yamineko.meowvivors
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Activate Unity license
+        script: |
+          "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
+            -serial "${UNITY_SERIAL}" -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}"
+      - name: Build iOS Xcode project (Unity)
+        script: |
+          "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
+            -projectPath . -executeMethod BuildScript.BuildIos -buildTarget iOS
+      - name: Return Unity license
+        script: |
+          "$UNITY_BIN" -batchmode -nographics -quit -returnlicense -logFile /dev/stdout || true
+      - name: Set up code signing
+        script: |
+          xcode-project use-profiles
+      - name: Install CocoaPods
+        script: |
+          find . -name "Podfile" -execdir pod install \; || true
+      - name: Build signed .ipa
+        script: |
+          xcode-project build-ipa --project "$XCODE_PROJECT" --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true    # once TestFlight; hazirsan beta_groups/submit_to_app_store ekle
