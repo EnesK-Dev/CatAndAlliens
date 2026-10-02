@@ -15,17 +15,20 @@ definitions:
         --version 6000.3.15f1 --changeset 7aa55fbf98c2 \
         --architecture arm64 --module ios --childModules
   unity_activate: &unity_activate
-    name: Activate Unity (Personal - online login)
+    name: Activate Unity (manual .ulf license)
     script: |
+      # Secure var UNITY_LICENSE_ULF_B64 -> decode -> .ulf dosyasi
+      echo "$UNITY_LICENSE_ULF_B64" | base64 --decode > /tmp/unity_lic.ulf
+      # -manualLicenseFile basariyla import etse bile exit 1 donebilir (Unity ozelligi) -> || true
       /Applications/Unity/Hub/Editor/6000.3.15f1/Unity.app/Contents/MacOS/Unity \
         -batchmode -nographics -quit -logFile - \
-        -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD"
+        -manualLicenseFile /tmp/unity_lic.ulf || true
   unity_return: &unity_return
-    name: Return Unity license (Personal seat'i serbest birak)
+    name: Return Unity license (manual license - no-op)
     script: |
-      /Applications/Unity/Hub/Editor/6000.3.15f1/Unity.app/Contents/MacOS/Unity \
-        -batchmode -nographics -quit -returnlicense -logFile - \
-        -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" || true
+      # Manual .ulf lisansta floating seat tuketilmez; iade adimina gerek yok.
+      echo "Manual .ulf license — iade gerekmiyor."
+      rm -f /tmp/unity_lic.ulf || true
 
 workflows:
 
