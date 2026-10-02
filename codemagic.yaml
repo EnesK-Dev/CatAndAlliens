@@ -1,20 +1,30 @@
 # ============================================================================
-# Meowvivors — Codemagic CI/CD (Unity 6000.3.15f1 -> iOS)
+# Meowvivors — Codemagic CI/CD (Unity 6000.3.15f1 -> iOS)   [Unity PERSONAL lisans]
 # ----------------------------------------------------------------------------
 # Codemagic panelinde YAPMAN GEREKENLER:
 #  1) Environment variables -> yeni grup "unity" olustur, icine (Secure):
-#        UNITY_SERIAL    = Unity Personal lisans serial (ucretsiz)
-#        UNITY_USERNAME  = Unity hesabi e-posta
-#        UNITY_PASSWORD  = Unity hesabi sifre
-#     (Unity Personal: id.unity.com'dan hesap + Unity Hub'dan lisans; serial'i
-#      Unity Hub > Preferences > Licenses'tan alabilirsin.)
+#        UNITY_LICENSE = .ulf lisans dosyasinin TUM icerigi (XML).
+#        (.ulf nasil uretilir? Asagidaki "Personal lisans uretme" adimlarina bak -
+#         sohbette sana komutlari verdim: once .alf uret -> Unity'ye yukle -> .ulf indir.)
 #  2) Apple Developer hesabi acilinca:
-#        Teams -> Integrations -> App Store Connect baglantisini kur
-#        (App Store Connect API key: Issuer ID + Key ID + .p8).
+#        Teams -> Integrations -> App Store Connect baglantisini kur (adi "codemagic").
 #     Sonra 2. workflow (ios-appstore) calisabilir.
 #
 # ILK ONCE "ios-xcode-build" workflow'unu calistir -> Unity+lisans dogru mu test et.
 # ============================================================================
+
+definitions:
+  unity_activate: &unity_activate
+    name: Activate Unity (Personal - manual .ulf)
+    script: |
+      echo "$UNITY_LICENSE" > /tmp/Unity_lic.ulf
+      "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
+        -manualLicenseFile /tmp/Unity_lic.ulf || true
+  unity_build_ios: &unity_build_ios
+    name: Build iOS Xcode project (Unity)
+    script: |
+      "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
+        -projectPath . -executeMethod BuildScript.BuildIos -buildTarget iOS
 
 workflows:
 
@@ -32,19 +42,10 @@ workflows:
       vars:
         UNITY_BIN: ${UNITY_HOME}/Contents/MacOS/Unity
     scripts:
-      - name: Activate Unity license
-        script: |
-          "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
-            -serial "${UNITY_SERIAL}" -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}"
-      - name: Build iOS Xcode project (Unity)
-        script: |
-          "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
-            -projectPath . -executeMethod BuildScript.BuildIos -buildTarget iOS
-      - name: Return Unity license
-        script: |
-          "$UNITY_BIN" -batchmode -nographics -quit -returnlicense -logFile /dev/stdout || true
+      - *unity_activate
+      - *unity_build_ios
     artifacts:
-      - ios/**           # uretilen Xcode projesi (indirip inceleyebilirsin)
+      - ios/**          # uretilen Xcode projesi (indirip inceleyebilirsin)
       - /tmp/unity_*.log
 
   # --------------------------------------------------------------------------
@@ -72,17 +73,8 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Activate Unity license
-        script: |
-          "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
-            -serial "${UNITY_SERIAL}" -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}"
-      - name: Build iOS Xcode project (Unity)
-        script: |
-          "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
-            -projectPath . -executeMethod BuildScript.BuildIos -buildTarget iOS
-      - name: Return Unity license
-        script: |
-          "$UNITY_BIN" -batchmode -nographics -quit -returnlicense -logFile /dev/stdout || true
+      - *unity_activate
+      - *unity_build_ios
       - name: Set up code signing
         script: |
           xcode-project use-profiles
@@ -98,4 +90,4 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        submit_to_testflight: true    # once TestFlight; hazirsan beta_groups/submit_to_app_store ekle
+        submit_to_testflight: true
