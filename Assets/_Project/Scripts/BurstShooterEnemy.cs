@@ -5,7 +5,7 @@ using UnityEngine;
 /// 3. uzaylı tipi — oyuncunun anlık konumuna 3 mermi sıkır, aralara bekleme koyar.
 /// Görsel olarak diğer uzaylılarla aynı prefab'ı kullanabilir; renk Inspector'dan ayarlanır.
 /// </summary>
-public class BurstShooterEnemy : MonoBehaviour
+public class BurstShooterEnemy : MonoBehaviour, IDifficultyScaled
 {
     #region Serialized Fields
     [Header("Hareket Ayarlari")]
@@ -14,6 +14,8 @@ public class BurstShooterEnemy : MonoBehaviour
 
     [Header("Can Ayarlari")]
     [SerializeField] private float maxHealth = 30f;
+    [Tooltip("Zorluk 1 iken (zamanla) can carpani. Spawn aninda GLOBAL DifficultyFactor ile Lerp'lenir.")]
+    [SerializeField] private float healthMultiplierAtMaxDifficulty = 3f;
 
     [Header("Vurulma Flash Ayarlari")]
     [SerializeField] private Color hitFlashColor = Color.red;
@@ -72,10 +74,15 @@ public class BurstShooterEnemy : MonoBehaviour
     private Coroutine _burstRoutine;
     private Coroutine _hitFlashRoutine;
     private Collider2D _bodyCollider;
-    private Animator _animator;
+    private SpriteAnimator _spriteAnimator;
     private bool _isDying;
     private bool _vacuumed; // Ultimate vacuum: AI/collider kapali, transform'u director oyuncuya ceker
     private float _effectiveMoveSpeed;
+
+    // Yerel zorluk (tipin acilisindan beri). Override yoksa global DifficultyFactor'a duser.
+    private float _spawnDifficulty;
+    private bool _hasSpawnDifficulty;
+    private float EffectiveDifficulty => _hasSpawnDifficulty ? _spawnDifficulty : DifficultyManager.DifficultyFactor;
     #endregion
 
     #region Unity Callbacks
@@ -84,15 +91,20 @@ public class BurstShooterEnemy : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _bodyCollider = GetComponent<Collider2D>();
-        _animator = GetComponent<Animator>();
+        _spriteAnimator = GetComponent<SpriteAnimator>();
+        // Zamanla (global zorluk) can olceklenir — maxHealth yerinde buyutulur ki clamp dogru kalsin.
+        maxHealth *= Mathf.Lerp(1f, healthMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor) * RunStats.EnemyHealthMult;
         _currentHealth = maxHealth;
         _nextShootTime = Time.time + shootCooldown;
 
-        // Hareket hizini spawn anindaki zorluga gore bir kez hesapla (hafif hizlanma).
-        _effectiveMoveSpeed = moveSpeed * Mathf.Lerp(1f, moveSpeedMultiplierAtMaxDifficulty, DifficultyManager.DifficultyFactor);
+        // Hareket hizini spawn anindaki (yerel) zorluga gore hesapla. SetSpawnDifficulty gelince yeniden hesaplanir.
+        ComputeEffectiveMoveSpeed();
 
         if (_spriteRenderer != null)
+        {
             _spriteRenderer.color = shooterColor;
+            FlashFx.SetTint(_spriteRenderer, shooterColor); // gorsel tint _Color'dan gelir (URP 2D)
+        }
 
         player target = Object.FindFirstObjectByType<player>();
         if (target != null)
@@ -103,6 +115,7 @@ public class BurstShooterEnemy : MonoBehaviour
     {
         if (_isDying || _vacuumed) return;
         if (_playerTransform == null || _isAttacking) return;
+        if (EnemyFreeze.IsFrozen) return; // donmusken yeni seri baslatma
 
         if (Time.time >= _nextShootTime)
             _burstRoutine = StartCoroutine(BurstRoutine());
@@ -111,6 +124,22 @@ public class BurstShooterEnemy : MonoBehaviour
     private void FixedUpdate()
     {
         if (_isDying || _vacuumed) return;
+        if (EnemyFreeze.IsFrozen)
+        {
+            _rb.linearVelocity = Vector2.zero;
+            return;
+        }
+        if (Time.time < _knockUntil) // silah vurusu geri tepmesi
+        {
+            float rem = _knockDur > 0f ? Mathf.Clamp01((_knockUntil - Time.time) / _knockDur) : 0f;
+            _rb.linearVelocity = _knockVel * rem;
+            return;
+        }
+        if (Time.time < _pushStunUntil) // dash ile itildi — kisa sure yerinde dur (duvar hissi)
+        {
+            _rb.linearVelocity = Vector2.zero;
+            return;
+        }
         if (_playerTransform == null || _isAttacking)
         {
             _rb.linearVelocity = Vector2.zero;
@@ -129,6 +158,27 @@ public class BurstShooterEnemy : MonoBehaviour
         }
     }
 
+    private float _pushStunUntil;
+    private float _knockUntil;
+    private float _knockDur;
+    private Vector2 _knockVel;
+
+    /// <summary>Dash ile itilince kisa sure yerinde dursun (sonra yurumeye devam) — 'duvari ittirme' hissi.</summary>
+    public void ApplyPushStun(float duration)
+    {
+        if (duration > 0f) _pushStunUntil = Mathf.Max(_pushStunUntil, Time.time + duration);
+    }
+
+    /// <summary>Silah vurusu geri tepmesi: dusmani 'dir' yonunde 'speed' hiziyla 'duration' sure iter (sonumlenir).</summary>
+    public void ApplyKnockback(Vector2 dir, float speed, float duration)
+    {
+        if (duration <= 0f || speed <= 0f || dir.sqrMagnitude < 0.0001f) return;
+        _knockVel = dir.normalized * speed;
+        _knockDur = duration;
+        _knockUntil = Time.time + duration;
+        _pushStunUntil = Mathf.Max(_pushStunUntil, _knockUntil + 0.06f); // geri gidince cok kisa DON (hit-stop hissi)
+    }
+
     private void OnDisable()
     {
         if (_burstRoutine != null)
@@ -140,6 +190,7 @@ public class BurstShooterEnemy : MonoBehaviour
 
     private void OnCollisionStay2D(Collision2D collision)
     {
+        if (EnemyFreeze.IsFrozen) return; // donmusken temas hasari vermez
         if (Time.time < _lastContactDamageTime + contactDamageCooldown) return;
 
         player cat = collision.gameObject.GetComponent<player>();
@@ -151,6 +202,19 @@ public class BurstShooterEnemy : MonoBehaviour
     #endregion
 
     #region Public Methods
+    /// <summary>EnemyGenerator spawn'da cagirir: bu dusmanin YEREL zorlugunu ayarlar (0=taban, 1=tam) ve hizi yeniler.</summary>
+    public void SetSpawnDifficulty(float factor01)
+    {
+        _spawnDifficulty = Mathf.Clamp01(factor01);
+        _hasSpawnDifficulty = true;
+        ComputeEffectiveMoveSpeed();
+    }
+
+    private void ComputeEffectiveMoveSpeed()
+    {
+        _effectiveMoveSpeed = moveSpeed * Mathf.Lerp(1f, moveSpeedMultiplierAtMaxDifficulty, EffectiveDifficulty) * RunStats.EnemySpeedMult; // adaptif hiz (kill-rate)
+    }
+
     /// <summary>Bu düşmana hasar verir; can bitince yok edilir.</summary>
     public void TakeDamage(float amount)
     {
@@ -171,8 +235,8 @@ public class BurstShooterEnemy : MonoBehaviour
     {
         _isAttacking = true;
 
-        // Zorlugu seri basinda bir kez ornekle — sayi/bekleme bu seriye sabit uygulanir.
-        float factor = DifficultyManager.DifficultyFactor;
+        // Zorlugu seri basinda bir kez ornekle — YEREL zorluk (tipin acilisindan beri). Ilk cikinca taban.
+        float factor = EffectiveDifficulty;
         int shots = burstCount + Mathf.FloorToInt(factor * (burstCountAtMaxDifficulty - burstCount));
         shots = Mathf.Max(burstCount, shots); // guvenlik: max < base yanlis ayarlanirsa base'in altina inme
         float shotDelay = Mathf.Lerp(delayBetweenShots, delayBetweenShotsAtMaxDifficulty, factor);
@@ -223,9 +287,9 @@ public class BurstShooterEnemy : MonoBehaviour
 
     private IEnumerator HitFlashRoutine()
     {
-        _spriteRenderer.color = hitFlashColor;
+        FlashFx.Set(_spriteRenderer, hitFlashColor, 1f);
         yield return new WaitForSeconds(hitFlashDuration);
-        _spriteRenderer.color = shooterColor;
+        FlashFx.Set(_spriteRenderer, hitFlashColor, 0f);
         _hitFlashRoutine = null;
     }
 
@@ -233,7 +297,18 @@ public class BurstShooterEnemy : MonoBehaviour
     /// Ultimate ekran-temizlemesi bu dusmani DROPSUZ ve ANINDA yok eder: core/ultFood birakmaz,
     /// olum animasyonu + duman OYNATMAZ (nuke temiz olsun). UltimateCinematic IMPACT aninda cagirir.
     /// </summary>
-    public void Vaporize() => Die(dropLoot: false, playDeathAnim: false);
+    public void Vaporize() { _noFoodDrop = true; Die(dropLoot: true, playDeathAnim: false); } // nuke/ulti: core EVET, yemek HAYIR
+
+    private bool _noFoodDrop; // nuke (bombardiman) ile olurse: ultFood YOK
+    private bool _noCoreDrop; // bomb rain/nuke ile olurse: core de BIRAKMAZ
+
+    /// <summary>Boss-oncesi bombardiman (nuke) bu dusmani oldururken cagirir: core birakir ama ultFood BIRAKMAZ.</summary>
+    public void NukeKill(float damage)
+    {
+        _noFoodDrop = true;
+        _noCoreDrop = true; // bomb rain: core de birakma
+        TakeDamage(damage);
+    }
 
     /// <summary>
     /// Ultimate CHARGE fazi: dusmani "emilebilir" hale getirir — AI durur, fizik+collider kapanir
@@ -256,19 +331,20 @@ public class BurstShooterEnemy : MonoBehaviour
 
         if (dropLoot)
         {
+            if (playDeathAnim) DifficultyManager.RegisterKill(); // adaptif can: normal (nuke/ulti degil) oyuncu olumu
             // Olum aninda core birak — araliktan rastgele.
             // Random.Range(int, int) ust sinir HARIC oldugu icin +1.
-            CoreManager.SpawnCores(transform.position, UnityEngine.Random.Range(coreDropMin, coreDropMax + 1));
+            if (!_noCoreDrop) CoreManager.SpawnCores(transform.position, UnityEngine.Random.Range(coreDropMin, coreDropMax + 1));
 
             // Sansa bagli ultFood birak — dusmanin kendi rengiyle (olum animasyonuyla ayni renk)
-            if (UnityEngine.Random.value < ultFoodDropChance)
+            if (!_noFoodDrop && UnityEngine.Random.value < RunStats.EffectiveFoodDropChance)
                 UltimateManager.SpawnFood(transform.position, shooterColor, 1);
         }
 
         // Olurken AI, hareket ve carpismalari durdur
         StopAllCoroutines();                    // devam eden burst/flash coroutine'lerini kes
-        if (_animator != null)
-            _animator.enabled = false;          // Animator'i kapat — yoksa death frame'leri her kare ezer
+        if (_spriteAnimator != null)
+            _spriteAnimator.enabled = false;    // Kare oynaticiyi kapat — yoksa death frame'leri her kare ezer
         if (_rb != null)
         {
             _rb.linearVelocity = Vector2.zero;
@@ -290,9 +366,12 @@ public class BurstShooterEnemy : MonoBehaviour
 
     private IEnumerator DeathRoutine()
     {
-        // Flash yarim kalmis olabilir — rengi kendi rengine sifirla
+        // Flash yarim kalmis olabilir — rengi kendi rengine sifirla + flash miktarini kapat
         if (_spriteRenderer != null)
+        {
             _spriteRenderer.color = shooterColor;
+            FlashFx.Clear(_spriteRenderer);
+        }
 
         if (deathFrames != null && deathFrames.Length > 0 && _spriteRenderer != null)
         {

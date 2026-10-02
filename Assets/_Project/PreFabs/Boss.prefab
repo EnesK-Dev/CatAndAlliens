@@ -1,0 +1,276 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8193128965364514374
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5271289715256785139}
+  - component: {fileID: 2696317073395451186}
+  - component: {fileID: 4885085051868282130}
+  - component: {fileID: 1354173116538445112}
+  - component: {fileID: 5660292161846498325}
+  - component: {fileID: 733014060969819527}
+  - component: {fileID: 5827359841186546136}
+  m_Layer: 8
+  m_Name: Boss
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5271289715256785139
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8193128965364514374}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.55, y: 0.55, z: 0.55}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &2696317073395451186
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8193128965364514374}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 853854adb7f64cbe88b3aa1bd37d4422, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 1
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 1286655522, guid: 7d3d3137d8c98967481dc50693a95d58, type: 3}
+  m_Color: {r: 0, g: 0.9339623, b: 0.21675551, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 7, y: 7}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+--- !u!50 &4885085051868282130
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8193128965364514374}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 50
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 1
+  m_Constraints: 4
+--- !u!58 &1354173116538445112
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8193128965364514374}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: -0.094233856}
+  m_Radius: 2.1841435
+--- !u!114 &5660292161846498325
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8193128965364514374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c139e058639a17cad6021e64df8aff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
+  spriteRenderer: {fileID: 2696317073395451186}
+  frames:
+  - {fileID: 1286655522, guid: 7d3d3137d8c98967481dc50693a95d58, type: 3}
+  - {fileID: 1214443258, guid: 7d3d3137d8c98967481dc50693a95d58, type: 3}
+  - {fileID: 1762117632, guid: 7d3d3137d8c98967481dc50693a95d58, type: 3}
+  - {fileID: -1974478443, guid: 7d3d3137d8c98967481dc50693a95d58, type: 3}
+  - {fileID: -2058857640, guid: 7d3d3137d8c98967481dc50693a95d58, type: 3}
+  - {fileID: -231755070, guid: 7d3d3137d8c98967481dc50693a95d58, type: 3}
+  - {fileID: 164146900, guid: 7d3d3137d8c98967481dc50693a95d58, type: 3}
+  frameRate: 6
+  loop: 1
+  randomizeStartFrame: 1
+--- !u!114 &733014060969819527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8193128965364514374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e62a8cb75dfc178e1b6c287d911ced11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossController
+  isFinalBoss: 0
+  bossName: ALIEN OVERLORD
+  maxHealth: 2200
+  moveSpeed: 2.6
+  stopDistance: 0.7
+  centerMode: 0
+  centerPoint: {x: 0, y: 0}
+  kiteMode: 0
+  kiteCenter: {x: -1.5, y: -0.5}
+  kiteRadius: 8
+  kiteMoveSpeed: 3.5
+  facePlayer: 1
+  spriteFacesRight: 1
+  bodyContactDamage: 4
+  contactDamageCooldown: 2
+  hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
+  hitFlashDuration: 0.07
+  deathFrames: []
+  deathFrameRate: 10
+  coreDropMin: 100
+  coreDropMax: 100
+  coreScatterRadius: 3.5
+  healOnDeath: 0
+  useDashAttack: 1
+  attackInterval: 1
+  telegraphDuration: 0.5
+  dashSpeed: 25
+  dashDistance: 9
+  zigzagAmplitude: 2.5
+  dashDistanceMin: 6
+  dashDistanceMax: 12
+  zigzagAmplitudeMin: 1.5
+  zigzagAmplitudeMax: 4.5
+  zigzagSegmentsMin: 4
+  zigzagSegmentsMax: 7
+  headbuttOvershoot: 3.5
+  retreatChance: 0.168
+  zigzagChance: 0.5
+  arenaCenter: {x: -1.4, y: -0.36}
+  arenaHalfSize: {x: 21.37, y: 19.55}
+  wallClearance: 1.2012789
+  telegraphColor: {r: 0, g: 0.93333334, b: 0.21568628, a: 0.69411767}
+  telegraphWidth: 0.35
+  telegraphArrowSize: 0.4
+  leaveAfterImages: 1
+  afterImageInterval: 0.035
+  afterImageFadeTime: 0.35
+  afterImageAlpha: 0.55
+  afterImageColor: {r: 0, g: 0.93333334, b: 0.21568628, a: 1}
+--- !u!114 &5827359841186546136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8193128965364514374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6e49a6c09a4681138ba2dd4b23f13f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossMinionSpawner
+  minionPrefab: {fileID: 3971847470037377216, guid: 4b622fb260dca95a480e6d08863f11c0, type: 3}
+  firstDelay: 4
+  interval: 6
+  minPerWave: 1
+  maxPerWave: 2
+  maxAliveMinions: 6
+  launchSpeed: 22
+  launchDuration: 0.5
+  safeConeDegrees: 20
+  spreadDegrees: 60
+  spawnOffset: 1.5
+  spawnStartScale: 0.4
+  scalePopDuration: 0.22
+  birthPause: 0
+  launchAfterImage: 1
+  afterImageAlpha: 0.55
+  afterImageFadeTime: 0.35
+  afterImageInterval: 0.045

@@ -33,6 +33,10 @@ public class UltimateManager : MonoBehaviour
     [Header("Referanslar")]
     [Tooltip("Bos birakilirsa Awake'te otomatik bulunur.")]
     [SerializeField] private player playerRef;
+
+    [Header("Yemek Bonusu")]
+    [Tooltip("Yemek toplaninca doldurulan can (yarim-kalp birimi: 1 = yarim kalp, 2 = tam kalp). 0 = kapali.")]
+    [SerializeField] private float healOnFoodCollect = 1f;
     #endregion
 
     #region Private Fields
@@ -161,7 +165,8 @@ public class UltimateManager : MonoBehaviour
     private void SpawnFoodInternal(Vector3 position, Color tint, int amount)
     {
         if (ultFoodPrefab == null) return;
-        if (_isReady) return; // ult zaten dolu — kullanilana kadar yeni food bosa gitmesin
+        // NOT: ulti dolu olsa bile food DUSER — cunku food ayni zamanda CAN verir (HandleFoodCollected -> Heal).
+        // Dolu iken toplaninca charge eklenmez (AddChargeInternal guard) ama iyilestirme yine calisir.
 
         for (int i = 0; i < amount; i++)
         {
@@ -181,6 +186,8 @@ public class UltimateManager : MonoBehaviour
     private void HandleFoodCollected(UltFoodItem instance)
     {
         AddChargeInternal(1);
+        if (playerRef != null && healOnFoodCollect > 0f)
+            playerRef.Heal(healOnFoodCollect); // yemek ayni zamanda can doldurur (yarim kalp)
         ReturnToPool(instance);
     }
 

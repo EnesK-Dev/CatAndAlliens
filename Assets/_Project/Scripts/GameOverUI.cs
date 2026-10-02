@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 /// <summary>
 /// Player öldüğünde "YOU DIED" ekranını gösterir. player.cs'in static OnPlayerDied
@@ -12,6 +13,9 @@ public class GameOverUI : MonoBehaviour
     [Header("Referanslar")]
     [Tooltip("Ölünce açılacak GameOver paneli (YOU DIED + butonlar). Başlangıçta kapalı olmalı.")]
     [SerializeField] private GameObject gameOverPanel;
+
+    [Tooltip("Bu run'da toplanan core sayisini gosteren yazi (yaninda core ikonu). Bos ise atlanir.")]
+    [SerializeField] private TMP_Text coreCountText;
 
     [Tooltip("Sahne geçişlerini yapan SceneLoader objesi. Butonlar dolaylı olarak buna bağlanır.")]
     [SerializeField] private SceneLoader sceneLoader;
@@ -58,6 +62,17 @@ public class GameOverUI : MonoBehaviour
             sceneLoader.LoadScene(mainMenuSceneName);
     }
 
+    /// <summary>SHOP butonuna baglanir. Zamani normale dondurup MainMenu'yu yukler ve shop panelini actirir.
+    /// (Olumde run core'lari zaten HandleRunEnd ile bankaya yazildi.)</summary>
+    public void GoToShop()
+    {
+        SfxManager.Play(SfxId.ButtonClick);
+        Time.timeScale = 1f;
+        ShopUI.OpenOnLoad = true;
+        if (sceneLoader != null)
+            sceneLoader.LoadScene(mainMenuSceneName);
+    }
+
     /// <summary>Restart butonuna bağlanır. Zamanı normale döndürüp mevcut sahneyi yeniden yükler.</summary>
     public void RestartGame()
     {
@@ -74,8 +89,17 @@ public class GameOverUI : MonoBehaviour
     /// <summary>Player öldüğünde çağrılır: paneli açar, istenirse oyunu dondurur.</summary>
     private void HandlePlayerDied()
     {
+        GameFlow.Ended = true; // olum sonrasi ulti sinemasi timeScale'i 1'e dondurmesin
+
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
+
+        if (coreCountText != null)
+        {
+            // Olumde HandleRunEnd sayaci sifirlamis olabilir -> canli 0 ise son run degerini goster
+            int n = CoreManager.CoresThisRun > 0 ? CoreManager.CoresThisRun : CoreManager.LastRunCores;
+            coreCountText.SetText("{0}", n);
+        }
 
         if (pauseGameOnDeath)
             Time.timeScale = 0f;

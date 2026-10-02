@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -47,6 +48,17 @@ public class EnemyGenerator : MonoBehaviour
     [Tooltip("Her araliga eklenen rastgele +/- sapma (mekaniklik kirmak icin).")]
     [SerializeField] private float spawnIntervalJitter = 0.3f;
 
+    [Header("Tip Guclenme Rampasi (yerel zorluk)")]
+    [Tooltip("Bir dusman tipi ACILDIKTAN sonra kac SANIYEDE tam gucune ulassin. Bu sure boyunca o tip " +
+             "0 (taban) -> 1 (tam) olceklenir. Boylece burst/lazer ILK cikinca zayif gelir, zamanla guclenir. " +
+             "Global spawn sikligini ETKILEMEZ (o zamanla artmaya devam eder).")]
+    [SerializeField] private float typeRampSeconds = 180f;
+
+    [Header("Baslangic Dalgasi")]
+    [Tooltip("Oyun basinda ANINDA spawn edilecek dusman sayisi (o an acik tipler; basta normal). " +
+             "Acilisin bos/yavas hissetmemesi icin. 0 = kapali.")]
+    [SerializeField] private int startingBurstCount = 5;
+
     [Header("Spawn Cizgisi")]
     [Tooltip("Cizginin toplam uzunlugu.")]
     [SerializeField] private float spawnLineLength = 5f;
@@ -59,25 +71,67 @@ public class EnemyGenerator : MonoBehaviour
     [SerializeField] private int finalWaveMilestoneIndex = 4;
 
     [Tooltip("Son dalgada iki spawn arasi sabit bekleme (+/- jitter). minSpawnInterval'den KISA olmali ki fark hissedilsin.")]
-    [SerializeField] private float finalWaveSpawnInterval = 0.3f;
+    [SerializeField] private float finalWaveSpawnInterval = 1.8f;
+
+    [Header("Boss Sirasinda")]
+    [Tooltip("Sahnede canli boss varken yeni normal dusman spawn'i dursun mu (mevcutlar yasamaya devam eder).")]
+    [SerializeField] private bool pauseSpawnDuringBoss = true;
+
+    [Header("Eszamanli Dusman Limiti")]
+    [Tooltip("Ekranda ayni anda EN FAZLA kac dusman canli olabilir. Bu sayida dusman varken yeni spawn olmaz " +
+             "(oldurdukce yeni gelir). 'Adim atacak yer kalmamasini' onler — spawn araligi ne olursa olsun " +
+             "yogunluk sinirli kalir. 0 = limitsiz (eski davranis).")]
+    [SerializeField] private int maxAliveEnemies = 25;
+
+    [Tooltip("SON milestone'da (finalMilestoneIndex ve sonrasi) gecerli AYRI limit — genelde daha DUSUK, cunku son boss'a girerken kalabalik istenmez. 0 = ayrim yok (hep maxAliveEnemies).")]
+    [SerializeField] private int finalMilestoneMaxAlive = 0;
+
+    [Tooltip("Bu milestone ve sonrasinda finalMilestoneMaxAlive gecerli olur (son boss milestone'u).")]
+    [SerializeField] private int finalMilestoneIndex = 5;
+
+    [Header("Bos Alan Hizlandirmasi (guclu oyuncu bos beklemesin)")]
+    [Tooltip("Alandaki dusman azaldikca spawn HIZLANIR. Guclu oyuncu hepsini kesince aninda yenileri gelir; " +
+             "gucsuz oyuncu (alan zaten dolu) icin degismez. Kapatmak icin false.")]
+    [SerializeField] private bool emptyFieldAccelerate = true;
+
+    [Tooltip("Hedef doluluk (cap'in yuzdesi). Alandaki canli dusman bunun ALTINA dusunce hizlanma devreye girer. 0.6 = cap'in %60'i.")]
+    [SerializeField] private float fillTargetRatio = 0.6f;
+
+    [Tooltip("Alan TAMAMEN bosken iki spawn arasi bekleme (cok kisa). Alan doldukca normal araliga geri doner.")]
+    [SerializeField] private float emptyFieldInterval = 0.3f;
     #endregion
 
     #region Private Fields
     private const float IntervalFloor = 0.05f; // araligin altina inemeyecegi guvenli taban
     private float _nextSpawnTime;
+
+    // Spawn ettigimiz dusmanlar — canli sayimi icin. Dusman olunce Destroy edilir, referans "fake null" olur;
+    // her spawn denemesinde temizlenir. Enemy class'larina dokunmadan yogunlugu sinirlamak icin (tek-sorumluluk).
+    private readonly List<GameObject> _aliveEnemies = new List<GameObject>();
     #endregion
 
     #region Unity Callbacks
     private void Start()
     {
+        SpawnStartingBurst();
         ScheduleNextSpawn();
+    }
+
+    /// <summary>Oyun basinda bir grup dusmani aninda spawn eder (acilis bos hissetmesin). O an acik tipler.</summary>
+    private void SpawnStartingBurst()
+    {
+        for (int i = 0; i < startingBurstCount; i++)
+            SpawnEnemyOnLine();
     }
 
     private void Update()
     {
         if (Time.time >= _nextSpawnTime)
         {
-            SpawnEnemyOnLine();
+            // Boss varken VEYA boss-oncesi bombardimanda spawn duraklar (mevcut dusmanlar silinmez;
+            // bombardimanda bombalardan olurler). Tek-sorumluluk: sadece spawn tarafi.
+            if (!((pauseSpawnDuringBoss && BossController.AnyBossAlive) || BombardmentDirector.IsActive || SplitterEnemy.BossLineageAlive))
+                SpawnEnemyOnLine();
             ScheduleNextSpawn();
         }
     }
@@ -112,6 +166,26 @@ public class EnemyGenerator : MonoBehaviour
             interval = Mathf.Lerp(maxSpawnInterval, minSpawnInterval, factor);
         }
 
+        interval /= Mathf.Max(1f, RunStats.CurseMult); // Curse: spawn araligini kisaltir (daha sik dusman)
+
+        // Bos alan hizlandirmasi: alandaki dusman hedefin altindaysa, bosluk oranina gore araligi
+        // emptyFieldInterval'e dogru kis. Boylece guclu oyuncu alani bosaltinca yeniler HIZLI gelir,
+        // gucsuz oyuncu (alan dolu) icin hicbir sey degismez. Cap zaten toplam yogunlugu sinirlar.
+        if (emptyFieldAccelerate)
+        {
+            int cap = EffectiveMaxAlive();
+            float target = cap > 0 ? cap * fillTargetRatio : 0f;
+            if (target > 0f)
+            {
+                int alive = CountAliveEnemies();
+                if (alive < target)
+                {
+                    float emptiness = 1f - alive / target; // 0 = hedef dolu, 1 = tamamen bos
+                    interval = Mathf.Lerp(interval, emptyFieldInterval, emptiness);
+                }
+            }
+        }
+
         interval += UnityEngine.Random.Range(-spawnIntervalJitter, spawnIntervalJitter);
         interval = Mathf.Max(IntervalFloor, interval);
         _nextSpawnTime = Time.time + interval;
@@ -120,8 +194,14 @@ public class EnemyGenerator : MonoBehaviour
     /// <summary>Cizgi uzerinde rastgele bir noktaya, weighted random ile secilen tipi spawn eder.</summary>
     private void SpawnEnemyOnLine()
     {
-        GameObject prefabToSpawn = PickWeightedPrefab();
-        if (prefabToSpawn == null) return;
+        // Yogunluk siniri: ekranda zaten (etkin) limit kadar dusman varsa bu spawn'i atla.
+        // Son milestone'da ayri (daha dusuk) limit gecerli olabilir. Oldurdukce yer acilir.
+        int cap = EffectiveMaxAlive();
+        if (cap > 0 && CountAliveEnemies() >= cap)
+            return;
+
+        EnemySpawnEntry entry = PickWeightedEntry();
+        if (entry == null || entry.prefab == null) return;
 
         float halfLength = spawnLineLength / 2f;
         float randomOffset = UnityEngine.Random.Range(-halfLength, halfLength);
@@ -132,14 +212,23 @@ public class EnemyGenerator : MonoBehaviour
         else
             spawnPosition.x += randomOffset;
 
-        Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
+        GameObject spawned = PoolManager.Spawn(entry.prefab, spawnPosition, Quaternion.identity); // havuzdan (Instantiate yerine)
+        _aliveEnemies.Add(spawned); // canli sayimi icin izle (limit kontrolu bunu kullanir)
+
+        // YEREL ZORLUK: bu tip acilalı (unlockMilestone) ne kadar oldu -> 0..1 rampa. Ilk cikinca taban.
+        float localFactor = typeRampSeconds > 0f
+            ? Mathf.Clamp01(DifficultyManager.TimeSinceMilestone(entry.unlockMilestone) / typeRampSeconds)
+            : 1f;
+        // Dusman IDifficultyScaled uyguluyorsa yerel zorlugu ver (Awake sonrasi, Start oncesi — hesaplar buna gore).
+        var scaled = spawned.GetComponent<IDifficultyScaled>();
+        scaled?.SetSpawnDifficulty(localFactor);
     }
 
     /// <summary>
     /// Acilmis (unlockMilestone'una ulasilmis) tipler arasinda agirliga gore rastgele birini secer.
     /// Agirlik zorlukla (DifficultyFactor) Lerp'lenir. Alloc yok — dizide iki gecis yapar.
     /// </summary>
-    private GameObject PickWeightedPrefab()
+    private EnemySpawnEntry PickWeightedEntry()
     {
         if (spawnEntries == null || spawnEntries.Length == 0) return null;
 
@@ -158,19 +247,44 @@ public class EnemyGenerator : MonoBehaviour
 
         // 2. gecis: rastgele nokta hangi girise denk geliyor
         float roll = UnityEngine.Random.value * totalWeight;
-        GameObject lastValid = null;
+        EnemySpawnEntry lastValid = null;
         for (int i = 0; i < spawnEntries.Length; i++)
         {
             EnemySpawnEntry entry = spawnEntries[i];
             if (!IsUnlocked(entry)) continue;
 
-            lastValid = entry.prefab;
+            lastValid = entry;
             roll -= Mathf.Max(0f, Mathf.Lerp(entry.baseWeight, entry.maxWeight, factor));
-            if (roll <= 0f) return entry.prefab;
+            if (roll <= 0f) return entry;
         }
 
         // Float yuvarlama guvencesi: son gecerli girisi don
         return lastValid;
+    }
+
+    /// <summary>
+    /// Canli dusman sayisini dondurur; bu sirada Destroy edilmis (fake-null) VEYA havuza donmus (inactive)
+    /// referanslari listeden atar. Havuz: despawn edilen dusman null degildir ama pasiftir — onu da 'olu' say.
+    /// Liste kucuk (en fazla ~limit kadar) oldugu icin maliyeti onemsiz; her spawn denemesinde bir kez cagrilir.
+    /// </summary>
+    private int CountAliveEnemies()
+    {
+        for (int i = _aliveEnemies.Count - 1; i >= 0; i--)
+        {
+            GameObject e = _aliveEnemies[i];
+            if (e == null || !e.activeSelf) // olmus/Destroy edilmis VEYA havuza donmus (pasif)
+                _aliveEnemies.RemoveAt(i);
+        }
+        return _aliveEnemies.Count;
+    }
+
+    /// <summary>O anki gecerli eszamanli dusman limiti: son milestone'da (varsa) ayri limit, degilse normal.</summary>
+    private int EffectiveMaxAlive()
+    {
+        float curse = Mathf.Max(1f, RunStats.CurseMult); // Curse: alive-cap'i de buyut (spawn hizi cap'e takilmasin)
+        if (finalMilestoneMaxAlive > 0 && DifficultyManager.CurrentMilestone >= finalMilestoneIndex)
+            return Mathf.RoundToInt(finalMilestoneMaxAlive * curse);
+        return Mathf.RoundToInt(maxAliveEnemies * curse);
     }
 
     /// <summary>Giris gecerli mi ve milestone'una ulasildi mi? unlockMilestone &lt;= 0 ise bastan aciktir (manager yoksa da).</summary>

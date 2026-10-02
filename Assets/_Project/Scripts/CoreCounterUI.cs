@@ -27,8 +27,11 @@ public class CoreCounterUI : MonoBehaviour
     #region Private Methods
     private void HandleCoreCountChanged(int total)
     {
-        if (countText != null)
-            countText.text = total.ToString();
+        // Guncel core / sonraki upgrade esigi (hedef): "12/20". Bir sonraki karta ne kadar kaldigini gosterir.
+        if (countText == null) return;
+        int next = CoreManager.NextThreshold;
+        if (next > 0) countText.SetText("{0}/{1}", total, next); // alloc yok
+        else countText.SetText("{0}", total);
     }
     #endregion
 }

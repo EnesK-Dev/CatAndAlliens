@@ -18,6 +18,9 @@ public class ClawSlashVisual : MonoBehaviour
 
     [Tooltip("Animasyon bitince baştan dönsün mü? (false = son frame'de kalır)")]
     [SerializeField] private bool loop = false;
+
+    [Tooltip("Frame'leri TERSTEN oynat (son frame'den ilkine). Array'i değiştirmez.")]
+    [SerializeField] private bool reverse = false;
     #endregion
 
     #region Private Fields
@@ -57,7 +60,8 @@ public class ClawSlashVisual : MonoBehaviour
         {
             for (int i = 0; i < frames.Length; i++)
             {
-                spriteRenderer.sprite = frames[i];
+                int idx = reverse ? frames.Length - 1 - i : i; // reverse: son frame'den basa
+                spriteRenderer.sprite = frames[idx];
                 yield return wait;
             }
         }

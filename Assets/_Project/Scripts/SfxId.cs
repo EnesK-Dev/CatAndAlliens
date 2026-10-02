@@ -36,5 +36,18 @@ public enum SfxId
     // NOT: Yeni id'ler HEP sona eklenmeli — ortaya eklemek sahnede kayitli enum index'lerini kaydirir.
     GameplayMusic,  // oyun sahnesinde arkada donen muzik (loop)
 
-    UltimateImpact  // ulti beyaz flash / patlama ani (Ultimate = aktivasyon; bu = impact)
+    UltimateImpact, // ulti beyaz flash / patlama ani (Ultimate = aktivasyon; bu = impact)
+
+    BombardmentWarning, // boss oncesi bombardiman baslamadan once calan uyari sesi (ekran kirmizi yanip sonerken)
+
+    KamikazeExplode, // kamikaze dusman patlayinca
+    SplitterSplit,   // splitter dusman bolununce
+
+    // ---- Silahlar (oyuncu) — klip atanmazsa sessiz ----
+    BlasterFire,     // auto-blaster mermi ateslenince
+    OrbitalHit,      // orbital yildiz dusmana degince
+
+    BossMusic,       // boss savasi muzigi (ayri kaynak, OnBossSpawned ile baslar)
+
+    Reroll           // oyun ici upgrade panelinde kart reroll butonu
 }

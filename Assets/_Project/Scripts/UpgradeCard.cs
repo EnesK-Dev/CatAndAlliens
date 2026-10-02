@@ -21,11 +21,26 @@ public class UpgradeCard : MonoBehaviour
     [SerializeField] private TMP_Text levelText;
 
     [SerializeField] private Button selectButton;
+
+    [Header("Silah Karti (opsiyonel)")]
+    [Tooltip("Kart cercevesi/arka plani — silah kartlarinda renk (tint) uygulanir. Bos ise renk atlanir.")]
+    [SerializeField] private Image frameImage;
+
+    [Tooltip("'NEW WEAPON' etiketi — sadece yeni silah kartinda gorunur. Bos ise atlanir.")]
+    [SerializeField] private GameObject newWeaponBanner;
+
+    [Tooltip("'LUCKY' etiketi — bariz guclu upgrade'lerde (sayi/yon/hedef) gorunur. Bos ise atlanir.")]
+    [SerializeField] private GameObject luckyBanner;
     #endregion
 
     #region Private Fields
     private int _optionIndex;
     private Action<int> _onSelected;
+    private LayoutElement _iconLayout; // ikonun boyut kontrolu (Icon objesindeki LayoutElement)
+
+    // Kartlar acilir acilmaz, oyun sirasindaki son (kaza) dokunusun yanlis kart secmesini onleyen kisa giris kilidi.
+    private const float SelectLockoutSeconds = 0.4f;
+    private float _selectableAtTime; // Time.unscaledTime bunu gecince kart secilebilir (timeScale=0'da da ilerler)
     #endregion
 
     #region Unity Callbacks
@@ -33,6 +48,9 @@ public class UpgradeCard : MonoBehaviour
     {
         if (selectButton != null)
             selectButton.onClick.AddListener(HandleClick);
+
+        // Ikon boyutunu (preferredHeight) ayarlayabilmek icin LayoutElement'i yakala.
+        if (iconImage != null) _iconLayout = iconImage.GetComponent<LayoutElement>();
     }
 
     private void OnDestroy()
@@ -53,26 +71,45 @@ public class UpgradeCard : MonoBehaviour
     /// <param name="description">Kisa aciklama (Ingilizce).</param>
     /// <param name="displayLevel">Kart secilince ulasilacak seviye (Lv.N).</param>
     /// <param name="onSelected">Tiklaninca cagrilacak callback; parametre optionIndex.</param>
-    public void Bind(int optionIndex, Sprite icon, string title, string description, int displayLevel, Action<int> onSelected)
+    public void Bind(int optionIndex, Sprite icon, Color iconColor, float iconHeight, string title, string description, int displayLevel,
+                     Sprite frameSprite, Color frameColor, bool isNewWeapon, Action<int> onSelected, bool lucky = false)
     {
         _optionIndex = optionIndex;
         _onSelected = onSelected;
 
+        // Kart bu an gosterildi -> kisa sure secilemez (kaza tiklamasi korumasi).
+        _selectableAtTime = Time.unscaledTime + SelectLockoutSeconds;
+
         if (iconImage != null)
         {
             iconImage.sprite = icon;
-            iconImage.enabled = icon != null; // ikon yoksa bos kutu gorunmesin
+            iconImage.color = iconColor;       // kategoriye gore tint (silahlar mor, stat'lar beyaz)
+            iconImage.enabled = icon != null;  // ikon yoksa bos kutu gorunmesin
         }
+
+        // Ikon boyutu: iconHeight > 0 ise o yukseklige ayarla (silah/stat farkli olabilir); 0 = prefab varsayilani.
+        if (iconHeight > 0f && _iconLayout != null) _iconLayout.preferredHeight = iconHeight;
 
         if (titleText != null) titleText.text = title;
         if (descriptionText != null) descriptionText.text = description;
-        if (levelText != null) levelText.SetText("Lv.{0}", displayLevel); // alloc yok (TMP)
+        if (levelText != null) levelText.SetText("x {0}", displayLevel); // alloc yok (TMP)
+
+        // Kategoriye gore kart cercevesi: renkli sprite (varsa) + tint. NEW WEAPON etiketi.
+        if (frameImage != null)
+        {
+            if (frameSprite != null) frameImage.sprite = frameSprite;
+            frameImage.color = frameColor;
+        }
+        if (newWeaponBanner != null) newWeaponBanner.SetActive(isNewWeapon);
+        if (luckyBanner != null) luckyBanner.SetActive(lucky);
     }
     #endregion
 
     #region Private Methods
     private void HandleClick()
     {
+        // Acilistan hemen sonraki (kaza) dokunuslari yok say — kisa giris kilidi.
+        if (Time.unscaledTime < _selectableAtTime) return;
         _onSelected?.Invoke(_optionIndex);
     }
     #endregion

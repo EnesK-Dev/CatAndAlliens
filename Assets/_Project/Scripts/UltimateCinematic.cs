@@ -52,6 +52,9 @@ public class UltimateCinematic : MonoBehaviour
     [Tooltip("RECOVERY: beyaz fade + kamera geri acilma suresi.")]
     [SerializeField] private float recoveryDuration = 0.5f;
 
+    [Tooltip("Ulti IMPACT aninda BOSSLARA verilen SABIT hasar. Bosslar emilmez/vaporize olmaz — sadece bu kadar hasar alir.")]
+    [SerializeField] private float bossUltimateDamage = 10000f;
+
     [Header("Dusman Vacuum (charge boyunca oyuncuya cekme)")]
     [Tooltip("CHARGE basindaki cekme hizi (yavas baslar).")]
     [SerializeField] private float pullSpeedStart = 1.5f;
@@ -70,6 +73,8 @@ public class UltimateCinematic : MonoBehaviour
     private float _baseOrthoSize = 5f; // Sahnenin varsayilan zoom'u — restore hedefi (Awake'te okunur)
     private readonly List<Transform> _pulled = new List<Transform>(); // emilen dusman transformlari (alloc'suz yeniden kullanilir)
     private readonly List<Vector3> _pullTargets = new List<Vector3>(); // her dusmanin kedinin etrafindaki hedef noktasi (_pulled ile ayni index)
+    private readonly List<Vector3> _ultiHitPos = new List<Vector3>();   // ulti boss hasar sayilari (beyaz flash sonrasi gosterilir)
+    private readonly List<float> _ultiHitDmg = new List<float>();
 
     // Altin aci (~137.5°) radyan cinsinden — dusmanlari kedinin etrafina ust uste binmeden (phyllotaxis) dagitir.
     private const float GoldenAngleRad = 2.399963f;
@@ -122,8 +127,9 @@ public class UltimateCinematic : MonoBehaviour
     private IEnumerator PlaySequence()
     {
         // --- Hazirlik ---
-        if (playerRef != null) playerRef.EnterUltimatePose();
-        Time.timeScale = Mathf.Clamp01(slowMoTimeScale);
+        if (playerRef != null) { playerRef.SetUltimateInvulnerable(true); playerRef.EnterUltimatePose(); } // sinema boyunca hasara immun
+        ComboManager.KeepAlive(); // ulti "saldiri gibi" sayilir — charge boyunca combo decay penceresi sifirlanir
+        if (!GameFlow.Ended) Time.timeScale = Mathf.Clamp01(slowMoTimeScale);
         if (screenFX != null) screenFX.ResetFX();
         if (aura != null) aura.SetIntensity(0f); // baseline (senin ayarin) — buradan yukari rampa
 
@@ -131,12 +137,15 @@ public class UltimateCinematic : MonoBehaviour
         float zoomedSize = _baseOrthoSize * zoomInFactor;
 
         BeginVacuumGather(playerPos); // dusmanlari emilebilir yap + kedinin etrafinda hedef nokta ata
+        GatherCoresAround(playerPos); // map'teki core'lari da AYNI ANDA kedinin etrafindaki halkaya cek (dusman vacuum'u ile birlikte)
         if (cameraShake != null) cameraShake.BeginSustainedShake(); // charge boyunca ekran sarsintisi
 
         // --- 1) CHARGE ---
         float t = 0f;
         while (t < chargeDuration)
         {
+            if (GameFlow.Paused) { yield return null; continue; } // duraklatilinca sinema DONAR, timeScale'e dokunma
+            if (!GameFlow.Ended) Time.timeScale = Mathf.Clamp01(slowMoTimeScale); // Continue 1 yapsa da her kare slow-mo'ya don
             t += Time.unscaledDeltaTime;
             float n = Mathf.Clamp01(t / chargeDuration);
 
@@ -168,11 +177,12 @@ public class UltimateCinematic : MonoBehaviour
         }
 
         // --- 2) IMPACT ---
-        Time.timeScale = 1f;
+        if (!GameFlow.Ended && !GameFlow.Paused) Time.timeScale = 1f;
         if (cameraShake != null) cameraShake.EndSustainedShake(); // sarsintiyi durdur, kamerayi yerine al
         if (screenFX != null) screenFX.SetWhite(1f); // tam ekran beyaz (her seyin ustunde)
         SfxManager.Play(SfxId.UltimateImpact); // beyaz flash / patlama sesi (aktivasyondan ayri)
-        VaporizeAllEnemies();                        // dropsuz + aninda sil (emilenler + stragglerlar)
+        VaporizeAllEnemies();                        // dropsuz + aninda sil (+ combo'ya vurus ekler; icinde)
+        ComboManager.SetMaxRank();                   // ulti odulu: rank S
         _pulled.Clear();
         _pullTargets.Clear();
         yield return WaitUnscaled(whiteHold);
@@ -182,6 +192,7 @@ public class UltimateCinematic : MonoBehaviour
         float r = 0f;
         while (r < recoveryDuration)
         {
+            if (GameFlow.Paused) { yield return null; continue; } // duraklatilinca recovery de DONAR
             r += Time.unscaledDeltaTime;
             float n = Mathf.Clamp01(r / recoveryDuration);
 
@@ -193,6 +204,10 @@ public class UltimateCinematic : MonoBehaviour
         }
 
         RestoreState();
+        // Ulti hasar sayilarini beyaz flash bitince goster (yoksa flash ardinda gizli kalirdi).
+        for (int i = 0; i < _ultiHitPos.Count; i++)
+            DamagePopupManager.Show(_ultiHitPos[i], _ultiHitDmg[i]);
+        _ultiHitPos.Clear(); _ultiHitDmg.Clear();
         _sequence = null;
     }
 
@@ -208,15 +223,16 @@ public class UltimateCinematic : MonoBehaviour
 
         var chasers = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
         for (int i = 0; i < chasers.Length; i++)
-            if (chasers[i] != null) { chasers[i].BeginUltimateVacuum(); _pulled.Add(chasers[i].transform); }
+        {
+            if (chasers[i] == null) continue;
+            if (chasers[i] is SplitterEnemy sp && sp.IsBossLineage) continue; // splitter BOSS emilmez
+            chasers[i].BeginUltimateVacuum();
+            _pulled.Add(chasers[i].transform);
+        }
 
         var shooters = FindObjectsByType<BurstShooterEnemy>(FindObjectsSortMode.None);
         for (int i = 0; i < shooters.Length; i++)
             if (shooters[i] != null) { shooters[i].BeginUltimateVacuum(); _pulled.Add(shooters[i].transform); }
-
-        var boomerangs = FindObjectsByType<BoomerangEnemy>(FindObjectsSortMode.None);
-        for (int i = 0; i < boomerangs.Length; i++)
-            if (boomerangs[i] != null) { boomerangs[i].BeginUltimateVacuum(); _pulled.Add(boomerangs[i].transform); }
 
         // Her dusman icin diskteki hedef: yaricap = minRadius + spacing*sqrt(index), aci = index*altinAci.
         // sqrt + altin aci = esit yogunluklu, ust uste binmeyen dagilim (ayciyegi cekirdek dizilimi).
@@ -235,32 +251,63 @@ public class UltimateCinematic : MonoBehaviour
     /// </summary>
     private void VaporizeAllEnemies()
     {
+        int killed = 0; // vaporize edilen dusman sayisi -> combo'ya "vurus" olarak eklenir
+        float ultiDmg = bossUltimateDamage + RunStats.UltimateDamageBonus; // deck kartlari ulti hasarini artirir
+        _ultiHitPos.Clear(); _ultiHitDmg.Clear();
+
         var chasers = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
         for (int i = 0; i < chasers.Length; i++)
-            if (chasers[i] != null) chasers[i].Vaporize();
+        {
+            if (chasers[i] == null) continue;
+            // Splitter BOSS vaporize OLMAZ (instakill degil) — sadece sabit hasar alir, combo saymaz.
+            if (chasers[i] is SplitterEnemy sp && sp.IsBossLineage) { _ultiHitPos.Add(chasers[i].transform.position + Vector3.up * 1.5f); _ultiHitDmg.Add(ultiDmg); chasers[i].TakeDamage(ultiDmg); continue; }
+            chasers[i].Vaporize();
+            killed++;
+        }
 
         var shooters = FindObjectsByType<BurstShooterEnemy>(FindObjectsSortMode.None);
         for (int i = 0; i < shooters.Length; i++)
-            if (shooters[i] != null) shooters[i].Vaporize();
+            if (shooters[i] != null) { shooters[i].Vaporize(); killed++; }
 
-        var boomerangs = FindObjectsByType<BoomerangEnemy>(FindObjectsSortMode.None);
-        for (int i = 0; i < boomerangs.Length; i++)
-            if (boomerangs[i] != null) boomerangs[i].Vaporize();
+        // BOSSLAR (BossController: dash/laser/kamikaze/burst) — emilmez/vaporize olmaz, SABIT hasar alir (combo saymaz).
+        var bosses = FindObjectsByType<BossController>(FindObjectsSortMode.None);
+        for (int i = 0; i < bosses.Length; i++)
+            if (bosses[i] != null && !bosses[i].IsDying) { _ultiHitPos.Add(bosses[i].transform.position + Vector3.up * 1.5f); _ultiHitDmg.Add(ultiDmg); bosses[i].TakeDamage(ultiDmg); }
+
+        // Ulti "saldiri" sayilir: her oldurulen dusman +1 combo vurusu (combo firlar). Dusman yoksa en azindan
+        // decay penceresini taze tut (KeepAlive) — ekran bosalinca combo dusmesin.
+        if (killed > 0) ComboManager.AddHits(killed);
+        else ComboManager.KeepAlive();
+    }
+
+    /// <summary>
+    /// Map'teki (aktif) tum core'lari oyuncunun etrafindaki halkaya toplar — magnet menzili disinda dururlar,
+    /// otomatik toplanmazlar; oyuncu sonra isteyerek uzerlerine gidip toplar. Ulti nadir oldugu icin FindObjects OK.
+    /// </summary>
+    private void GatherCoresAround(Vector3 center)
+    {
+        var cores = FindObjectsByType<CoreItem>(FindObjectsSortMode.None); // sadece aktif core'lar (havuzdaki pasifler haric)
+        for (int i = 0; i < cores.Length; i++)
+            if (cores[i] != null) cores[i].GatherAround(center);
     }
 
     private IEnumerator WaitUnscaled(float seconds)
     {
         float t = 0f;
-        while (t < seconds) { t += Time.unscaledDeltaTime; yield return null; }
+        while (t < seconds)
+        {
+            if (!GameFlow.Paused) t += Time.unscaledDeltaTime; // duraklatilinca bekleme sayaci durur
+            yield return null;
+        }
     }
 
     /// <summary>Sinema durumunu guvenli varsayilana dondur: normal hiz, taban zoom, poz kapali, overlay temiz.</summary>
     private void RestoreState()
     {
-        Time.timeScale = 1f;
+        if (!GameFlow.Ended && !GameFlow.Paused) Time.timeScale = 1f;
         if (cam != null && cam.orthographic) cam.orthographicSize = _baseOrthoSize;
         if (cameraShake != null) cameraShake.EndSustainedShake(); // sarsinti yarida kalmis olabilir — temizle
-        if (playerRef != null) playerRef.ExitUltimatePose();
+        if (playerRef != null) { playerRef.ExitUltimatePose(); playerRef.SetUltimateInvulnerable(false); } // immunity biter (yarida kesilse bile buradan temizlenir)
         if (screenFX != null) screenFX.ResetFX();
     }
     #endregion

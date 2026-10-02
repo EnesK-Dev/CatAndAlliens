@@ -23,8 +23,12 @@ public class DamageNumber : MonoBehaviour
     [Header("Combo Rank Etkisi")]
     [Tooltip("Combo rank'i basina sayinin ne kadar buyuyecegi. Ornek 0.12 -> S rank'te ~1.6x buyuk sayi.")]
     [SerializeField] private float rankScaleStep = 0.12f;
-    [Tooltip("Acikken sayilar combo rank rengine boyanir; kapaliyken prefab'in kendi rengi kalir.")]
+    [Tooltip("Acikken sayilar rank'a gore lowRankColor -> highRankColor lerp'lenir; kapaliyken prefab rengi.")]
     [SerializeField] private bool useRankColor = true;
+    [Tooltip("En dusuk rank (E) sayilarinin rengi.")]
+    [SerializeField] private Color lowRankColor = Color.white;
+    [Tooltip("En yuksek rank (S) sayilarinin rengi.")]
+    [SerializeField] private Color highRankColor = Color.red;
     #endregion
 
     #region Private Fields
@@ -67,8 +71,14 @@ public class DamageNumber : MonoBehaviour
 
         if (label != null)
         {
-            // Rank rengi tek kaynaktan (ComboManager). Kapaliysa prefab'in kendi rengi kalir.
-            _baseColor = useRankColor ? ComboManager.RankColorAt(rank) : label.color;
+            // Rank'a gore beyaz(E) -> kirmizi(S) lerp. Palet rengi DEGIL. Kapaliysa prefab rengi.
+            if (useRankColor)
+            {
+                int maxRank = Mathf.Max(1, ComboManager.MaxRankIndex);
+                float rankT = Mathf.Clamp01((float)rank / maxRank);
+                _baseColor = Color.Lerp(lowRankColor, highRankColor, rankT);
+            }
+            else _baseColor = label.color;
             label.color = _baseColor;
             // Alloc yapmadan int yazar — mobilde her vurusta cop uretmemek icin SetText
             label.SetText("{0}", Mathf.RoundToInt(damage));

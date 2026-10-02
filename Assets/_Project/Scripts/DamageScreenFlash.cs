@@ -41,7 +41,16 @@ public class DamageScreenFlash : MonoBehaviour
 
     private Image flashImage;
     private Coroutine flashRoutine;
+    private static DamageScreenFlash _instance;
 
+    #endregion
+
+    #region Static API
+    /// <summary>Ekrani birkac kez kirmiziya yanip sondurur (boss oncesi bombardiman uyarisi gibi). unscaled — pause'da bile calisir.</summary>
+    public static void WarningBlink(int pulses, float peakAlpha, float pulseUp, float pulseDown)
+    {
+        if (_instance != null) _instance.StartWarningBlink(pulses, peakAlpha, pulseUp, pulseDown);
+    }
     #endregion
 
     #region Unity Callbacks
@@ -49,10 +58,16 @@ public class DamageScreenFlash : MonoBehaviour
     private void Awake()
     {
         flashImage = GetComponent<Image>();
+        _instance = this;
 
         // Overlay'in dokunmayi yutmasini engelle — acikken joystick/butonlar calismaz hale gelirdi
         flashImage.raycastTarget = false;
         SetAlpha(0f);
+    }
+
+    private void OnDestroy()
+    {
+        if (_instance == this) _instance = null;
     }
 
     private void OnEnable()
@@ -111,6 +126,23 @@ public class DamageScreenFlash : MonoBehaviour
 
         yield return FadeAlpha(targetAlpha, 0f, fadeOutDuration);
 
+        SetAlpha(0f);
+        flashRoutine = null;
+    }
+
+    private void StartWarningBlink(int pulses, float peak, float up, float down)
+    {
+        if (flashRoutine != null) StopCoroutine(flashRoutine);
+        flashRoutine = StartCoroutine(WarningBlinkRoutine(Mathf.Max(1, pulses), peak, up, down));
+    }
+
+    private IEnumerator WarningBlinkRoutine(int pulses, float peak, float up, float down)
+    {
+        for (int i = 0; i < pulses; i++)
+        {
+            yield return FadeAlpha(0f, peak, up);
+            yield return FadeAlpha(peak, 0f, down);
+        }
         SetAlpha(0f);
         flashRoutine = null;
     }

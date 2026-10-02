@@ -1,0 +1,365 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffdc327f7bb04f0ee85e4bdfe62f79f7, type: 3}
+  m_Name: CardDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::CardDatabase
+  cards:
+  - id: wpn_claw
+    displayName: Sharp Claws
+    description: "Basic melee \u2014 your default combo weapon."
+    icon: {fileID: 21300000, guid: 6d5455177cfe5dc0a868f1c8c535cbba, type: 3}
+    frameSprite: {fileID: -8735525269625259630, guid: 31d21c8edf6291a14b8f68948f9e0e06, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 1
+    cost: 0
+    maxPerSlot: 1
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: claw
+    upgradeKey: 
+  - id: wpn_blaster
+    displayName: Blaster
+    description: Auto-firing blaster
+    icon: {fileID: -6137623135985537652, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+    frameSprite: {fileID: -8735525269625259630, guid: 31d21c8edf6291a14b8f68948f9e0e06, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 1
+    cost: 60
+    maxPerSlot: 1
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: blaster
+    upgradeKey: 
+  - id: wpn_boomerang
+    displayName: Boomerang
+    description: Returning boomerang
+    icon: {fileID: 6216987119186573744, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+    frameSprite: {fileID: -8735525269625259630, guid: 31d21c8edf6291a14b8f68948f9e0e06, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 1
+    cost: 60
+    maxPerSlot: 1
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: boomerang
+    upgradeKey: 
+  - id: wpn_orbital
+    displayName: Orbital
+    description: Orbiting blades
+    icon: {fileID: 8181939858501728441, guid: 307d0e1c7f023bee5955e8dcda6f77e4, type: 3}
+    frameSprite: {fileID: -8735525269625259630, guid: 31d21c8edf6291a14b8f68948f9e0e06, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 1
+    cost: 70
+    maxPerSlot: 1
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: orbital
+    upgradeKey: 
+  - id: wpn_multislash
+    displayName: Multi-Slash
+    description: Extra slash directions
+    icon: {fileID: 21300000, guid: 4f1aa48254f68edc9ac51921cb2834a7, type: 3}
+    frameSprite: {fileID: -8735525269625259630, guid: 31d21c8edf6291a14b8f68948f9e0e06, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 1
+    cost: 70
+    maxPerSlot: 1
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: multislash
+    upgradeKey: 
+  - id: wpn_blaster_dmg
+    displayName: Blaster Damage
+    description: +damage
+    icon: {fileID: -6137623135985537652, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 2
+    cost: 40
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: blaster
+    upgradeKey: damage
+  - id: wpn_blaster_firerate
+    displayName: Blaster Fire Rate
+    description: +attack speed
+    icon: {fileID: -6137623135985537652, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 2
+    cost: 40
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: blaster
+    upgradeKey: firerate
+  - id: wpn_blaster_targets
+    displayName: Blaster Targets
+    description: +1 enemy targeted
+    icon: {fileID: -6137623135985537652, guid: 8ed3f31c8356ca86aa204b6948f974c6, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 2
+    cost: 55
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: blaster
+    upgradeKey: targets
+  - id: wpn_boomerang_dmg
+    displayName: Boomerang Damage
+    description: +damage
+    icon: {fileID: 6216987119186573744, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 2
+    cost: 40
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: boomerang
+    upgradeKey: damage
+  - id: wpn_boomerang_count
+    displayName: Boomerang +1
+    description: one more boomerang
+    icon: {fileID: 6216987119186573744, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 2
+    cost: 55
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: boomerang
+    upgradeKey: count
+  - id: wpn_boomerang_speed
+    displayName: Boomerang Speed
+    description: flies faster
+    icon: {fileID: 6216987119186573744, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 2
+    cost: 35
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: boomerang
+    upgradeKey: speed
+  - id: wpn_boomerang_cd
+    displayName: Boomerang Cooldown
+    description: throws sooner
+    icon: {fileID: 6216987119186573744, guid: d105b19e68477f54da0db71e2c1c6502, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 2
+    cost: 35
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: boomerang
+    upgradeKey: cooldown
+  - id: wpn_orbital_dmg
+    displayName: Orbital Damage
+    description: +damage
+    icon: {fileID: 8181939858501728441, guid: 307d0e1c7f023bee5955e8dcda6f77e4, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 2
+    cost: 40
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: orbital
+    upgradeKey: damage
+  - id: wpn_orbital_count
+    displayName: Orbital +1
+    description: one more orb
+    icon: {fileID: 8181939858501728441, guid: 307d0e1c7f023bee5955e8dcda6f77e4, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 2
+    cost: 55
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: orbital
+    upgradeKey: count
+  - id: wpn_orbital_speed
+    displayName: Orbital Speed
+    description: spins faster
+    icon: {fileID: 8181939858501728441, guid: 307d0e1c7f023bee5955e8dcda6f77e4, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 2
+    cost: 35
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: orbital
+    upgradeKey: speed
+  - id: wpn_orbital_radius
+    displayName: Orbital Radius
+    description: wider orbit
+    icon: {fileID: 8181939858501728441, guid: 307d0e1c7f023bee5955e8dcda6f77e4, type: 3}
+    frameSprite: {fileID: -4446478501685291816, guid: 90b7a6c165e308aafa13f55583a9148b, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 2
+    cost: 35
+    maxPerSlot: 0
+    statType: 0
+    amount: 1
+    amountMult: 1
+    weaponId: orbital
+    upgradeKey: radius
+  - id: meta_might
+    displayName: Might
+    description: +Sharp Claws damage
+    icon: {fileID: -8285997511256225826, guid: 3bc435cab7be966b485f8901a71b6d86, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 1, g: 0.85, b: 0.2, a: 1}
+    category: 0
+    cost: 30
+    maxPerSlot: 0
+    statType: 0
+    amount: 15
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_haste
+    displayName: Haste
+    description: Attacks faster
+    icon: {fileID: 7614817794888221515, guid: 7cf698bf1bf6e892bbe1a8374787e1bf, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 0.33, g: 0.7, b: 1, a: 1}
+    category: 0
+    cost: 30
+    maxPerSlot: 0
+    statType: 7
+    amount: 0.93
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_area
+    displayName: Area
+    description: +range & size
+    icon: {fileID: -8970998617824141593, guid: d5a969d4e3c14e27bae7d1fb47871dd9, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 0.3, g: 0.9, b: 0.5, a: 1}
+    category: 0
+    cost: 25
+    maxPerSlot: 0
+    statType: 8
+    amount: 0.12
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_maxhp
+    displayName: Max Health
+    description: +1 Max Heart & heal
+    icon: {fileID: -854701565890967653, guid: f27c00166eec9b8cd9c1cb533daf83e4, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 1, g: 0.35, b: 0.42, a: 1}
+    category: 0
+    cost: 25
+    maxPerSlot: 6
+    statType: 3
+    amount: 2
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_amount
+    displayName: Amount
+    description: +1 projectile / orb
+    icon: {fileID: -5512450159367960604, guid: bd4731aaa0db0d748a3cd013ffc79a4e, type: 3}
+    frameSprite: {fileID: 21300000, guid: 816d78c97abee4cd0a791622370f63df, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 0
+    cost: 60
+    maxPerSlot: 0
+    statType: 9
+    amount: 1
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_charge
+    displayName: Charge
+    description: +Orbital damage
+    icon: {fileID: 5697095726050013000, guid: a1196de3e7f3c44ec89c6e79770e592c, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 0.8, g: 0.4, b: 0.98, a: 1}
+    category: 0
+    cost: 35
+    maxPerSlot: 0
+    statType: 10
+    amount: 1
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_firepower
+    displayName: Firepower
+    description: +Blaster damage
+    icon: {fileID: -1736326233518769972, guid: 9c0195e8af9403d7ea036ebe356bb9c7, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 1, g: 0.5, b: 0.15, a: 1}
+    category: 0
+    cost: 35
+    maxPerSlot: 0
+    statType: 11
+    amount: 1
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_impact
+    displayName: Impact
+    description: +Boomerang damage
+    icon: {fileID: -8221737138467185080, guid: b0e3fbf022989a180a23b99f9dc8afd0, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 0.24, g: 0.86, b: 0.52, a: 1}
+    category: 0
+    cost: 35
+    maxPerSlot: 0
+    statType: 12
+    amount: 1
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 
+  - id: meta_curse
+    displayName: Curse
+    description: Enemies spawn faster
+    icon: {fileID: 6894929934875589815, guid: 87cc33ca5e991d27583657441f9ac3fd, type: 3}
+    frameSprite: {fileID: 6502649139011597260, guid: c6be5bb492b218cfc912a1d25844ae84, type: 3}
+    frameTint: {r: 1, g: 1, b: 1, a: 1}
+    category: 0
+    cost: 20
+    maxPerSlot: 0
+    statType: 13
+    amount: 0.5
+    amountMult: 1
+    weaponId: 
+    upgradeKey: 

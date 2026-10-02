@@ -49,3 +49,16 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/
+
+# Graphify knowledge-graph çıktısı (oyun kodu değil)
+/graphify-out/
+
+# Geçici build cache (Android CMake vb.)
+/.utmp/
+
+# Unity crash-recovery scene yedekleri
+/[Aa]ssets/_Recovery/
+
+# Signing keys — ASLA commit etme, kaybedersen uygulama guncellenemez
+*.keystore
+*.jks

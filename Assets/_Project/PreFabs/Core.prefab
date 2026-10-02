@@ -83,8 +83,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 3625043607559282579, guid: 310e452a3ced43c5293b5eb6e73018f3, type: 3}
-  m_Color: {r: 1, g: 0.53494537, b: 0, a: 1}
+  m_Sprite: {fileID: 1632925732872728751, guid: d296f486b704db05d8098e610c9bb601, type: 3}
+  m_Color: {r: 0.9716981, g: 0.9567254, b: 0.93961376, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -141,9 +141,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30a29c017c2aab8f2b41832e4fb2b73a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoreItem
-  pulseAmount: 0.3
-  pulseSpeed: 2
-  spinSpeed: 0
+  spriteRenderer: {fileID: 8561555627674785500}
+  frames:
+  - {fileID: 1632925732872728751, guid: d296f486b704db05d8098e610c9bb601, type: 3}
+  - {fileID: 1155969455088231095, guid: d296f486b704db05d8098e610c9bb601, type: 3}
+  - {fileID: -6459312461157349629, guid: d296f486b704db05d8098e610c9bb601, type: 3}
+  - {fileID: -3337064616643865647, guid: d296f486b704db05d8098e610c9bb601, type: 3}
+  frameRate: 6
+  burstSpeedMin: 3.5
+  burstSpeedMax: 6.5
+  burstDuration: 0.32
   magnetRadius: 1.5
   magnetSpeed: 6
   magnetAcceleration: 18

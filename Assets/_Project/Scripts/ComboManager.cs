@@ -24,12 +24,16 @@ public class ComboManager : MonoBehaviour
         [Tooltip("Bu rank aktifken hasar VE saldiri hizina uygulanan carpan (1 = etkisiz).")]
         public float multiplier = 1f;
 
+        [Tooltip("Bu rank'in RENGI — combo yazisi ve hasar sayilari bu renkte. Inspector'daki renk karesinden elle sec.")]
+        public Color color = Color.white;
+
         /// <summary>Inspector-dostu ctor + kod tarafi varsayilanlar icin.</summary>
-        public ComboTier(string label, int requiredHits, float multiplier)
+        public ComboTier(string label, int requiredHits, float multiplier, Color color)
         {
             this.label = label;
             this.requiredHits = requiredHits;
             this.multiplier = multiplier;
+            this.color = color;
         }
     }
     #endregion
@@ -40,12 +44,12 @@ public class ComboManager : MonoBehaviour
     [SerializeField]
     private ComboTier[] tiers =
     {
-        new ComboTier("E", 0, 1.00f),
-        new ComboTier("D", 10, 1.10f),
-        new ComboTier("C", 25, 1.25f),
-        new ComboTier("B", 45, 1.45f),
-        new ComboTier("A", 70, 1.70f),
-        new ComboTier("S", 100, 2.00f),
+        new ComboTier("E", 0, 1.00f, new Color(0.85f, 0.85f, 0.85f)), // gri/beyaz
+        new ComboTier("D", 10, 1.10f, new Color(0.40f, 0.90f, 0.45f)), // yesil
+        new ComboTier("C", 25, 1.25f, new Color(0.35f, 0.75f, 1.00f)), // mavi
+        new ComboTier("B", 45, 1.45f, new Color(0.70f, 0.45f, 1.00f)), // mor
+        new ComboTier("A", 70, 1.70f, new Color(1.00f, 0.60f, 0.20f)), // turuncu
+        new ComboTier("S", 100, 2.00f, new Color(1.00f, 0.85f, 0.20f)), // altin
     };
 
     [Header("Kirilma Kurallari (Karma)")]
@@ -69,28 +73,42 @@ public class ComboManager : MonoBehaviour
     private int _count;             // Guncel ardisik vurus sayisi
     private int _tierIndex;         // tiers[] icindeki guncel rank indeksi
     private float _timeSinceLastHit; // Son basarili vurustan beri gecen sure (zaman decay icin)
+    private float _fillAccum;        // Agirlikli combo birikimi (kesirli vuruslar; 1'e ulasinca sayac +1)
     #endregion
 
     #region Rank Renk Paleti
-    // Rank'lara karsilik gelen renkler. Kod-tabanli tek kaynak: hem ComboUI hem DamageNumber
-    // buradan okur, boylece renkler her yerde tutarli. Asset/tema gelince buradan degistirilir.
-    // Sira tiers[] ile ayni: E, D, C, B, A, S.
-    private static readonly Color[] RankColors =
-    {
-        new Color(0.85f, 0.85f, 0.85f), // E - gri/beyaz
-        new Color(0.40f, 0.90f, 0.45f), // D - yesil
-        new Color(0.35f, 0.75f, 1.00f), // C - mavi
-        new Color(0.70f, 0.45f, 1.00f), // B - mor
-        new Color(1.00f, 0.60f, 0.20f), // A - turuncu
-        new Color(1.00f, 0.85f, 0.20f), // S - altin
-    };
+    // Rank renkleri artik tiers[] icindeki 'color' alanindan gelir (Inspector'da her rank'in renk
+    // karesinden ELLE secilir). Tek kaynak: hem ComboUI hem DamageNumber buradan okur.
 
-    /// <summary>Verilen rank indeksinin rengini dondurur (sinir disi indeks guvenli sekilde kirpilir).</summary>
-    public static Color RankColorAt(int index) =>
-        RankColors[Mathf.Clamp(index, 0, RankColors.Length - 1)];
+    /// <summary>Verilen rank indeksinin rengini (tiers[index].color) dondurur; manager yoksa beyaz.</summary>
+    public static Color RankColorAt(int index)
+    {
+        if (_instance != null && _instance.tiers != null && _instance.tiers.Length > 0)
+            return _instance.tiers[Mathf.Clamp(index, 0, _instance.tiers.Length - 1)].color;
+        return Color.white;
+    }
 
     /// <summary>Guncel rank'in rengi.</summary>
     public static Color CurrentRankColor => RankColorAt(RankIndex);
+
+    /// <summary>Bir SONRAKI rank'in rengi (progress dolgusu bu renkle). Max rank'te kendi rengi.</summary>
+    public static Color NextRankColor => RankColorAt(Mathf.Min(RankIndex + 1, MaxRankIndex));
+
+    /// <summary>Guncel tier icinde bir sonraki rank'e ilerleme (0-1). Max rank'te 1. UI progress dolgusu icin.</summary>
+    public static float TierProgress
+    {
+        get
+        {
+            if (_instance == null) return 0f;
+            var t = _instance.tiers;
+            int i = _instance._tierIndex;
+            if (t == null || i >= t.Length - 1) return 1f; // en ust rank -> dolu
+            int cur = t[i].requiredHits;
+            int next = t[i + 1].requiredHits;
+            if (next <= cur) return 0f;
+            return Mathf.Clamp01((float)(_instance._count - cur) / (next - cur));
+        }
+    }
     #endregion
 
     #region Static API
@@ -125,6 +143,56 @@ public class ComboManager : MonoBehaviour
     {
         if (_instance != null)
             _instance.RegisterHitInternal();
+    }
+
+    /// <summary>Agirlikli combo katkisi: weight kadar (kesirli) doldurur. 1 = tam bir vurus.</summary>
+    public static void RegisterHit(float weight)
+    {
+        if (_instance != null) _instance.RegisterHitWeighted(weight);
+    }
+
+    /// <summary>Sadece AKTIF combo silahi (RunStats.ComboWeaponKey) combo doldurur. weaponKey eslesirse weight kadar.
+    /// Diger silahlar hasar verir ama comboyu DOLDURMAZ. Hizli silah kucuk weight verir (yavas dolar), yavas silah buyuk.</summary>
+    public static void RegisterWeaponHit(string weaponKey, float weight)
+    {
+        if (_instance == null) return;
+        if (string.IsNullOrEmpty(RunStats.ComboWeaponKey) || RunStats.ComboWeaponKey != weaponKey) return;
+        _instance.RegisterHitWeighted(weight);
+    }
+
+    /// <summary>Combo rank'ini N kademe YUKARI tasir (odul). Ornek: bombardimanda hasar yemeyince cagrilir.</summary>
+    public static void GainRank(int steps)
+    {
+        if (_instance != null)
+            _instance.GainRankInternal(steps);
+    }
+
+    /// <summary>
+    /// Combo'yu "canli tutar": zaman decay penceresini (son vurustan beri gecen sure) SIFIRLAR ama
+    /// sayaci/rank'i degistirmez. Ulti gibi ekrani temizleyen (ama RegisterHit tetiklemeyen) aksiyonlar
+    /// cagirir — boylece dusman kalmadigi bosluk suresinde combo dusmez ("saldiri gibi sayilir").
+    /// </summary>
+    public static void KeepAlive()
+    {
+        if (_instance != null)
+            _instance._timeSinceLastHit = 0f;
+    }
+
+    /// <summary>
+    /// Comboyu tek seferde N vurus arttirir (toplu). Ulti ekrani temizlerken her oldurulen dusman
+    /// +1 vurus sayilsin diye cagrilir — combo firlar. Decay penceresini de sifirlar. UI bir kez guncellenir.
+    /// </summary>
+    public static void AddHits(int n)
+    {
+        if (_instance != null && n > 0)
+            _instance.AddHitsInternal(n);
+    }
+
+    /// <summary>Rank'i dogrudan en uste (S) tasir — ulti odulu. Zaten S ise bir sey yapmaz.</summary>
+    public static void SetMaxRank()
+    {
+        if (_instance != null)
+            _instance.GainRankInternal(_instance.tiers.Length); // steps >= max -> clamp ile S'e ciker
     }
     #endregion
 
@@ -184,6 +252,45 @@ public class ComboManager : MonoBehaviour
         _timeSinceLastHit = 0f; // Vurdu — decay penceresi sifirlanir
         RecomputeRank();
         OnComboChanged?.Invoke(_count, _tierIndex);
+    }
+
+    /// <summary>Agirlikli birikim: weight'i biriktirir; tam sayiya ulastikca sayaci arttirir. Her katkida decay penceresi sifirlanir.</summary>
+    private void RegisterHitWeighted(float weight)
+    {
+        if (weight <= 0f) return;
+        _timeSinceLastHit = 0f;      // combo silahi vurdukca canli kalsin
+        _fillAccum += weight;
+        int whole = Mathf.FloorToInt(_fillAccum);
+        if (whole <= 0) return;
+        _fillAccum -= whole;
+        _count += whole;
+        RecomputeRank();
+        OnComboChanged?.Invoke(_count, _tierIndex);
+    }
+
+    /// <summary>N vurusu tek seferde ekler; rank'i yeniden hesaplar, UI'yi bir kez gunceller.</summary>
+    private void AddHitsInternal(int n)
+    {
+        _count += n;
+        _timeSinceLastHit = 0f;
+        RecomputeRank();
+        OnComboChanged?.Invoke(_count, _tierIndex);
+    }
+
+    /// <summary>Combo rank'ini N kademe yukari tasir; sayaci yeni rank tabanina ceker. Zaten max ise bir sey yapmaz.</summary>
+    private void GainRankInternal(int steps)
+    {
+        if (steps <= 0) return;
+        int target = Mathf.Min(tiers.Length - 1, _tierIndex + steps);
+        if (target == _tierIndex) return; // zaten en ust rank
+
+        int oldTier = _tierIndex;
+        _tierIndex = target;
+        _count = tiers[target].requiredHits; // sayaci yeni rank'in tabanina cek
+        _timeSinceLastHit = 0f;
+
+        OnComboChanged?.Invoke(_count, _tierIndex);
+        OnRankChanged?.Invoke(oldTier, _tierIndex);
     }
 
     /// <summary>Player hasar aldiginda cagrilir (OnPlayerDamaged). Combo'yu tiersLostOnDamage kadar dusurur.</summary>

@@ -49,6 +49,8 @@ public class SfxManager : MonoBehaviour
     [Header("Oyun Muzigi (ayri kaynak, loop)")]
     [Tooltip("Oyun sahnesi acilinca arkada donen muzik. MainMenu'de bos birak (ya da menu muzigi ata).")]
     [SerializeField] private SfxEntry gameplayMusic = new SfxEntry { id = SfxId.GameplayMusic, volume = 0.5f, pitchRange = Vector2.one };
+    [Tooltip("Boss savasinda calan muzik (boss gelince baslar, olunce normal muzige doner).")]
+    [SerializeField] private SfxEntry bossMusic = new SfxEntry { id = SfxId.BossMusic, volume = 0.6f, pitchRange = Vector2.one };
     [Tooltip("Sahne acilir acilmaz muzigi otomatik baslat.")]
     [SerializeField] private bool playMusicOnStart = true;
     #endregion
@@ -66,6 +68,8 @@ public class SfxManager : MonoBehaviour
     private bool _ultimateActive;
     private bool _musicWasPlaying;
     private bool _loopWasPlaying;
+    private bool _musicPausedByBombardment; // bombardiman muzigi ayri duraklatir (ulti'den bagimsiz)
+    private int _activeBossCount; // sahnede kac boss aktif -> boss muzigi
     #endregion
 
     #region Unity Callbacks
@@ -98,12 +102,74 @@ public class SfxManager : MonoBehaviour
         // Static event'ler — sahnede yoksa bile guvenli. OnDisable'da mutlaka cikilir (leak olmasin).
         player.OnPlayerDamaged += HandlePlayerDamaged;
         ComboManager.OnRankChanged += HandleRankChanged;
+        VolumeSettings.OnChanged += HandleVolumeChanged; // slider degisince muzik/loop sesini canli guncelle
+        BombardmentDirector.OnBombardmentStarted += HandleBombardmentStarted; // bombardimanda muzik sussun
+        BombardmentDirector.OnBombardmentFinished += HandleBombardmentFinished;
+        BossController.OnBossSpawned += HandleBossSpawned;
+        BossController.OnBossDefeated += HandleBossDefeated;
     }
 
     private void OnDisable()
     {
         player.OnPlayerDamaged -= HandlePlayerDamaged;
         ComboManager.OnRankChanged -= HandleRankChanged;
+        VolumeSettings.OnChanged -= HandleVolumeChanged;
+        BombardmentDirector.OnBombardmentStarted -= HandleBombardmentStarted;
+        BombardmentDirector.OnBombardmentFinished -= HandleBombardmentFinished;
+        BossController.OnBossSpawned -= HandleBossSpawned;
+        BossController.OnBossDefeated -= HandleBossDefeated;
+    }
+
+    /// <summary>Bombardiman baslayinca oyun muzigini duraklat (SFX/uyari sesleri devam eder).</summary>
+    private void HandleBombardmentStarted()
+    {
+        if (_musicSource != null && _musicSource.isPlaying)
+        {
+            _musicSource.Pause();
+            _musicPausedByBombardment = true;
+        }
+    }
+
+    /// <summary>Bombardiman bitince (boss gelince) muzigi kaldigi yerden devam ettir.</summary>
+    private void HandleBombardmentFinished(Color bossColor)
+    {
+        if (_musicPausedByBombardment && _musicSource != null)
+        {
+            _musicSource.UnPause();
+            _musicPausedByBombardment = false;
+        }
+    }
+
+    /// <summary>Boss gelince boss muzigine gec (ilk boss'ta).</summary>
+    private void HandleBossSpawned(BossController b)
+    {
+        _activeBossCount++;
+        if (_activeBossCount == 1) SwitchToBossMusic();
+    }
+
+    /// <summary>Boss olunce, baska boss yoksa normal muzige don.</summary>
+    private void HandleBossDefeated(bool wasFinal)
+    {
+        _activeBossCount = Mathf.Max(0, _activeBossCount - 1);
+        if (_activeBossCount == 0) PlayMusicInternal();
+    }
+
+    /// <summary>Music kaynagini boss muzigine cevirir (klip atanmissa).</summary>
+    private void SwitchToBossMusic()
+    {
+        if (_musicSource == null || bossMusic == null || bossMusic.clips == null || bossMusic.clips.Length == 0) return;
+        _musicPausedByBombardment = false;
+        _musicSource.clip = bossMusic.clips[Random.Range(0, bossMusic.clips.Length)];
+        _musicSource.volume = bossMusic.volume * VolumeSettings.Music;
+        _musicSource.loop = true;
+        _musicSource.Play();
+    }
+
+    /// <summary>Ses seviyesi degisince surekli calan kaynaklari (muzik + S-loop) canli guncelle.</summary>
+    private void HandleVolumeChanged()
+    {
+        if (_loopSource != null) _loopSource.volume = sRankLoop.volume * VolumeSettings.Sfx;
+        if (_musicSource != null) _musicSource.volume = (_activeBossCount > 0 ? bossMusic.volume : gameplayMusic.volume) * VolumeSettings.Music;
     }
 
     private void OnDestroy()
@@ -205,7 +271,7 @@ public class SfxManager : MonoBehaviour
         _nextVoice = (_nextVoice + 1) % _voices.Length;
 
         src.clip = clip;
-        src.volume = e.volume;
+        src.volume = e.volume * VolumeSettings.Sfx; // ayar barina gore
         src.pitch = Random.Range(e.pitchRange.x, e.pitchRange.y);
         src.Play();
     }
@@ -218,7 +284,7 @@ public class SfxManager : MonoBehaviour
         if (_loopSource.isPlaying && _loopSource.clip == clip) return; // zaten calıyor
 
         _loopSource.clip = clip;
-        _loopSource.volume = sRankLoop.volume;
+        _loopSource.volume = sRankLoop.volume * VolumeSettings.Sfx;
         _loopSource.pitch = sRankLoop.pitchRange.x <= 0f ? 1f : sRankLoop.pitchRange.x;
         _loopSource.Play();
     }
@@ -236,7 +302,7 @@ public class SfxManager : MonoBehaviour
         if (_musicSource.isPlaying && _musicSource.clip == clip) return; // zaten calıyor
 
         _musicSource.clip = clip;
-        _musicSource.volume = gameplayMusic.volume;
+        _musicSource.volume = gameplayMusic.volume * VolumeSettings.Music;
         _musicSource.pitch = gameplayMusic.pitchRange.x <= 0f ? 1f : gameplayMusic.pitchRange.x;
         _musicSource.Play();
     }

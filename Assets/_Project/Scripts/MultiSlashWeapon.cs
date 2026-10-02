@@ -1,0 +1,70 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+/// <summary>
+/// Silah 4 — Multi-slash. Yeni saldiri olusturmaz; oyuncunun MEVCUT pence saldirisinin vurdugu YON
+/// sayisini arttirir. Alinca 2 yon (ileri+geri), her yukseltmede +1 (3,4,5,6 max 6). Tek track.
+/// </summary>
+public class MultiSlashWeapon : WeaponBase
+{
+    #region Serialized Fields
+    [Header("Multi-slash")]
+    [Tooltip("Bos birakilirsa ayni GameObject'ten alinir.")]
+    [SerializeField] private player playerRef;
+
+    [Tooltip("Ilk alimdaki yon sayisi (ileri+geri = 2).")]
+    [SerializeField] private int startDirections = 2;
+
+    [Tooltip("Maksimum yon sayisi.")]
+    [SerializeField] private int maxDirections = 6;
+
+    [Tooltip("Might (damage track) her level'inde eklenen claw hasari. Hasar arttikca claw'lar gorsel olarak da buyur (player.ClawVisualScale).")]
+    [SerializeField] private float damagePerLevel = 18f;
+    #endregion
+
+    #region Private Fields
+    private int _dirLevel; // 0 = start (2 yon), her seviye +1
+    private int _damageLevel; // Might track seviyesi (claw hasari + gorsel buyume)
+    #endregion
+
+    #region Unity Callbacks
+    protected override void Awake()
+    {
+        base.Awake();
+        if (playerRef == null) playerRef = GetComponent<player>();
+    }
+    #endregion
+
+    #region Overrides
+    protected override void OnAcquired()
+    {
+        // Multi-Slash MEVCUT pence saldirisini surdurur; Sharp Claws ayri alinmamis olsa bile melee'yi ac
+        // (yoksa _clawEquipped=false kalir ve HandleVampireHunterAttack hic calismaz -> vuruş/sprite yok).
+        if (playerRef != null) playerRef.SetClawEquipped(true);
+        ApplyDirections();
+    }
+
+    public override int GetTrackLevel(string key) => key switch { "dir" => _dirLevel, "damage" => _damageLevel, _ => 0 };
+
+    public override void ApplyTrack(string key, int times)
+    {
+        if (times <= 0) return;
+        if (key == "dir") { _dirLevel += times; ApplyDirections(); }
+        else if (key == "damage") { _damageLevel += times; if (playerRef != null) playerRef.AddDamage(damagePerLevel * times); } // hasar + gorsel buyume (ClawVisualScale hasara bagli)
+    }
+
+    public override void CollectUpgrades(List<WeaponUpgradeOption> into)
+    {
+        // LIMITSIZ (sonsuz alinabilir) + LUCKY rozeti (bariz guclu)
+        into.Add(new WeaponUpgradeOption("Multi-Slash +1", "One more slash direction", _dirLevel + 1,
+            () => { _dirLevel++; ApplyDirections(); }, true));
+    }
+    #endregion
+
+    #region Private Methods
+    private int CurrentDirections() => startDirections + _dirLevel + RunStats.AmountBonus; // clamp YOK — sonsuz
+
+    public override void RefreshStats() { ApplyDirections(); } // Amount degisince yon sayisini yenile
+    private void ApplyDirections() { if (playerRef != null) playerRef.SetAttackDirections(CurrentDirections()); }
+    #endregion
+}

@@ -14,6 +14,8 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private SceneLoader sceneLoader;
     [Tooltip("Build listesindeki oyun sahnesinin adi.")]
     [SerializeField] private string gameSceneName = "SampleScene";
+    [Tooltip("PLAY'de once oynayacak intro/loading sahnesi. Bos ise dogrudan oyun sahnesine gecer.")]
+    [SerializeField] private string splashSceneName = "MeowvivorsSplash";
 
     [Header("Paneller")]
     [SerializeField] private GameObject settingsPanel;
@@ -46,8 +48,18 @@ public class MainMenuController : MonoBehaviour
     public void PlayGame()
     {
         SfxManager.Play(SfxId.ButtonClick);
-        if (sceneLoader != null)
+        if (sceneLoader == null) return;
+
+        // PLAY: once intro/loading sahnesini oynat, oradan oyun sahnesine gec (loading screen gibi).
+        if (!string.IsNullOrEmpty(splashSceneName))
+        {
+            SplashIntro.NextSceneOverride = gameSceneName;
+            sceneLoader.LoadScene(splashSceneName);
+        }
+        else
+        {
             sceneLoader.LoadScene(gameSceneName);
+        }
     }
 
     /// <summary>SETTINGS butonuna baglanir. Ayarlar panelini acar.</summary>
