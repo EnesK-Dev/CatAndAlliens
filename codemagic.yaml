@@ -1,42 +1,26 @@
 # ============================================================================
 # Meowvivors — Codemagic CI/CD (Unity 6000.3.15f1 -> iOS)   [Unity PERSONAL lisans]
-# ----------------------------------------------------------------------------
-# Codemagic panelinde YAPMAN GEREKENLER:
-#  1) Environment variables -> yeni grup "unity" olustur, icine (Secure):
-#        UNITY_USERNAME = Unity hesabi e-posta
-#        UNITY_PASSWORD = Unity hesabi sifre
-#        (Personal'da SERIAL YOK. Unity hesabinda 2FA KAPALI olmali - headless login icin.)
-#  2) Apple Developer hesabi acilinca:
-#        Teams -> Integrations -> App Store Connect baglantisini kur (adi "codemagic").
-#     Sonra 2. workflow (ios-appstore) calisabilir.
-#
-# ILK ONCE "ios-xcode-build" workflow'unu calistir -> Unity+lisans dogru mu test et.
+# DUZELTI: UNITY_HOME yerine `unity` komutunu kullan (Codemagic PATH'te var)
 # ============================================================================
 
 definitions:
   unity_activate: &unity_activate
     name: Activate Unity (Personal - online login)
     script: |
-      # Personal: serial YOK; Unity hesabi kullanici adi + sifre ile online aktive olur.
-      # ONEMLI: Unity hesabinda 2FA (iki adimli dogrulama) KAPALI olmali, yoksa headless login patlar.
-      "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
+      # Personal: Unity hesabi kullanici adi + sifre ile online aktive olur.
+      # ONEMLI: Unity hesabinda 2FA (iki adimli dogrulama) KAPALI olmali.
+      unity -batchmode -nographics -quit -logFile /dev/stdout \
         -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD"
   unity_return: &unity_return
     name: Return Unity license (Personal seat'i serbest birak)
     script: |
-      "$UNITY_BIN" -batchmode -nographics -quit -returnlicense -logFile /dev/stdout \
+      unity -batchmode -nographics -quit -returnlicense -logFile /dev/stdout \
         -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" || true
-  unity_build_ios: &unity_build_ios
-    name: Build iOS Xcode project (Unity)
-    script: |
-      "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
-        -projectPath . -executeMethod BuildScript.BuildIos -buildTarget iOS
 
 workflows:
 
   # --------------------------------------------------------------------------
   # 1) SADECE Unity -> Xcode projesi uret. Apple hesabi GEREKMEZ.
-  #    Amac: Unity lisansi + build pipeline CI'da calisiyor mu dogrulamak.
   # --------------------------------------------------------------------------
   ios-xcode-build:
     name: Meowvivors iOS (Xcode project only)
@@ -46,31 +30,31 @@ workflows:
       groups:
         - unity
       vars:
-        UNITY_BIN: ${UNITY_HOME}/Contents/MacOS/Unity
+        XCODE_PROJECT: "ios/Unity-iPhone.xcodeproj"
     scripts:
       - *unity_activate
-      - *unity_build_ios
+      - name: Build iOS Xcode project (Unity)
+        script: |
+          unity -batchmode -nographics -quit -logFile /dev/stdout \
+            -projectPath . -executeMethod BuildScript.BuildIos -buildTarget iOS
       - *unity_return
     artifacts:
-      - ios/**          # uretilen Xcode projesi (indirip inceleyebilirsin)
+      - ios/**          # uretilen Xcode projesi
       - /tmp/unity_*.log
 
   # --------------------------------------------------------------------------
   # 2) TAM YAYIN: Unity -> Xcode -> imzala -> .ipa -> TestFlight/App Store.
-  #    Apple Developer hesabi + App Store Connect entegrasyonu GEREKIR.
-  #    com.yamineko.meowvivors icin App Store Connect'te app olusturulmus olmali.
   # --------------------------------------------------------------------------
   ios-appstore:
     name: Meowvivors iOS (App Store)
     max_build_duration: 120
     instance_type: mac_mini_m2
     integrations:
-      app_store_connect: codemagic   # Teams>Integrations'ta verdigin baglanti adi
+      app_store_connect: codemagic
     environment:
       groups:
         - unity
       vars:
-        UNITY_BIN: ${UNITY_HOME}/Contents/MacOS/Unity
         BUNDLE_ID: "com.yamineko.meowvivors"
         XCODE_PROJECT: "ios/Unity-iPhone.xcodeproj"
         XCODE_SCHEME: "Unity-iPhone"
@@ -81,7 +65,10 @@ workflows:
       cocoapods: default
     scripts:
       - *unity_activate
-      - *unity_build_ios
+      - name: Build iOS Xcode project (Unity)
+        script: |
+          unity -batchmode -nographis -quit -logFile /dev/stdout \
+            -projectPath . -executeMethod BuildScript.BuildIos -buildTarget iOS
       - *unity_return
       - name: Set up code signing
         script: |
