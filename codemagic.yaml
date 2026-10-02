@@ -3,9 +3,9 @@
 # ----------------------------------------------------------------------------
 # Codemagic panelinde YAPMAN GEREKENLER:
 #  1) Environment variables -> yeni grup "unity" olustur, icine (Secure):
-#        UNITY_LICENSE = .ulf lisans dosyasinin TUM icerigi (XML).
-#        (.ulf nasil uretilir? Asagidaki "Personal lisans uretme" adimlarina bak -
-#         sohbette sana komutlari verdim: once .alf uret -> Unity'ye yukle -> .ulf indir.)
+#        UNITY_USERNAME = Unity hesabi e-posta
+#        UNITY_PASSWORD = Unity hesabi sifre
+#        (Personal'da SERIAL YOK. Unity hesabinda 2FA KAPALI olmali - headless login icin.)
 #  2) Apple Developer hesabi acilinca:
 #        Teams -> Integrations -> App Store Connect baglantisini kur (adi "codemagic").
 #     Sonra 2. workflow (ios-appstore) calisabilir.
@@ -15,11 +15,17 @@
 
 definitions:
   unity_activate: &unity_activate
-    name: Activate Unity (Personal - manual .ulf)
+    name: Activate Unity (Personal - online login)
     script: |
-      echo "$UNITY_LICENSE" > /tmp/Unity_lic.ulf
+      # Personal: serial YOK; Unity hesabi kullanici adi + sifre ile online aktive olur.
+      # ONEMLI: Unity hesabinda 2FA (iki adimli dogrulama) KAPALI olmali, yoksa headless login patlar.
       "$UNITY_BIN" -batchmode -nographics -quit -logFile /dev/stdout \
-        -manualLicenseFile /tmp/Unity_lic.ulf || true
+        -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD"
+  unity_return: &unity_return
+    name: Return Unity license (Personal seat'i serbest birak)
+    script: |
+      "$UNITY_BIN" -batchmode -nographics -quit -returnlicense -logFile /dev/stdout \
+        -username "$UNITY_USERNAME" -password "$UNITY_PASSWORD" || true
   unity_build_ios: &unity_build_ios
     name: Build iOS Xcode project (Unity)
     script: |
@@ -44,6 +50,7 @@ workflows:
     scripts:
       - *unity_activate
       - *unity_build_ios
+      - *unity_return
     artifacts:
       - ios/**          # uretilen Xcode projesi (indirip inceleyebilirsin)
       - /tmp/unity_*.log
@@ -75,6 +82,7 @@ workflows:
     scripts:
       - *unity_activate
       - *unity_build_ios
+      - *unity_return
       - name: Set up code signing
         script: |
           xcode-project use-profiles
