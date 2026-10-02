@@ -11,7 +11,7 @@ public static class MetaSave
 {
     #region Constants
     public const int SlotCount = 3;
-    public const int MaxCardsPerSlot = 25; // 3 silah + 20 stat
+    public const int MaxCardsPerSlot = 40; // kusanilabilir stat kapasitesi (silahlar ayri weaponSlots'ta)
     public const int WeaponSlotCap = 3;   // kafanin cevresindeki 3 silah slotu (orta index 1 = combo)
     private const string PrefsKey = "MeowvivorsMeta_v3"; // v3: guncelleme ile TUM oyuncular sifirdan baslar (yeni anahtar = eski v2 verisi okunmaz)
     private const string OldPrefsKey = "MeowvivorsMeta_v2"; // temizlik: v3'e gecince eski veriyi sil

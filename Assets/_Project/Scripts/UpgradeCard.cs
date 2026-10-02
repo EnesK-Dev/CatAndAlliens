@@ -92,7 +92,7 @@ public class UpgradeCard : MonoBehaviour
 
         if (titleText != null) titleText.text = title;
         if (descriptionText != null) descriptionText.text = description;
-        if (levelText != null) levelText.SetText("Lv.{0}", displayLevel); // alloc yok (TMP)
+        if (levelText != null) levelText.SetText("x {0}", displayLevel); // alloc yok (TMP)
 
         // Kategoriye gore kart cercevesi: renkli sprite (varsa) + tint. NEW WEAPON etiketi.
         if (frameImage != null)

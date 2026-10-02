@@ -119,6 +119,9 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
     private bool canUseLaser = false;
 
     private LaserVisual laserVisualInstance;
+    // Lazer hasar taramasi icin alloc'suz buffer (Player layer'inda birden fazla collider var:
+    // govde CapsuleCollider2D [trigger=0] + AttackPoint menzil dairesi [trigger=1]).
+    private readonly Collider2D[] _laserHitBuffer = new Collider2D[8];
     private Transform playerTransform;
     private Rigidbody2D rb;
     // Duvar kaymasi (wall slide) — Obstacle layer'ina rb.Cast ile bakip pinlenmeyi onler.
@@ -701,11 +704,16 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
                 {
                     Vector2 center = (origin + endP) * 0.5f;
                     float angleDeg = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
-                    Collider2D hitP = Physics2D.OverlapBox(center, new Vector2(len, dmgWidth), angleDeg, playerLayer);
-                    if (hitP != null)
+                    // TEK OverlapBox yerine ALL: Player layer'inda birden fazla collider var; tek donen collider
+                    // AttackPoint'in trigger menzil dairesi olabilir (player component'i YOK) -> hasar kayboluyordu.
+                    // Trigger'lari atla (sadece GOVDE isinin uzerindeyse vur), parent'tan player'i bul.
+                    int hitCount = Physics2D.OverlapBoxNonAlloc(center, new Vector2(len, dmgWidth), angleDeg, _laserHitBuffer, playerLayer);
+                    for (int hi = 0; hi < hitCount; hi++)
                     {
-                        player cat = hitP.GetComponent<player>();
-                        if (cat != null) cat.TakeDamage(laserDamage);
+                        Collider2D hitP = _laserHitBuffer[hi];
+                        if (hitP == null || hitP.isTrigger) continue; // menzil dairesi (trigger) degil, govde
+                        player cat = hitP.GetComponentInParent<player>();
+                        if (cat != null) { cat.TakeDamage(laserDamage); break; }
                     }
                 }
             }
@@ -775,6 +783,7 @@ public class EnemyController : MonoBehaviour, IDifficultyScaled
 
     /// <summary>Bu dusmanin temel rengi (flash sonrasi donulen). Splitter yavrularini kendi rengine boyamak icin okur.</summary>
     public Color BaseColor => baseColor; // boss minion iz rengi disaridan da okunur
+    public float CurrentHealth => currentHealth;   // boss can bari (SplitterEnemy boss toplam cani) icin
 
     /// <summary>Dis sistem (ornek: splitter) bu dusmanin rengini ayarlar — hem gorsel hem flash-donus rengi. Awake sonrasi cagrilmali.</summary>
     public void SetTint(Color c)

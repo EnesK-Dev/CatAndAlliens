@@ -27,12 +27,15 @@ public class ShopUI : MonoBehaviour
     [Tooltip("Stat kartlarinin bir satirda kac tane dizilecegi.")]
     [SerializeField] private int statsPerRow = 5;
     [Tooltip("Bir statin her yeni aliminda fiyat bu carpanla artar (1.6 = her seferinde %60 pahali).")]
-    [SerializeField] private float statCostGrowth = 1.6f;
+    [SerializeField] private float statCostGrowth = 2f;
     [Tooltip("Silah fiyat carpani. TUM silahlar PAYLASIR: herhangi bir silah alininca (claw haric) hepsinin fiyati bu carpanla artar.")]
     [SerializeField] private float weaponCostGrowth = 2f;
     #endregion
 
     #region Private Fields
+    // Oyun ici (GameOver/Pause) 'SHOP' butonu bunu true yapip MainMenu sahnesini yukler;
+    // sahne acilinca Start bunu gorup shop panelini otomatik acar (SplashIntro.NextSceneOverride deseni).
+    public static bool OpenOnLoad;
     private readonly List<ShopItemUI> _items = new List<ShopItemUI>();
     private readonly List<string> _itemCardIds = new List<string>();
     private ShopCardSizer _sizer;
@@ -42,6 +45,16 @@ public class ShopUI : MonoBehaviour
     #region Unity Callbacks
     private void OnEnable() { MetaSave.OnCoresChanged += HandleCoresChanged; }
     private void OnDisable() { MetaSave.OnCoresChanged -= HandleCoresChanged; }
+
+    /// <summary>Sahne yuklenince: oyun ici SHOP butonundan gelindiyse (OpenOnLoad) shop panelini otomatik ac.</summary>
+    private void Start()
+    {
+        if (OpenOnLoad)
+        {
+            OpenOnLoad = false;
+            Open();
+        }
+    }
     #endregion
 
     #region Public Methods
@@ -133,22 +146,30 @@ public class ShopUI : MonoBehaviour
         _itemCardIds.Add(card.id);
     }
 
-    /// <summary>Bir kartin GUNCEL fiyati. Statlar: her sahip olunan adette carpanla artar. Silah: sabit.</summary>
+    /// <summary>Bir kartin GUNCEL fiyati. Statlar: her sahip olunan adette carpanla artar. Silah: sabit.
+    /// Carpan uygulandiktan SONRA fiyat 5in en yakin katina yuvarlanir (yukari/asagi) — oyun ici CoreManager ile ayni.</summary>
     private int CostFor(CardDefinition card)
     {
         if (card == null) return 0;
         if (card.category == CardCategory.Stat)
         {
             int owned = MetaSave.OwnedCount(card.id);
-            return Mathf.RoundToInt(card.cost * Mathf.Pow(Mathf.Max(1f, statCostGrowth), owned));
+            return RoundTo5(card.cost * Mathf.Pow(Mathf.Max(1f, statCostGrowth), owned));
         }
         if (card.category == CardCategory.Weapon)
         {
             // PAYLASIMLI: alinan (claw disi) silah sayisi kadar TUM silahlarin fiyati artar.
             float wg = weaponCostGrowth >= 1.01f ? weaponCostGrowth : 2f; // yeni alan 0 serialize olursa guvenli varsayilan
-            return Mathf.RoundToInt(card.cost * Mathf.Pow(wg, WeaponsOwnedCount()));
+            return RoundTo5(card.cost * Mathf.Pow(wg, WeaponsOwnedCount()));
         }
         return card.cost;
+    }
+
+    /// <summary>Ham fiyati 5in en yakin katina yuvarlar (yukari ya da asagi), en az 5. CoreManager.CostForCardsTaken ile ayni mantik.</summary>
+    private static int RoundTo5(float raw)
+    {
+        int rounded = Mathf.RoundToInt(raw / 5f) * 5;
+        return Mathf.Max(5, rounded);
     }
 
     /// <summary>Sahip olunan (claw haric) silah sayisi — silah fiyat artisi TUM silahlar arasinda PAYLASILIR.</summary>

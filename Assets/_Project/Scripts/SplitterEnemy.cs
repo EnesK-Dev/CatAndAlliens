@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -40,16 +41,36 @@ public class SplitterEnemy : EnemyController
     #endregion
 
     #region Boss Soyu (dovus takibi)
-    private static int _lineageAlive;
+    private static readonly List<SplitterEnemy> _bossLineage = new List<SplitterEnemy>();
+    private static float _bossPeakTotal; // boss soyunun gorulen EN YUKSEK toplam cani (bar paydasi)
 
     /// <summary>Splitter boss soyundan CANLI parca var mi. Difficulty/EnemyGenerator ilerlemeyi durdurmak icin okur.</summary>
-    public static bool BossLineageAlive => _lineageAlive > 0;
+    public static bool BossLineageAlive => _bossLineage.Count > 0;
 
     /// <summary>Bu parca boss soyundan mi (bombardiman onu OLDURMEMELI — spawn ani havada kalan bombaya kurban gitmesin).</summary>
     public bool IsBossLineage => isBossLineage;
 
-    protected override void OnEnable() { base.OnEnable(); if (isBossLineage) _lineageAlive++; }
-    protected override void OnDisable() { base.OnDisable(); if (isBossLineage) _lineageAlive = Mathf.Max(0, _lineageAlive - 1); }
+    protected override void OnEnable() { base.OnEnable(); if (isBossLineage && !_bossLineage.Contains(this)) _bossLineage.Add(this); }
+    protected override void OnDisable() { base.OnDisable(); if (isBossLineage) { _bossLineage.Remove(this); if (_bossLineage.Count == 0) _bossPeakTotal = 0f; } }
+
+    /// <summary>Boss can bari icin: TUM canli boss-soyu parcalarinin TOPLAM cani / gorulen en yuksek toplam.
+    /// Renk = ilk canli parcanin rengi. Boss soyu yoksa false.</summary>
+    public static bool TryGetBossBar(out float cur, out float max, out Color col)
+    {
+        cur = 0f; max = 0f; col = Color.white;
+        float sum = 0f; bool got = false;
+        for (int i = 0; i < _bossLineage.Count; i++)
+        {
+            var e = _bossLineage[i];
+            if (e == null) continue;
+            sum += e.CurrentHealth;
+            if (!got) { col = e.BaseColor; got = true; }
+        }
+        if (!got) return false;
+        if (sum > _bossPeakTotal) _bossPeakTotal = sum;
+        cur = sum; max = _bossPeakTotal;
+        return true;
+    }
     #endregion
 
     #region Pool Reset

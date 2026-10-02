@@ -212,6 +212,11 @@ public class BossController : MonoBehaviour
     /// <summary>Sahnede su an canli boss var mi. EnemyGenerator normal spawn'i durdurmak icin kullanir.</summary>
     public static bool AnyBossAlive => _aliveCount > 0;
 
+    /// <summary>Su an canli olan boss (ekran can bari icin). Ayni anda tek boss varsayilir.</summary>
+    public static BossController ActiveBoss { get; private set; }
+    public float CurrentHealthValue => _currentHealth; // can bari (ekran alt-orta) okur
+    public float MaxHealthValue => maxHealth;
+
     /// <summary>Boss olum surecinde mi (attack modulleri bunu kontrol eder).</summary>
     public bool IsDying => _isDying;
 
@@ -254,6 +259,7 @@ public class BossController : MonoBehaviour
     private void Start()
     {
         // Gec enable olsa bile can bari baslangic durumunu alsin diye ilk event'leri firlat.
+        ActiveBoss = this; // ekran can bari bunu okur
         OnBossSpawned?.Invoke(this);
         OnBossHealthChanged?.Invoke(_currentHealth, maxHealth);
 
@@ -287,6 +293,7 @@ public class BossController : MonoBehaviour
     private void OnDestroy()
     {
         _aliveCount = Mathf.Max(0, _aliveCount - 1);
+        if (ActiveBoss == this) ActiveBoss = null;
     }
 
     private void FixedUpdate()
@@ -678,6 +685,7 @@ public class BossController : MonoBehaviour
     {
         if (_isDying) return;
         _isDying = true;
+        if (ActiveBoss == this) ActiveBoss = null; // can bari gizlensin
 
         StopAllCoroutines();
         _isAttacking = false;

@@ -27,7 +27,7 @@ public class BuildUI : MonoBehaviour
     [Tooltip("Orta kolon: silah level onizleme paneli icerigi (VerticalLayoutGroup). Kusanilan statlara gore silah leveleri.")]
     [SerializeField] private Transform weaponPreviewContent;
     [Tooltip("Kac stat kutusu uretilecek (4x5 = 20).")]
-    [SerializeField] private int statBoxCount = 20;
+    [SerializeField] private int statBoxCount = 40;
     [Tooltip("Katalog item kare boyutu (px).")]
     [SerializeField] private float catalogItemSize = 150f;
     #endregion

@@ -8,4 +8,8 @@ public static class GameFlow
 {
     /// <summary>Oyun kazanildi ya da kaybedildi mi? True iken kimse timeScale'i 1'e dondurmemeli.</summary>
     public static bool Ended;
+
+    /// <summary>Oyun DURAKLATILDI mi? (PauseMenu set eder.) True iken timeScale'i 1'e cekmeye calisan
+    /// sistemler (ulti sinemasi) oyunu YENIDEN baslatmaz; ayrica ulti sinemasi kendi de donar.</summary>
+    public static bool Paused;
 }

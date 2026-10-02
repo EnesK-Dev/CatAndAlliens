@@ -44,6 +44,7 @@ public class WinUI : MonoBehaviour
         if (winPanel != null)
             winPanel.SetActive(false);
         GameFlow.Ended = false; // yeni run: bayragi sifirla
+        GameFlow.Paused = false; // yeni run: duraklatma bayragini da sifirla
     }
 
     #endregion

@@ -53,7 +53,7 @@ public class UltimateCinematic : MonoBehaviour
     [SerializeField] private float recoveryDuration = 0.5f;
 
     [Tooltip("Ulti IMPACT aninda BOSSLARA verilen SABIT hasar. Bosslar emilmez/vaporize olmaz — sadece bu kadar hasar alir.")]
-    [SerializeField] private float bossUltimateDamage = 500f;
+    [SerializeField] private float bossUltimateDamage = 10000f;
 
     [Header("Dusman Vacuum (charge boyunca oyuncuya cekme)")]
     [Tooltip("CHARGE basindaki cekme hizi (yavas baslar).")]
@@ -144,6 +144,8 @@ public class UltimateCinematic : MonoBehaviour
         float t = 0f;
         while (t < chargeDuration)
         {
+            if (GameFlow.Paused) { yield return null; continue; } // duraklatilinca sinema DONAR, timeScale'e dokunma
+            if (!GameFlow.Ended) Time.timeScale = Mathf.Clamp01(slowMoTimeScale); // Continue 1 yapsa da her kare slow-mo'ya don
             t += Time.unscaledDeltaTime;
             float n = Mathf.Clamp01(t / chargeDuration);
 
@@ -175,7 +177,7 @@ public class UltimateCinematic : MonoBehaviour
         }
 
         // --- 2) IMPACT ---
-        if (!GameFlow.Ended) Time.timeScale = 1f;
+        if (!GameFlow.Ended && !GameFlow.Paused) Time.timeScale = 1f;
         if (cameraShake != null) cameraShake.EndSustainedShake(); // sarsintiyi durdur, kamerayi yerine al
         if (screenFX != null) screenFX.SetWhite(1f); // tam ekran beyaz (her seyin ustunde)
         SfxManager.Play(SfxId.UltimateImpact); // beyaz flash / patlama sesi (aktivasyondan ayri)
@@ -190,6 +192,7 @@ public class UltimateCinematic : MonoBehaviour
         float r = 0f;
         while (r < recoveryDuration)
         {
+            if (GameFlow.Paused) { yield return null; continue; } // duraklatilinca recovery de DONAR
             r += Time.unscaledDeltaTime;
             float n = Mathf.Clamp01(r / recoveryDuration);
 
@@ -291,13 +294,17 @@ public class UltimateCinematic : MonoBehaviour
     private IEnumerator WaitUnscaled(float seconds)
     {
         float t = 0f;
-        while (t < seconds) { t += Time.unscaledDeltaTime; yield return null; }
+        while (t < seconds)
+        {
+            if (!GameFlow.Paused) t += Time.unscaledDeltaTime; // duraklatilinca bekleme sayaci durur
+            yield return null;
+        }
     }
 
     /// <summary>Sinema durumunu guvenli varsayilana dondur: normal hiz, taban zoom, poz kapali, overlay temiz.</summary>
     private void RestoreState()
     {
-        if (!GameFlow.Ended) Time.timeScale = 1f;
+        if (!GameFlow.Ended && !GameFlow.Paused) Time.timeScale = 1f;
         if (cam != null && cam.orthographic) cam.orthographicSize = _baseOrthoSize;
         if (cameraShake != null) cameraShake.EndSustainedShake(); // sarsinti yarida kalmis olabilir — temizle
         if (playerRef != null) { playerRef.ExitUltimatePose(); playerRef.SetUltimateInvulnerable(false); } // immunity biter (yarida kesilse bile buradan temizlenir)

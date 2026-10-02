@@ -245,7 +245,7 @@ MonoBehaviour:
     frameTint: {r: 1, g: 0.85, b: 0.2, a: 1}
     category: 0
     cost: 30
-    maxPerSlot: 10
+    maxPerSlot: 0
     statType: 0
     amount: 15
     amountMult: 1
@@ -259,7 +259,7 @@ MonoBehaviour:
     frameTint: {r: 0.33, g: 0.7, b: 1, a: 1}
     category: 0
     cost: 30
-    maxPerSlot: 10
+    maxPerSlot: 0
     statType: 7
     amount: 0.93
     amountMult: 1
@@ -273,7 +273,7 @@ MonoBehaviour:
     frameTint: {r: 0.3, g: 0.9, b: 0.5, a: 1}
     category: 0
     cost: 25
-    maxPerSlot: 10
+    maxPerSlot: 0
     statType: 8
     amount: 0.12
     amountMult: 1
@@ -287,7 +287,7 @@ MonoBehaviour:
     frameTint: {r: 1, g: 0.35, b: 0.42, a: 1}
     category: 0
     cost: 25
-    maxPerSlot: 3
+    maxPerSlot: 6
     statType: 3
     amount: 2
     amountMult: 1
@@ -301,7 +301,7 @@ MonoBehaviour:
     frameTint: {r: 1, g: 1, b: 1, a: 1}
     category: 0
     cost: 60
-    maxPerSlot: 3
+    maxPerSlot: 0
     statType: 9
     amount: 1
     amountMult: 1
@@ -315,7 +315,7 @@ MonoBehaviour:
     frameTint: {r: 0.8, g: 0.4, b: 0.98, a: 1}
     category: 0
     cost: 35
-    maxPerSlot: 10
+    maxPerSlot: 0
     statType: 10
     amount: 1
     amountMult: 1
@@ -329,7 +329,7 @@ MonoBehaviour:
     frameTint: {r: 1, g: 0.5, b: 0.15, a: 1}
     category: 0
     cost: 35
-    maxPerSlot: 10
+    maxPerSlot: 0
     statType: 11
     amount: 1
     amountMult: 1
@@ -343,7 +343,7 @@ MonoBehaviour:
     frameTint: {r: 0.24, g: 0.86, b: 0.52, a: 1}
     category: 0
     cost: 35
-    maxPerSlot: 10
+    maxPerSlot: 0
     statType: 12
     amount: 1
     amountMult: 1

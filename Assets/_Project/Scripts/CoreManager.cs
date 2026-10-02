@@ -27,6 +27,9 @@ public class CoreManager : MonoBehaviour
     [Tooltip("Her kartta maliyet bu carpanla buyur (USTEL). 1.4 = her kart %40 daha pahali; sonuc 5'in katina yuvarlanir.\n" +
              "Ornek (first=10, 1.4): 10, 15, 20, 25, 40, 55, 75... Kart sayisi dogal azalir (hizli OP olmayi yavaslatir).")]
     [SerializeField] private float costMultiplier = 1.4f;
+
+    /// <summary>In-run kart maliyetinin TAVANI. Ustel artis bu degere ulasinca sabit kalir (1500, 1500, ...).</summary>
+    private const int MaxCardCost = 1500;
     #endregion
 
     #region Private Fields
@@ -215,7 +218,7 @@ public class CoreManager : MonoBehaviour
         float mult = costMultiplier >= 1.05f ? costMultiplier : 1.4f; // 0/serialize tuzagina karsi
         float raw = firstThreshold * Mathf.Pow(mult, cardsTaken);
         int rounded = Mathf.RoundToInt(raw / 5f) * 5; // 5'in katina (yukari/asagi) yuvarla
-        return Mathf.Max(5, rounded);
+        return Mathf.Clamp(rounded, 5, MaxCardCost); // ustel artis TAVANI: 1500'e ulasinca sabit kalir
     }
 
     private void ReturnToPool(CoreItem instance)

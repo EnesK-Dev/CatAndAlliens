@@ -22,6 +22,8 @@ public class PauseMenu : MonoBehaviour
     [SerializeField] private TMP_Text coreCountText;
 
     [SerializeField] private Button continueButton;
+    [Tooltip("SHOP butonu — MainMenu'yu yukleyip shop panelini actirir (run core'lari once bankalanir).")]
+    [SerializeField] private Button shopButton;
     [SerializeField] private Button restartButton;
     [SerializeField] private Button mainMenuButton;
 
@@ -48,6 +50,7 @@ public class PauseMenu : MonoBehaviour
         if (pauseButton != null) pauseButton.onClick.AddListener(Pause);
         if (continueButton != null) continueButton.onClick.AddListener(Continue);
         if (restartButton != null) restartButton.onClick.AddListener(Restart);
+        if (shopButton != null) shopButton.onClick.AddListener(GoToShop);
         if (mainMenuButton != null) mainMenuButton.onClick.AddListener(GoMainMenu);
     }
 
@@ -56,10 +59,11 @@ public class PauseMenu : MonoBehaviour
         if (pauseButton != null) pauseButton.onClick.RemoveListener(Pause);
         if (continueButton != null) continueButton.onClick.RemoveListener(Continue);
         if (restartButton != null) restartButton.onClick.RemoveListener(Restart);
+        if (shopButton != null) shopButton.onClick.RemoveListener(GoToShop);
         if (mainMenuButton != null) mainMenuButton.onClick.RemoveListener(GoMainMenu);
 
         // Guvenlik: bu obje kapanirken oyun donuk kalmasin
-        if (_paused) Time.timeScale = 1f;
+        if (_paused) { Time.timeScale = 1f; GameFlow.Paused = false; }
     }
     #endregion
 
@@ -70,6 +74,7 @@ public class PauseMenu : MonoBehaviour
         if (_paused) return;
         _paused = true;
         Time.timeScale = 0f;
+        GameFlow.Paused = true; // ulti sinemasi (ve timeScale'i 1'e cekenler) oyunu yeniden baslatmasin
         if (coreCountText != null) coreCountText.SetText("{0}", CoreManager.CoresThisRun); // bu run'daki toplam core
         if (pausePanel != null) pausePanel.SetActive(true);
     }
@@ -78,6 +83,7 @@ public class PauseMenu : MonoBehaviour
     private void Continue()
     {
         _paused = false;
+        GameFlow.Paused = false;
         Time.timeScale = 1f;
         if (pausePanel != null) pausePanel.SetActive(false);
     }
@@ -86,14 +92,27 @@ public class PauseMenu : MonoBehaviour
     private void Restart()
     {
         _paused = false;
+        GameFlow.Paused = false;
         Time.timeScale = 1f;
         if (sceneLoader != null) sceneLoader.ReloadCurrentScene();
+    }
+
+    /// <summary>SHOP'a gider: run core'larini bankalar, MainMenu'yu yukler ve shop panelini actirir.</summary>
+    private void GoToShop()
+    {
+        _paused = false;
+        GameFlow.Paused = false;
+        Time.timeScale = 1f;
+        ShopUI.OpenOnLoad = true;
+        CoreManager.BankRunCores(); // run'da toplanan parayi bankaya (shop'ta harcanabilsin)
+        if (sceneLoader != null) sceneLoader.LoadScene(mainMenuSceneName);
     }
 
     /// <summary>Ana menuye doner (timeScale ONCE 1'e alinir).</summary>
     private void GoMainMenu()
     {
         _paused = false;
+        GameFlow.Paused = false;
         Time.timeScale = 1f;
         CoreManager.BankRunCores(); // run'da toplanan parayi bankaya aktar (yoksa menuye donunce kaybolur)
         if (sceneLoader != null) sceneLoader.LoadScene(mainMenuSceneName);

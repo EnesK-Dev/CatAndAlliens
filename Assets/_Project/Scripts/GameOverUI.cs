@@ -62,6 +62,17 @@ public class GameOverUI : MonoBehaviour
             sceneLoader.LoadScene(mainMenuSceneName);
     }
 
+    /// <summary>SHOP butonuna baglanir. Zamani normale dondurup MainMenu'yu yukler ve shop panelini actirir.
+    /// (Olumde run core'lari zaten HandleRunEnd ile bankaya yazildi.)</summary>
+    public void GoToShop()
+    {
+        SfxManager.Play(SfxId.ButtonClick);
+        Time.timeScale = 1f;
+        ShopUI.OpenOnLoad = true;
+        if (sceneLoader != null)
+            sceneLoader.LoadScene(mainMenuSceneName);
+    }
+
     /// <summary>Restart butonuna bağlanır. Zamanı normale döndürüp mevcut sahneyi yeniden yükler.</summary>
     public void RestartGame()
     {
