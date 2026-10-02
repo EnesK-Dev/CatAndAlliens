@@ -170,6 +170,7 @@ PlayerSettings:
   applicationIdentifier:
     Android: com.yamineko.meowvivors
     Standalone: com.DefaultCompany.2D-URP
+    iPhone: com.yamineko.meowvivors
   buildNumber:
     Standalone: 0
     VisionOS: 0
