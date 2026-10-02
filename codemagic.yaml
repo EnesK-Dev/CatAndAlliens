@@ -8,9 +8,12 @@ definitions:
     name: Install Unity via unity-hub
     script: |
       # unity-hub kur + Unity 6000.3.15f1 indir
+      # --architecture arm64: M2 Apple Silicon; olmazsa headless'ta mimari sorusu takilir
+      # --module ios --childModules: iOS Build Support + alt modulleri (yoksa -buildTarget iOS patlar)
       brew install --cask unity-hub
       /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install \
-        --version 6000.3.15f1 --changeset 7aa55fbf98c2
+        --version 6000.3.15f1 --changeset 7aa55fbf98c2 \
+        --architecture arm64 --module ios --childModules
   unity_activate: &unity_activate
     name: Activate Unity (Personal - online login)
     script: |
