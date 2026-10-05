@@ -296,7 +296,7 @@ MonoBehaviour:
   attackDuration: 0.19
   attackCooldown: 0.85
   minAttackCooldown: 0.1
-  autoAttackRange: 2.4
+  autoAttackRange: 2.6
   playerDamage: 40
   attackRadius: 0.3
   attackKnockback: 0.3
@@ -1776,7 +1776,7 @@ MonoBehaviour:
   minSpawnInterval: 5
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
-  startingBurstCount: 2
+  startingBurstCount: 1
   spawnLineLength: 42.9
   isVerticalLine: 0
   finalWaveMilestoneIndex: 4
@@ -3481,7 +3481,7 @@ MonoBehaviour:
   minSpawnInterval: 5
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
-  startingBurstCount: 2
+  startingBurstCount: 1
   spawnLineLength: 37.6
   isVerticalLine: 1
   finalWaveMilestoneIndex: 4
@@ -7842,7 +7842,7 @@ MonoBehaviour:
   minSpawnInterval: 5
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
-  startingBurstCount: 2
+  startingBurstCount: 1
   spawnLineLength: 36.5
   isVerticalLine: 1
   finalWaveMilestoneIndex: 4
@@ -19821,7 +19821,7 @@ MonoBehaviour:
   minSpawnInterval: 5
   spawnIntervalJitter: 0.3
   typeRampSeconds: 180
-  startingBurstCount: 2
+  startingBurstCount: 1
   spawnLineLength: 40
   isVerticalLine: 0
   finalWaveMilestoneIndex: 4
