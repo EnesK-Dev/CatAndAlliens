@@ -7442,7 +7442,7 @@ MonoBehaviour:
   itemPrefab: {fileID: 9075194820564360488, guid: 38d2c20083148aee7bb9e50200cb37ba, type: 3}
   rowSpacing: 24
   statsPerRow: 5
-  statCostGrowth: 2
+  statCostGrowth: 1.6
   weaponCostGrowth: 2
 --- !u!1 &1569479102
 GameObject:

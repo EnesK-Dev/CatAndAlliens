@@ -19,7 +19,7 @@ public class WeaponLevelTracker : MonoBehaviour
     [SerializeField] private Sprite clawsIcon;
 
     [Header("Denge")]
-    [SerializeField] private int firstCost = 3;
+    [SerializeField] private int firstCost = 2;
     [SerializeField] private float clawsDamagePerLevel = 20f;
     [SerializeField] private int maxPips = 6;
 
@@ -34,7 +34,7 @@ public class WeaponLevelTracker : MonoBehaviour
         public UpgradeSelectionUI.UpgradeType stat;
         public string statLabel, effect, trackKey;
         public WeaponBase weapon;   // null = Sharp Claws
-        public int level = 0, progress = 0, cost = 3;
+        public int level = 0, progress = 0, cost = 2;
         public bool global;    // Amount: efekt RunStats.AmountBonus ile GLOBAL uygulanir -> burada ApplyTrack YAPMA
         public bool fixedCost; // Amount: esik SABIT (artmaz); her AmountCardsPerBonus kartta +1 level
         public TMP_Text label;

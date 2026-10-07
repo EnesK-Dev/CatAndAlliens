@@ -44,7 +44,6 @@ public class BuildUI : MonoBehaviour
     private readonly List<Image> _statFrames = new List<Image>();
     private Sprite _defaultWeaponFrame; // bos silah slotlari icin kart deseni
     private readonly List<Button> _statButtons = new List<Button>();
-    private bool _statBuilt;
     private readonly List<GameObject> _catalogItems = new List<GameObject>();
     #endregion
 
@@ -61,7 +60,6 @@ public class BuildUI : MonoBehaviour
     private void Rebuild(bool resetScroll = false)
     {
         if (_font == null) _font = FindFont();
-        EnsureStatBoxes();
 
         int slot = MetaSave.ActiveSlot;
         var deck = MetaSave.GetActiveDeck(); // index'ler MetaSave slot listesiyle ayni sirada
@@ -74,6 +72,9 @@ public class BuildUI : MonoBehaviour
         }
         // Ayni statlar yan yana gorunsun: id'ye gore grupla. Key = gercek deck index oldugu icin silme dogru kalir.
         stats.Sort((a, b) => string.CompareOrdinal(a.Value.id, b.Value.id));
+
+        // Stat grid DINAMIK: kusanilan kadar kutu (sinir yok). Taban statBoxCount, gerekince buyur.
+        EnsureStatBoxes(Mathf.Max(statBoxCount, stats.Count + 1));
 
         // Silah slotlari SABIT: her UI slotu bir data index'ine esli (orta=1=COMBO, sol=0, sag=2).
         // Silah cikarilinca SADECE kendi slotu bosalir; digerleri KAYMAZ.
@@ -269,7 +270,7 @@ public class BuildUI : MonoBehaviour
         if (stat == "Amount") { level = n; prog = 0; pipsShown = 0; } // Amount: nadir -> aninda level, kutu yok
         else
         {
-            level = 0; int cost = 3; prog = 0;
+            level = 0; int cost = 2; prog = 0;
             for (int i = 0; i < n; i++) { prog++; if (prog >= cost) { prog -= cost; level++; cost++; } }
             pipsShown = Mathf.Min(cost, 6);
         }
@@ -369,7 +370,7 @@ public class BuildUI : MonoBehaviour
             else
             {
                 int inDeck = MetaSave.CountInSlot(slot, card.id);
-                canAdd = inDeck < ownedCount && statsInDeck < statBoxCount;
+                canAdd = inDeck < ownedCount;
                 displayCount = Mathf.Max(0, ownedCount - inDeck); // KALAN adet — kullanildikca azalir
             }
 
@@ -389,9 +390,6 @@ public class BuildUI : MonoBehaviour
             if (MetaSave.AddWeaponAuto(slot, id)) { SfxManager.Play(SfxId.ButtonClick); Rebuild(); }
             return;
         }
-        var deck = MetaSave.GetActiveDeck();
-        int statsInDeck = deck.Count(x => { var c = CardCatalog.Get(x); return c != null && c.category == CardCategory.Stat; });
-        if (statsInDeck >= statBoxCount) return;
         if (MetaSave.CountInSlot(slot, id) >= MetaSave.OwnedCount(id)) return;
         if (MetaSave.AddCardToSlot(slot, id)) { SfxManager.Play(SfxId.ButtonClick); Rebuild(); }
     }
@@ -430,17 +428,17 @@ public class BuildUI : MonoBehaviour
         return img;
     }
 
-    private void EnsureStatBoxes()
+    private void EnsureStatBoxes(int needed)
     {
-        if (_statBuilt || statGridContent == null) return;
-        for (int i = 0; i < statBoxCount; i++)
+        if (statGridContent == null) return;
+        while (_statIcons.Count < needed)
         {
+            int i = _statIcons.Count;
             var box = NewBox(statGridContent, "StatBox" + i, out Image icon);
             _statIcons.Add(icon);
             _statButtons.Add(box.GetComponent<Button>());
             _statFrames.Add(EnsureBoxFrame(box));
         }
-        _statBuilt = true;
     }
 
     /// <summary>Bir slot/kutu: kok Image(slotBg) + Button + child "Icon" Image.</summary>
@@ -496,6 +494,7 @@ public class BuildUI : MonoBehaviour
         nrt.offsetMin = Vector2.zero; nrt.offsetMax = Vector2.zero;
         var t = nGO.AddComponent<TextMeshProUGUI>(); if (_font != null) t.font = _font;
         t.text = card.displayName; t.fontSize = 26; t.alignment = TextAlignmentOptions.Center; t.enableAutoSizing = true; t.fontSizeMin = 14; t.fontSizeMax = 28; t.color = Color.white; t.raycastTarget = false;
+        go.AddComponent<UiPressPulse>(); // basinca pop (basildi hissi)
         return go;
     }
 

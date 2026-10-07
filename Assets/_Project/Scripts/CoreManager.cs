@@ -29,7 +29,7 @@ public class CoreManager : MonoBehaviour
     [SerializeField] private float costMultiplier = 1.4f;
 
     /// <summary>In-run kart maliyetinin TAVANI. Ustel artis bu degere ulasinca sabit kalir (1500, 1500, ...).</summary>
-    private const int MaxCardCost = 1500;
+    private const int MaxCardCost = 1000;
     #endregion
 
     #region Private Fields

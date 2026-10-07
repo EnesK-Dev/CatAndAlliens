@@ -6319,7 +6319,7 @@ MonoBehaviour:
   weaponManager: {fileID: 19887879}
   playerRef: {fileID: 19887873}
   clawsIcon: {fileID: -8285997511256225826, guid: 3bc435cab7be966b485f8901a71b6d86, type: 3}
-  firstCost: 3
+  firstCost: 2
   clawsDamagePerLevel: 20
   maxPips: 8
   weaponNameSize: 54
@@ -16010,28 +16010,28 @@ MonoBehaviour:
     milestoneIndex: 1
     tint: {r: 0.1, g: 0.85, b: 0.25, a: 1}
     isFinalBoss: 0
-    maxHealth: 45000
+    maxHealth: 25000
   - label: Laser Boss
     bossPrefab: {fileID: 733014060969819527, guid: dc337d24e43cb5d29a68ece93f69bc71, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 3
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 0
-    maxHealth: 70000
+    maxHealth: 55000
   - label: Kamikaze Boss
     bossPrefab: {fileID: 733014060969819527, guid: 41156fdc126fc33ab9e617abbbb08607, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 4
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 0
-    maxHealth: 100000
+    maxHealth: 70000
   - label: Burst Boss FINAL
     bossPrefab: {fileID: 733014060969819527, guid: 8e1b786b0f6d9b7b4bae2db97a9cedd4, type: 3}
     enemyBossPrefab: {fileID: 0}
     milestoneIndex: 5
     tint: {r: 1, g: 1, b: 1, a: 1}
     isFinalBoss: 1
-    maxHealth: 125000
+    maxHealth: 90000
   spawnOffset: {x: 0, y: 6}
 --- !u!4 &1532023695
 Transform:

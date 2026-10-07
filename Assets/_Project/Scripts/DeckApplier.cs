@@ -95,7 +95,7 @@ public class DeckApplier : MonoBehaviour
     #region Private Methods
 
     private const float ClawsDamagePerLevel = 20f; // WeaponLevelTracker ile AYNI olmali (Might claws hasari/level)
-    private const int TrackFirstCost = 3;          // WeaponLevelTracker.firstCost ile AYNI olmali (esik 3->4->5)
+    private const int TrackFirstCost = 2;          // WeaponLevelTracker.firstCost ile AYNI olmali (esik 2->3->4->5)
 
     /// <summary>Deck stat karti: LEVEL'li statlar (Might/Haste/Area/Charge/Firepower/Impact) sadece SAYILIR (post-pass esikle uygular),
     /// boylece meta = in-run (ayni esik + tracker'da gorunur). Global/degismeyen statlar (Amount/MaxHealth/Curse vb.) burada uygulanir.</summary>

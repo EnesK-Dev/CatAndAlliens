@@ -362,12 +362,7 @@ public class UpgradeSelectionUI : MonoBehaviour
         {
             var def = upgrades[o.statIndex];
             float w = Mathf.Max(0.001f, def.weight);
-            int lvl = WeaponLevelTracker.StatLevel(def.type); // o statin en yuksek silah track level'i
-            if (lvl > 0)
-            {
-                float fo = (levelWeightFalloff >= 0.05f && levelWeightFalloff < 1f) ? levelWeightFalloff : 0.7f; // 0 serialize tuzagina karsi
-                w *= Mathf.Pow(fo, lvl); // yuksek level -> daha nadir (abuse engeli)
-            }
+            // Level falloff KALDIRILDI (oyun kolaylastirma): ayni stat yukseldikce nadirlesmez, base weight korunur.
             return Mathf.Max(0.001f, w);
         }
         return 1f;
